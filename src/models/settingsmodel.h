@@ -1,0 +1,41 @@
+#ifndef SETTINGSMODEL_H
+#define SETTINGSMODEL_H
+
+#include <QAbstractTableModel>
+#include <QVector>
+#include <QString>
+#include "iconfigfilter.h"
+#include "configfilter.h"
+#include "settingentry.h"
+
+class SettingsModel : public QAbstractTableModel
+{
+    Q_OBJECT
+
+public:
+    explicit SettingsModel(QObject *parent = nullptr);
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    
+    void setSettings(const QVector<SettingEntry> &settings);
+    void updateSettings(const QVector<SettingEntry> &settings);  // Update values without clearing filter
+    const QVector<SettingEntry>& getSettings() const;
+    
+    void applyFilter(const QString &nameFilter, const QString &valueFilter = QString());
+    void clearFilter();
+
+private:
+    QVector<SettingEntry> m_allSettings;
+    QVector<SettingEntry> m_filteredSettings;
+    ConfigFilter m_filter;
+    bool m_isFiltered;
+    QString m_currentNameFilter;   // Store current name filter to reapply after update
+    QString m_currentValueFilter;  // Store current value filter to reapply after update
+};
+
+#endif // SETTINGSMODEL_H

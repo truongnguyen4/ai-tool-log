@@ -1,0 +1,682 @@
+# Log file saved by ToolLogPro
+# Format: MM-DD HH:MM:SS.mmm PID TID LEVEL TAG: message (threadtime format)
+# Total entries: 678
+
+03-13 16:44:34.696   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1698478, confidence = 100
+03-13 16:44:34.893   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1699007, confidence = 100
+03-13 16:44:35.021   2023   2264 D WifiStaIfaceHidlImpl:  getCachedScanData is not implemented by HIDL
+03-13 16:44:35.089   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1706746, confidence = 100
+03-13 16:44:35.285   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 44 mm, shake = 1705849, confidence = 100
+03-13 16:44:35.482   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1697080, confidence = 100
+03-13 16:44:35.678   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1701614, confidence = 100
+03-13 16:44:35.874   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 44 mm, shake = 1709750, confidence = 100
+03-13 16:44:36.070   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 44 mm, shake = 1702454, confidence = 100
+03-13 16:44:36.266   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1698607, confidence = 100
+03-13 16:44:36.462   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 44 mm, shake = 1693701, confidence = 100
+03-13 16:44:36.595   2023   2237 I InputDispatcher:  Canceling pointers for device 6 in PointerEventDispatcher0 (server) with event MotionEvent
+03-13 16:44:36.600   2023   2141 V DisplayPowerController2[0]:  Brightness [0.39763778] reason changing to: 'manual', previous reason: 'manual [ dim ]'.
+03-13 16:44:36.601   2023   2141 I DisplayPowerController2[0]:  BrightnessEvent: disp=0, physDisp=local:4630946232874835841, displayState=ON, displayPolicy=BRIGHT, brt=0.39763778, initBrt=0.05, rcmdBrt=NaN, preBrt=NaN, lux=0.0, preLux=0.0, hbmMax=1.0, hbmMode=off, rbcStrength=50, thrmMax=1.0, powerFactor=1.0, wasShortTermModelActive=false, flags=, reason=manual, autoBrightness=false, strategy=InvalidBrightnessStrategy, autoBrightnessMode=default
+03-13 16:44:36.602   2023   2108 D DisplayManagerService:  Ignore redundant display event 0/4 to 10052/4601
+03-13 16:44:36.602   2023   2108 D DisplayManagerService:  Ignore redundant display event 0/4 to 10131/6003
+03-13 16:44:36.656   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 42 mm, shake = 1694976, confidence = 100
+03-13 16:44:36.720   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.724   6623   6623 D DL-ConstantCondition:   constant=false
+03-13 16:44:36.727   6623   6623 D DL-ConfigurationManager:  commit()
+03-13 16:44:36.727   6623   6623 D DL-ConfigurationManager:  commit - to be applied map = {USB_HOST_DATA=0}
+03-13 16:44:36.728   3262   6647 D DL-ProfileManagerService:  getLoadedProfile - no loaded profile
+03-13 16:44:36.728   3262   6647 D DL-ConfigurationManagerService:  commitInternal
+03-13 16:44:36.728   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `PowerManagerService`(id #0)
+03-13 16:44:36.729   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `DualSimPropertyManager`(id #23)
+03-13 16:44:36.729   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `EthernetPropertyManager`(id #11)
+03-13 16:44:36.729   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `DeveloperOptionsPropertyManager`(id #16)
+03-13 16:44:36.729   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `WifiPropertyManager`(id #8)
+03-13 16:44:36.729   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `DevicePropertyManager`(id #20)
+03-13 16:44:36.729   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `PowerStatusService.PropertyManager`(id #3)
+03-13 16:44:36.730   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `TouchPropertyManager`(id #13)
+03-13 16:44:36.730   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - properties to be notified to observer `ConfigurationManager by com.datalogic.dlsettings.usb.WhitelistUsbDeviceActivity.onCreate`(id #31): {USB_HOST_DATA=0}
+03-13 16:44:36.731   3262   6647 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - wait to synchronize with notifyObserverInBackgroundSync task
+03-13 16:44:36.731   3262  11229 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - start task
+03-13 16:44:36.732   3262  11229 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - calling onConfigurationChanged of remote observer `ConfigurationManager by com.datalogic.dlsettings.usb.WhitelistUsbDeviceActivity.onCreate`(#31) (properties={USB_HOST_DATA=0})
+03-13 16:44:36.733   6623   6719 D DL-ConfigurationManager:  onConfigurationChanged(properties={USB_HOST_DATA=0}, persist=true)
+03-13 16:44:36.733   1361   4288 D audioserver:  logFgsApiBegin: FGS Logger Transaction failed, -129
+03-13 16:44:36.733   6623   6719 D DL-ConfigurationManager:  onConfigurationChanged(id=USB_HOST_DATA, value=0)
+03-13 16:44:36.733   6623   6719 D DL-Property:   onInternalChangeSet(id=USB_HOST_DATA, value=false, SUPPORTED)
+03-13 16:44:36.733   6623  11211 E DL-ConfigurationManager:  ConfigurationManager listener's callback called
+03-13 16:44:36.733   2023   2508 W AS.PlaybackActivityMon:  No piid assigned for invalid/internal port id 40
+03-13 16:44:36.733   3262  11229 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - out from remote observer `ConfigurationManager by com.datalogic.dlsettings.usb.WhitelistUsbDeviceActivity.onCreate`(#31) onConfigurationChanged (errors=[])result=0
+03-13 16:44:36.734   3262   6647 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - task run end
+03-13 16:44:36.734   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `LocationPropertyManager`(id #22)
+03-13 16:44:36.734   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `PttPropertyManager`(id #19)
+03-13 16:44:36.734   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `AdvancedKeyboardService`(id #2)
+03-13 16:44:36.734   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - properties to be notified to observer `UsbPropertyManager`(id #10): {USB_HOST_DATA=0}
+03-13 16:44:36.735   3262   6647 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - wait to synchronize with notifyObserverInBackgroundSync task
+03-13 16:44:36.735   1247   4984 D AHAL:  AudioStream: out_update_source_metadata_v7: 1001: track count is 1 for usecase(1: low-latency-playback)
+03-13 16:44:36.735   1247   4984 D AHAL:  AudioStream: out_update_source_metadata_v7: 1033: Source metadata usage:13 content_type:4
+03-13 16:44:36.735   1247   4984 D AHAL:  AudioStream: SetAggregateSourceMetadata: 3701: Agreegated Source metadata usage:13 content_type:4
+03-13 16:44:36.736   3262  11230 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - start task
+03-13 16:44:36.736   3262  11230 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - calling onConfigurationChanged of remote observer `UsbPropertyManager`(#10) (properties={USB_HOST_DATA=0})
+03-13 16:44:36.736   3262  11230 D DL-UsbPropertyManager:  setPropertiesValue - request to change properties: {USB_HOST_DATA=0}
+03-13 16:44:36.737   1247   6286 D AHAL:  AudioStream: AutoPerfLock: 134: (Acquired) perf_lock_handle: 0x121, count: 1
+03-13 16:44:36.737   3262  11230 D DL-UsbPropertyManager:  setPropertiesValue - request to set property USB_HOST_DATA to value `0`
+03-13 16:44:36.737   1247   6286 I AHAL:  AudioStream: Open: 2915: Enter: OutPrimary usecase(1: low-latency-playback)
+03-13 16:44:36.737   1247   6286 D AHAL:  AudioStream: Open: 2921: no_of_devices 1
+03-13 16:44:36.737   1247   6286 D AHAL:  AudioStream: Open: 2976: halInputFormat 1 halOutputFormat 1 palformat 1
+03-13 16:44:36.737   1247   6286 I PAL:  ResourceManager: getParameter: 8884: get parameter for HIFI PCM Filter
+03-13 16:44:36.737   3262  11230 D DL-UsbPropertyManager:  set - setting property USB_HOST_DATA to value `0`
+03-13 16:44:36.737   1247   6286 D AHAL:  AudioStream: Open: 3056: channels 2 samplerate 48000 format id 1, stream type 1  stream bitwidth 16
+03-13 16:44:36.737   1247   6286 D AHAL:  AudioStream: Open: 3057: msample_rate 0 mchannels 0 mNoOfOutDevices 1
+03-13 16:44:36.737   1247   6286 I PAL:  API: pal_stream_open: 194: Enter, stream type:1
+03-13 16:44:36.737   3262  11230 D DL-UsbPropertyManager:  set - setting USB host data lock to `true`
+03-13 16:44:36.737   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.737   1247   6286 I PAL:  ResourceManager: isStreamSupported: 2602: config suppported
+03-13 16:44:36.737   1247   6286 I PAL:  Device: setDeviceAttributes: 313: DeviceAttributes for Device Id 3 updated
+03-13 16:44:36.737   1247   6286 I PAL:  ResourceManager: allocateFrontEndIds: 6283: allocateFrontEndIds: front end 117
+03-13 16:44:36.737   1247   6286 I PAL:  PayloadBuilder: populateStreamKV: 2631: stream type 1
+03-13 16:44:36.737   1247   6286 I PAL:  PayloadBuilder: getSelectorValues: 2459: Direction: 1
+03-13 16:44:36.737   1247   6286 I PAL:  PayloadBuilder: getSelectorValues: 2475: Instance: 1
+03-13 16:44:36.737   1247   6286 I PAL:  PayloadBuilder: findKVs: 2349: key: 0xa1000000 value: 0xa100000e
+03-13 16:44:36.737   1247   6286 I PAL:  PayloadBuilder: findKVs: 2349: key: 0xab000000 value: 0x1
+03-13 16:44:36.738   1247   6286 I PAL:  PayloadBuilder: populateDeviceKV: 2745: Enter device id:3
+03-13 16:44:36.738   1247   6286 I PAL:  PayloadBuilder: findKVs: 2362: key: 0xa2000000 value: 0xa2000001
+03-13 16:44:36.738   1247   6286 I PAL:  PayloadBuilder: populateDeviceKV: 2773: Exit device id:3, status 0
+03-13 16:44:36.738   1247   6286 I PAL:  PayloadBuilder: populateDevicePPKV: 2887: Rx device id:3
+03-13 16:44:36.738   1247   6286 I PAL:  PayloadBuilder: getSelectorValues: 2529: stream type: 1
+03-13 16:44:36.738   1247   6286 I PAL:  PayloadBuilder: findKVs: 2349: key: 0xa2000000 value: 0xa2000001
+03-13 16:44:36.738   1247   6286 I PAL:  PayloadBuilder: findKVs: 2349: key: 0xac000000 value: 0xac000002
+03-13 16:44:36.738   1247   6286 I PAL:  PayloadBuilder: populateDevicePPCkv: 3084: SpeakerProt Status[1], RAS Status[0]
+03-13 16:44:36.739   1306   1306 I AGM:  device: device_set_metadata: 744 Setting device metadata for CODEC_DMA-LPAIF_WSA-RX-0
+03-13 16:44:36.739   1306   1306 D AGM:  metadata: metadata_print: 79 *************************Metadata*************************
+03-13 16:44:36.739   1306   1306 D AGM:  metadata: metadata_print: 80 GKV size:1
+03-13 16:44:36.739   1306   1306 D AGM:  metadata: metadata_print: 83 key:0xa2000000, value:0xa2000001
+03-13 16:44:36.739   1306   1306 D AGM:  metadata: metadata_print: 87
+03-13 16:44:36.739   1306   1306 D AGM:  metadata: CKV count:1
+03-13 16:44:36.739   1306   1306 D AGM:  metadata: metadata_print: 90 key:0xbe000000, value:0x3
+03-13 16:44:36.739   1306   1306 D AGM:  metadata: metadata_print: 92
+03-13 16:44:36.739   1306   1306 D AGM:  metadata: metadata_print: 94 Property ID:134217744
+03-13 16:44:36.739   1306   1306 D AGM:  metadata: metadata_print: 95 property count:2
+03-13 16:44:36.739   1306   1306 D AGM:  metadata: metadata_print: 98 Property Values:
+03-13 16:44:36.739   1306   1306 D AGM:  metadata: metadata_print: 100 0x2
+03-13 16:44:36.739   1306   1306 D AGM:  metadata: metadata_print: 100 0x5
+03-13 16:44:36.739   1306   1306 D AGM:  metadata: metadata_print: 102
+03-13 16:44:36.739   1306   1306 D AGM:  metadata: metadata_print: 103 ****************Metadata Done***************************
+03-13 16:44:36.739   1306   1306 D AGM:  metadata:
+03-13 16:44:36.739   1283   1283 I com.datalogic.usb:  in_property = 2 in_value = 0
+03-13 16:44:36.740   1306   6545 I AGM:  session: session_obj_set_sess_aif_metadata: 1758 Setting metadata for sess aif id 8
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: metadata_print: 79 *************************Metadata*************************
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: metadata_print: 80 GKV size:2
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: metadata_print: 83 key:0xa2000000, value:0xa2000001
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: metadata_print: 83 key:0xac000000, value:0xac000002
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: metadata_print: 87
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: CKV count:2
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: metadata_print: 90 key:0xd2000000, value:0x0
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: metadata_print: 90 key:0xa5000000, value:0xbb80
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: metadata_print: 92
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: metadata_print: 94 Property ID:134217744
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: metadata_print: 95 property count:1
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: metadata_print: 98 Property Values:
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: metadata_print: 100 0x3
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: metadata_print: 102
+03-13 16:44:36.740   1306   6545 D AGM:  metadata: metadata_print: 103 ****************Metadata Done***************************
+03-13 16:44:36.740   1306   6545 D AGM:  metadata:
+03-13 16:44:36.740   1306   6545 I AGM:  session: session_obj_set_sess_aif_metadata: 1778 Exit
+03-13 16:44:36.740   1306   1306 D agm_server_wrapper:  Aif id 8 already added to session list of 117
+03-13 16:44:36.740   1306   1306 I AGM:  API: agm_session_aif_connect: 603 connecting aifid:8 with session id=117
+03-13 16:44:36.740   1247   6286 I PAL:  Device: open: 428: Enter. deviceCount 0 for device id 3 (PAL_DEVICE_OUT_SPEAKER)
+03-13 16:44:36.740   1247   6286 I PAL:  SessionAlsaUtils: setDeviceMediaConfig: 963: CODEC_DMA-LPAIF_WSA-RX-0 rate ch fmt data_fmt 48000 2 2 1
+03-13 16:44:36.741   1247   6286 D audio_route:  Apply path: speaker
+03-13 16:44:36.744   1247   6286 I PAL:  Device: open: 468: Exit. deviceCount 1 for device id 3 (PAL_DEVICE_OUT_SPEAKER), exit status: 0
+03-13 16:44:36.744   1247   6286 I PAL:  ResourceManager: GetConcurrencyInfo: 4757: stream type 1 Tx conc 0, Rx conc 0, concurrency allowed
+03-13 16:44:36.744   1247   6286 I PAL:  ResourceManager: GetConcurrencyInfo: 4757: stream type 1 Tx conc 0, Rx conc 0, concurrency allowed
+03-13 16:44:36.744   1247   6286 I PAL:  ResourceManager: GetConcurrencyInfo: 4757: stream type 1 Tx conc 0, Rx conc 0, concurrency allowed
+03-13 16:44:36.744   1247   6286 I PAL:  API: pal_stream_open: 230: Exit. Value of stream_handle 0xb40000782fa31c70K, status 0
+03-13 16:44:36.744   1247   6286 D AHAL:  AudioStream: GetBufferSize: 2871: type 1
+03-13 16:44:36.744   1247   6286 D AHAL:  AudioStream: Open: 3201: fragment_size_ 768 fragments_ 2
+03-13 16:44:36.744   1247   6286 D AHAL:  AudioStream: Open: 3231: Exit ret: 0
+03-13 16:44:36.744   1247   6286 D AHAL:  AudioStream: ~AutoPerfLock: 144: (release) perf_lock_handle: 0x121, count: 1
+03-13 16:44:36.744   1247   6286 D AHAL:  AudioStream: ~AutoPerfLock: 148: Releasing perf_lock_handle: 0x121
+03-13 16:44:36.745   1247   6286 D AHAL:  AudioStream: AutoPerfLock: 134: (Acquired) perf_lock_handle: 0x122, count: 1
+03-13 16:44:36.745   1247   6286 I PAL:  API: pal_stream_start: 294: Enter. Stream handle 0xb40000782fa31c70K
+03-13 16:44:36.746   1247  11232 I PAL:  PayloadBuilder: findKVs: 2362: key: 0xa3000000 value: 0xa3000009
+03-13 16:44:36.746   1247   6286 I PAL:  SpeakerProtection: spkrProtProcessingMode: 3649: Normal mode being used
+03-13 16:44:36.746   1247   6286 I PAL:  Device: updateCustomPayload: 336: customPayloadSize = 24
+03-13 16:44:36.746   1247   6286 I PAL:  Device: updateCustomPayload: 336: customPayloadSize = 80
+03-13 16:44:36.746   1247   6286 I PAL:  Device: updateCustomPayload: 336: customPayloadSize = 184
+03-13 16:44:36.746   1306   1306 I AGM:  device: device_set_metadata: 744 Setting device metadata for CODEC_DMA-LPAIF_WSA-TX-0
+03-13 16:44:36.746   1247   6286 I PAL:  SessionAlsaUtils: setDeviceMediaConfig: 963: CODEC_DMA-LPAIF_WSA-RX-0 rate ch fmt data_fmt 48000 2 2 1
+03-13 16:44:36.746   1306   1306 D AGM:  metadata: metadata_print: 79 *************************Metadata*************************
+03-13 16:44:36.746   1306   1306 D AGM:  metadata: metadata_print: 80 GKV size:1
+03-13 16:44:36.746   1306   1306 D AGM:  metadata: metadata_print: 83 key:0xa3000000, value:0xa3000009
+03-13 16:44:36.747   1306   1306 D AGM:  metadata: metadata_print: 87
+03-13 16:44:36.747   1306   1306 D AGM:  metadata: CKV count:1
+03-13 16:44:36.747   1247   6286 E PAL:  ResourceManager: voteSleepMonitor: 1593: ioctl device is not open
+03-13 16:44:36.747   1306   1306 D AGM:  metadata: metadata_print: 90 key:0xbf000000, value:0x2
+03-13 16:44:36.747   1306   1306 D AGM:  metadata: metadata_print: 92
+03-13 16:44:36.747   1306   1306 D AGM:  metadata: metadata_print: 94 Property ID:134217744
+03-13 16:44:36.747   1306   1306 D AGM:  metadata: metadata_print: 95 property count:1
+03-13 16:44:36.747   1306   1306 D AGM:  metadata: metadata_print: 98 Property Values:
+03-13 16:44:36.747   1306   1306 D AGM:  metadata: metadata_print: 100 0x2
+03-13 16:44:36.747   1306   1306 D AGM:  metadata: metadata_print: 102
+03-13 16:44:36.747   1306   1306 D AGM:  metadata: metadata_print: 103 ****************Metadata Done***************************
+03-13 16:44:36.747   1306   1306 D AGM:  metadata:
+03-13 16:44:36.747   1247  11232 I PAL:  SessionAlsaUtils: setDeviceMediaConfig: 963: CODEC_DMA-LPAIF_WSA-TX-0 rate ch fmt data_fmt 48000 2 10 1
+03-13 16:44:36.747   1247  11232 I PAL:  ResourceManager: allocateFrontEndIds: 6315: allocateFrontEndIds: front end 121
+03-13 16:44:36.748   1306   6289 I AGM:  API: agm_session_aif_connect: 603 connecting aifid:11 with session id=121
+03-13 16:44:36.748   1247  11232 I PAL:  SpeakerProtection: viTxSetupThreadLoop: 3272: Normal mode being used
+03-13 16:44:36.748   1247  11232 I PAL:  SpeakerProtection: updateVICustomPayload: 159: viCustomPayloadSize = 40
+03-13 16:44:36.748   1247  11232 I PAL:  SpeakerProtection: updateVICustomPayload: 159: viCustomPayloadSize = 80
+03-13 16:44:36.748   1247  11232 I PAL:  SpeakerProtection: updateVICustomPayload: 159: viCustomPayloadSize = 104
+03-13 16:44:36.748   1247  11232 I PAL:  SpeakerProtection: updateVICustomPayload: 159: viCustomPayloadSize = 144
+03-13 16:44:36.749   1247   6286 D agm_client_wrapper:  agm_session_open called with handle = d9444d60 , *handle = 0
+03-13 16:44:36.750   1247  11232 D agm_client_wrapper:  agm_session_open called with handle = d82c3ad0 , *handle = 0
+03-13 16:44:36.751   1306   6289 D AGM:  graph: graph_open: 598 entry
+03-13 16:44:36.751   1306   6289 D AGM:  metadata: metadata_print: 79 *************************Metadata*************************
+03-13 16:44:36.751   1306   6289 D AGM:  metadata: metadata_print: 80 GKV size:4
+03-13 16:44:36.751   1306   6289 D AGM:  metadata: metadata_print: 83 key:0xa1000000, value:0xa100000e
+03-13 16:44:36.751   1306   6289 D AGM:  metadata: metadata_print: 83 key:0xab000000, value:0x1
+03-13 16:44:36.751   1306   6289 D AGM:  metadata: metadata_print: 83 key:0xa2000000, value:0xa2000001
+03-13 16:44:36.751   1306   6289 D AGM:  metadata: metadata_print: 83 key:0xac000000, value:0xac000002
+03-13 16:44:36.751   1306   6289 D AGM:  metadata: metadata_print: 87
+03-13 16:44:36.751   1306   6289 D AGM:  metadata: CKV count:4
+03-13 16:44:36.751   1306   6289 D AGM:  metadata: metadata_print: 90 key:0xa4000000, value:0xf
+03-13 16:44:36.751   1306   6289 D AGM:  metadata: metadata_print: 90 key:0xd2000000, value:0x0
+03-13 16:44:36.752   1306   6289 D AGM:  metadata: metadata_print: 90 key:0xa5000000, value:0xbb80
+03-13 16:44:36.752   1306   6289 D AGM:  metadata: metadata_print: 90 key:0xbe000000, value:0x3
+03-13 16:44:36.752   1306   6289 D AGM:  metadata: metadata_print: 92
+03-13 16:44:36.752   1306   6289 D AGM:  metadata: metadata_print: 94 Property ID:134217744
+03-13 16:44:36.752   1306   6289 D AGM:  metadata: metadata_print: 95 property count:4
+03-13 16:44:36.752   1306   6289 D AGM:  metadata: metadata_print: 98 Property Values:
+03-13 16:44:36.752   1306   6289 D AGM:  metadata: metadata_print: 100 0x1
+03-13 16:44:36.752   1306   6289 D AGM:  metadata: metadata_print: 100 0x3
+03-13 16:44:36.752   1306   6289 D AGM:  metadata: metadata_print: 100 0x2
+03-13 16:44:36.752   1306   6289 D AGM:  metadata: metadata_print: 100 0x5
+03-13 16:44:36.752   1306   6289 D AGM:  metadata: metadata_print: 102
+03-13 16:44:36.752   1306   6289 D AGM:  metadata: metadata_print: 103 ****************Metadata Done***************************
+03-13 16:44:36.752   1306   6289 D AGM:  metadata:
+03-13 16:44:36.752   1306   6289 E ACDB:  AcdbCmdGetGraphAlias:4153 Error[19]: Graph Alias chunk data does not exist. Is it enabled?.
+03-13 16:44:36.752   1306   6289 E gsl:  gsl_get_graph_alias:2212 acdb get graph alias failed 19, len 255
+03-13 16:44:36.752   1306   6289 D AGM:  graph: print_graph_alias: 2281 gsl_get_graph_alias failed: ret = 19
+03-13 16:44:36.752   1306   6289 D AGM:  graph: graph_open: 678 miid 40bd mid 7001000 tag c0000002
+03-13 16:44:36.752   1306   6289 D AGM:  graph: graph_open: 726 miid 43b1 mid 7001023 tag c0000004
+03-13 16:44:36.752   1306   6289 D AGM:  graph: graph_open: 678 miid 40c4 mid 7001019 tag c0000006
+03-13 16:44:36.752   1306   6289 D AGM:  graph: graph_open: 678 miid 40bf mid 7001005 tag c000000e
+03-13 16:44:36.752   1306   6289 D AGM:  graph: graph_open: 678 miid 40c0 mid 7001003 tag c0000010
+03-13 16:44:36.752   1306   6289 D AGM:  graph: graph_open: 678 miid 4165 mid 7001032 tag c0000013
+03-13 16:44:36.752   1306   6289 I GPR:     : __gpr_cmd_register_v2:902 GPR Register: Source Port is 8208 heap_index: 0
+03-13 16:44:36.752   1306   6289 I gsl:  gsl_graph_open_sgids_and_connections:2725 num_sgid= 4
+03-13 16:44:36.752   1306   6289 I gsl:  gsl_graph_open_sgids_and_connections:2726 sg list:
+03-13 16:44:36.752   1306   6289 I gsl:  gsl_graph_open_sgids_and_connections:2728 b0000002
+03-13 16:44:36.752   1306   6289 I gsl:  gsl_graph_open_sgids_and_connections:2728 b0000025
+03-13 16:44:36.752   1306   6289 I gsl:  gsl_graph_open_sgids_and_connections:2728 b0000024
+03-13 16:44:36.752   1306   6289 I gsl:  gsl_graph_open_sgids_and_connections:2728 b0000023
+03-13 16:44:36.752   1306   6289 I gsl:  gsl_print_sg_conn_info:180 num_sg_conn = 3
+03-13 16:44:36.752   1306   6289 I gsl:  gsl_print_sg_conn_info:182 sg b0000025 has 1 children:
+03-13 16:44:36.752   1306   6289 I gsl:  gsl_print_sg_conn_info:185 b0000002,
+03-13 16:44:36.752   1306   6289 I gsl:  gsl_print_sg_conn_info:182 sg b0000024 has 1 children:
+03-13 16:44:36.752   1306   6289 I gsl:  gsl_print_sg_conn_info:185 b0000025,
+03-13 16:44:36.752   1306   6289 I gsl:  gsl_print_sg_conn_info:182 sg b0000023 has 1 children:
+03-13 16:44:36.752   1306   6289 I gsl:  gsl_print_sg_conn_info:185 b0000024,
+03-13 16:44:36.753   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.754   1306   1306 D AGM:  graph: graph_open: 598 entry
+03-13 16:44:36.754   1306   1306 D AGM:  metadata: metadata_print: 79 *************************Metadata*************************
+03-13 16:44:36.754   1306   1306 D AGM:  metadata: metadata_print: 80 GKV size:1
+03-13 16:44:36.754   1306   1306 D AGM:  metadata: metadata_print: 83 key:0xa3000000, value:0xa3000009
+03-13 16:44:36.754   1306   1306 D AGM:  metadata: metadata_print: 87
+03-13 16:44:36.754   1306   1306 D AGM:  metadata: CKV count:1
+03-13 16:44:36.754   1306   1306 D AGM:  metadata: metadata_print: 90 key:0xbf000000, value:0x2
+03-13 16:44:36.754   1306   1306 D AGM:  metadata: metadata_print: 92
+03-13 16:44:36.754   1306   1306 D AGM:  metadata: metadata_print: 94 Property ID:134217744
+03-13 16:44:36.754   1306   1306 D AGM:  metadata: metadata_print: 95 property count:1
+03-13 16:44:36.754   1306   1306 D AGM:  metadata: metadata_print: 98 Property Values:
+03-13 16:44:36.754   1306   1306 D AGM:  metadata: metadata_print: 100 0x2
+03-13 16:44:36.754   1306   1306 D AGM:  metadata: metadata_print: 102
+03-13 16:44:36.754   1306   1306 D AGM:  metadata: metadata_print: 103 ****************Metadata Done***************************
+03-13 16:44:36.754   1306   1306 D AGM:  metadata:
+03-13 16:44:36.754   1306   1306 E ACDB:  AcdbCmdGetGraphAlias:4153 Error[19]: Graph Alias chunk data does not exist. Is it enabled?.
+03-13 16:44:36.754   1306   1306 E gsl:  gsl_get_graph_alias:2212 acdb get graph alias failed 19, len 255
+03-13 16:44:36.754   1306   1306 D AGM:  graph: print_graph_alias: 2281 gsl_get_graph_alias failed: ret = 19
+03-13 16:44:36.754   1306   1306 D AGM:  graph: graph_open: 726 miid 4589 mid 7001024 tag c0000005
+03-13 16:44:36.755    354   1593 I audioadsprpcd:  vendor/qcom/proprietary/adsprpc/src/apps_std_imp.c:860: Successfully opened file /vendor/dsp/adsp/CFCM.so.1
+03-13 16:44:36.755   2158   2166 D LOWI-9.0.1.69:  [LOWINetlinkSocketReceiver] unpackRTMLinkMessage: RTM_NEWLINK - ifname eth0, flags 0x1002 ()
+03-13 16:44:36.759    354   1593 I audioadsprpcd:  vendor/qcom/proprietary/adsprpc/src/apps_std_imp.c:860: Successfully opened file /vendor/dsp/adsp/SAPlusCmnModule.so.1
+03-13 16:44:36.759   2158   2166 D LOWI-9.0.1.69:  [LOWINetlinkSocketReceiver] unpackRTMLinkMessage: RTM_DELLINK - ifname eth0, flags 0x1002 ()
+03-13 16:44:36.761   2023   2272 I EthernetTracker:  interfaceLinkStateChanged, iface: eth0, up: false
+03-13 16:44:36.761   2023   2272 D EthernetNetworkFactory:  updateInterfaceLinkState, iface: eth0, up: false
+03-13 16:44:36.761   2023   2272 I EthernetTracker:  onInterfaceRemoved, iface: eth0
+03-13 16:44:36.765   3262  11234 D DL-EthernetPropertyManager:  onEthernetStateChange(eth0, STATE_LINK_DOWN)
+03-13 16:44:36.769   1306   6289 E ACDB:  AcdbCmdGetProcSubgraphCalDataPersist:8416 Error[19]: No calibration found
+03-13 16:44:36.769   1306   6289 E ACDB:  AcdbCmdGetProcSubgraphCalDataPersist:8416 Error[19]: No calibration found
+03-13 16:44:36.769   1306   6289 E ACDB:  AcdbCmdGetProcSubgraphCalDataPersist:8416 Error[19]: No calibration found
+03-13 16:44:36.769   1306   6289 E ACDB:  AcdbCmdGetProcSubgraphCalDataPersist:8416 Error[19]: No calibration found
+03-13 16:44:36.769   1306   6289 D AGM:  graph: graph_open: 757 graph_handle 0x47534c
+03-13 16:44:36.769   1306   6289 D AGM:  graph: graph_open: 792 exit, ret 0
+03-13 16:44:36.769   1306   6289 D AGM:  graph: graph_set_config: 1157 entry graph_handle 0x47534c
+03-13 16:44:36.769   1306   1306 I GPR:     : __gpr_cmd_register_v2:902 GPR Register: Source Port is 8209 heap_index: 0
+03-13 16:44:36.769   1306   1306 I gsl:  gsl_graph_open_sgids_and_connections:2725 num_sgid= 1
+03-13 16:44:36.769   1306   1306 I gsl:  gsl_graph_open_sgids_and_connections:2726 sg list:
+03-13 16:44:36.769   1306   1306 I gsl:  gsl_graph_open_sgids_and_connections:2728 b00000d5
+03-13 16:44:36.769   1306   6289 D AGM:  graph: graph_set_config: 1165 exit, graph handle 0x47534c, ret 0
+03-13 16:44:36.770   1247   6286 D agm_client_wrapper:  agm_session_open Received handle = 0x77d9444d60 , *handle = b40000755d952f90
+03-13 16:44:36.770   1247   6286 D PLUGIN:  pcm: agm_pcm_hw_params: 469 agm_pcm_hw_params: mode: 0
+03-13 16:44:36.770   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.771   1306   1306 E gsl:  gsl_graph_send_nonpersist_cal:789 send non-perist cal failed 3
+03-13 16:44:36.771   1306   1306 E ACDB:  AcdbCmdGetProcSubgraphCalDataPersist:8416 Error[19]: No calibration found
+03-13 16:44:36.771   1247   6286 I PAL:  Session: updateCustomPayload: 404: customPayloadSize = 32
+03-13 16:44:36.771   1306   1306 D AGM:  graph: graph_open: 757 graph_handle 0x147534c
+03-13 16:44:36.771   1306   1306 D AGM:  graph: graph_open: 792 exit, ret 0
+03-13 16:44:36.771   1306   1306 D AGM:  graph: graph_set_config: 1157 entry graph_handle 0x147534c
+03-13 16:44:36.771   1306   6289 D AGM:  graph: graph_set_config: 1157 entry graph_handle 0x47534c
+03-13 16:44:36.771   1306   1306 D AGM:  graph: graph_set_config: 1165 exit, graph handle 0x147534c, ret 0
+03-13 16:44:36.771   1306   6289 D AGM:  graph: graph_set_config: 1165 exit, graph handle 0x47534c, ret 0
+03-13 16:44:36.771   1247  11232 D agm_client_wrapper:  agm_session_open Received handle = 0x77d82c3ad0 , *handle = b40000755d953690
+03-13 16:44:36.772   1247  11232 D PLUGIN:  pcm: agm_pcm_hw_params: 469 agm_pcm_hw_params: mode: 268435456
+03-13 16:44:36.772   1306   6289 E ACDB:  AcdbCmdGetProcSubgraphCalDataPersist:8416 Error[19]: No calibration found
+03-13 16:44:36.772   1306   6289 E ACDB:  AcdbCmdGetProcSubgraphCalDataPersist:8416 Error[19]: No calibration found
+03-13 16:44:36.772   1306   6289 E ACDB:  AcdbCmdGetProcSubgraphCalDataPersist:8416 Error[19]: No calibration found
+03-13 16:44:36.772   1306   6289 E ACDB:  AcdbCmdGetProcSubgraphCalDataPersist:8416 Error[19]: No calibration found
+03-13 16:44:36.773   1306   6289 D AGM:  graph: graph_prepare: 858 entry graph_handle 0x47534c
+03-13 16:44:36.773   1306   6289 D AGM:  graph_module: configure_pcm_shared_mem_ep: 1604 entry mod tag c0000002 miid 40bd mid 7001000
+03-13 16:44:36.773   1306   6289 D AGM:  graph_module: configure_pcm_shared_mem_ep: 1680 exit, ret 0
+03-13 16:44:36.773   1306   6289 D AGM:  graph_module: configure_hw_ep_media_config: 664 entry mod tag c0000004 miid 43b1 mid 7001023
+03-13 16:44:36.773   1306   6289 D AGM:  graph_module: configure_hw_ep_media_config: 694 rate 48000 bw 16 ch 2, data_fmt 1
+03-13 16:44:36.773   1247  11232 D audio_route:  Apply path: vi-feedback
+03-13 16:44:36.773   1306   6289 D AGM:  graph_module: configure_hw_ep_media_config: 704 exit, ret 0
+03-13 16:44:36.774   1306   6289 D AGM:  graph_module: configure_codec_dma_ep: 281 cdc_dma intf cfg lpaif 2 indx 1 ch_msk 3
+03-13 16:44:36.774   1306   6289 D AGM:  graph_module: configure_codec_dma_ep: 296 exit, ret 0
+03-13 16:44:36.774   1306   6289 D AGM:  graph_module: configure_output_media_format: 790 entry mod tag c000000e miid 40bf mid 7001005
+03-13 16:44:36.774   1306   6289 D AGM:  graph_module: configure_output_media_format: 921 exit, ret 0
+03-13 16:44:36.775   1306   6289 D AGM:  graph_module: configure_output_media_format: 790 entry mod tag c0000010 miid 40c0 mid 7001003
+03-13 16:44:36.775   1306   6289 D AGM:  graph_module: configure_output_media_format: 921 exit, ret 0
+03-13 16:44:36.775   1306   6289 D AGM:  graph_module: configure_spr: 1804 SPR module IID 4165
+03-13 16:44:36.775   1306   6289 D AGM:  graph_module: configure_spr: 1827 HW EP module IID 43b1
+03-13 16:44:36.775   1306   6289 D AGM:  graph: configure_buffer_params: 200 Enter
+03-13 16:44:36.775   1306   6289 D AGM:  graph: configure_buffer_params: 263 Playback sess buf_sz 768 num_bufs 2
+03-13 16:44:36.775   1306   6289 E AGM:  graph: configure_buffer_params: 296 Unsupported buffer mode : 0, Default to Blocking
+03-13 16:44:36.775   1306   6289 D AGM:  graph: configure_buffer_params: 316 exit, ret 0
+03-13 16:44:36.778   1306   6289 D AGM:  graph: graph_prepare: 936 exit, ret 0
+03-13 16:44:36.778   1306   1306 D AGM:  graph: graph_prepare: 858 entry graph_handle 0x147534c
+03-13 16:44:36.778   1306   1306 D AGM:  graph_module: configure_hw_ep_media_config: 664 entry mod tag c0000005 miid 4589 mid 7001024
+03-13 16:44:36.778   1306   1306 D AGM:  graph_module: configure_hw_ep_media_config: 694 rate 48000 bw 32 ch 2, data_fmt 1
+03-13 16:44:36.779   1306   1306 D AGM:  graph_module: configure_hw_ep_media_config: 704 exit, ret 0
+03-13 16:44:36.779   1306   1306 D AGM:  graph_module: configure_codec_dma_ep: 281 cdc_dma intf cfg lpaif 2 indx 1 ch_msk 3
+03-13 16:44:36.779   1306   1306 D AGM:  graph_module: configure_codec_dma_ep: 296 exit, ret 0
+03-13 16:44:36.780   1306   1306 D AGM:  graph: graph_prepare: 936 exit, ret 0
+03-13 16:44:36.780   1306   6289 D AGM:  graph: graph_start: 950 entry graph_handle 0x47534c
+03-13 16:44:36.784   1306   6289 D AGM:  graph: graph_start: 962 exit, ret 0
+03-13 16:44:36.786   2023   2361 D UsbHostManager:  Removed device at /dev/bus/usb/003/002: USB 10/100/1000 LAN
+03-13 16:44:36.786   2023   2361 I UsbAlsaManager:  USB Audio Device Removed: null
+03-13 16:44:36.787   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.788   2023   2361 W UsbDescriptorParser:    Unparsed Class-specific
+03-13 16:44:36.788   2023   2361 W UsbDescriptorParser:    Unparsed Class-specific
+03-13 16:44:36.788   2023   2361 W UsbDescriptorParser:    Unparsed Class-specific
+03-13 16:44:36.794   2023   2116 D ActivityManager:  sync unfroze 4601 android.process.media for 3
+03-13 16:44:36.799   3057   3057 I xur:  onReceive
+03-13 16:44:36.803   2023   2361 D UsbHostManager:  Removed device at /dev/bus/usb/003/001 was already gone
+03-13 16:44:36.803   2023   2238 I EventHub:  Removing device PixArt Dell MS116 USB Optical Mouse due to epoll hang-up event.
+03-13 16:44:36.803   2023   2238 I EventHub:  Removed device: path=/dev/input/event6 name=PixArt Dell MS116 USB Optical Mouse id=10 fd=586 classes=CURSOR | EXTERNAL
+03-13 16:44:36.804   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.811   2023   2361 D UsbHostManager:  Removed device at /dev/bus/usb/002/003 was already gone
+03-13 16:44:36.811   2023   2238 I InputReader:  Device removed: id=11, eventHubId=10, name='PixArt Dell MS116 USB Optical Mouse', descriptor='69a7dc31227996cdd1aaacdbdf493f98040b3906', sources=MOUSE
+03-13 16:44:36.812   2023   2237 E WindowManager:  Display reconfigured outside of a transition: Display{#0 state=ON size=1340x800 ROTATION_90}
+03-13 16:44:36.813   2023   2237 W InputReader:  Ignoring invalid device id 11.
+03-13 16:44:36.814   2023   2238 I InputManager-JNI:  notifyPointerDisplayIdChanged: pointer displayId set to: -1
+03-13 16:44:36.815   2023   2238 I InputReader:  Reconfiguring input devices, changes=DISPLAY_INFO
+03-13 16:44:36.815   2023   2238 I EventHub:  Removing device '/dev/input/event6' due to inotify event
+03-13 16:44:36.817  11001  11001 I PkDeviceHelper:  PkDeviceHelper.refreshDevices():93 refreshing devices
+03-13 16:44:36.817   2362   2362 D NavigationModeController:  getCurrentUserContext: contextUser=0 currentUser=0
+03-13 16:44:36.820   3315   4310 D DL-KeyboardLayoutManager:  input device #11 removed
+03-13 16:44:36.820   2756   2788 D TouchInteractionService:  disposeEventHandlers: Reason: Initializing input monitor due to: onTrackpadConnected()
+03-13 16:44:36.820   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.822   1306   1306 D AGM:  graph: graph_start: 950 entry graph_handle 0x147534c
+03-13 16:44:36.823   1247   6286 I PAL:  API: pal_stream_start: 331: Exit. status 0
+03-13 16:44:36.823   1247   6286 I AHAL:  AudioStream: configurePalOutputStream: 3441: notify GEF client of device config
+03-13 16:44:36.823   1247   6286 D generic_effect_ar:  gef_device_config_cb: stream type=6 sample_rate=48000 device=2
+03-13 16:44:36.823   1247   6286 D AHAL:  AudioStream: ~AutoPerfLock: 144: (release) perf_lock_handle: 0x122, count: 1
+03-13 16:44:36.823   1247   6286 D AHAL:  AudioStream: ~AutoPerfLock: 148: Releasing perf_lock_handle: 0x122
+03-13 16:44:36.824   1306   1306 D AGM:  graph: graph_start: 962 exit, ret 0
+03-13 16:44:36.825   2023   2361 D UsbHostManager:  Removed device at /dev/bus/usb/002/002 was already gone
+03-13 16:44:36.837   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.850   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1698646, confidence = 100
+03-13 16:44:36.853   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.855   2023   2361 D UsbHostManager:  Removed device at /dev/bus/usb/002/001 was already gone
+03-13 16:44:36.870   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.887   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.904   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.920   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.937   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.954   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.971   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.981   1361   1982 D audioserver:  logFgsApiEnd: FGS Logger Transaction failed, -129
+03-13 16:44:36.988   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:36.990   7528   7537 I adbd:  resuming USB
+03-13 16:44:36.990   7528   7537 I adbd:  UsbFfsConnection constructed
+03-13 16:44:36.993   7528  11238 I adbd:  UsbFfs-monitor thread spawned
+03-13 16:44:37.004   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.010   1247   4984 D AHAL:  AudioStream: out_update_source_metadata_v7: 1001: track count is 0 for usecase(1: low-latency-playback)
+03-13 16:44:37.020   3262  11230 D DL-UsbPropertyManager:  setPropertiesValue - property USB_HOST_DATA set to value `0`
+03-13 16:44:37.020   3262  11230 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - out from remote observer `UsbPropertyManager`(#10) onConfigurationChanged (errors=[])result=0
+03-13 16:44:37.020   3262   6647 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - task run end
+03-13 16:44:37.021   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `DisplayPropertyManager`(id #17)
+03-13 16:44:37.021   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.021   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `BluetoothPropertyManager`(id #14)
+03-13 16:44:37.021   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `ScannerService`(id #26)
+03-13 16:44:37.021   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `DateAndTimePropertyManager`(id #9)
+03-13 16:44:37.021   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `SosTriggerPropertyManager`(id #21)
+03-13 16:44:37.021   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `DL-UxSettingsConfigurationObserver`(id #24)
+03-13 16:44:37.021   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - properties to be notified to observer `ConfigurationManager by com.datalogic.dlsettings.usb.WhitelistUsbDeviceActivity.onCreate`(id #29): {USB_HOST_DATA=0}
+03-13 16:44:37.022   3262   6647 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - wait to synchronize with notifyObserverInBackgroundSync task
+03-13 16:44:37.023   3262  11239 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - start task
+03-13 16:44:37.023   3262  11239 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - calling onConfigurationChanged of remote observer `ConfigurationManager by com.datalogic.dlsettings.usb.WhitelistUsbDeviceActivity.onCreate`(#29) (properties={USB_HOST_DATA=0})
+03-13 16:44:37.023   6623   6719 D DL-ConfigurationManager:  onConfigurationChanged(properties={USB_HOST_DATA=0}, persist=true)
+03-13 16:44:37.024   6623   6719 D DL-ConfigurationManager:  onConfigurationChanged(id=USB_HOST_DATA, value=0)
+03-13 16:44:37.024   6623   6719 D DL-Property:   onInternalChangeSet(id=USB_HOST_DATA, value=false, SUPPORTED)
+03-13 16:44:37.024   6623  11211 E DL-ConfigurationManager:  ConfigurationManager listener's callback called
+03-13 16:44:37.025   3262  11239 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - out from remote observer `ConfigurationManager by com.datalogic.dlsettings.usb.WhitelistUsbDeviceActivity.onCreate`(#29) onConfigurationChanged (errors=[])result=0
+03-13 16:44:37.026   3262   6647 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - task run end
+03-13 16:44:37.026   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `PowerLoggerService`(id #6)
+03-13 16:44:37.026   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - properties to be notified to observer `ConfigurationManager by A0.b.<init>`(id #27): {USB_HOST_DATA=0}
+03-13 16:44:37.027   3262   6647 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - wait to synchronize with notifyObserverInBackgroundSync task
+03-13 16:44:37.028   3262  11240 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - start task
+03-13 16:44:37.028   3262  11240 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - calling onConfigurationChanged of remote observer `ConfigurationManager by A0.b.<init>`(#27) (properties={USB_HOST_DATA=0})
+03-13 16:44:37.029   6623   6662 D DL-ConfigurationManager:  onConfigurationChanged(properties={USB_HOST_DATA=0}, persist=true)
+03-13 16:44:37.029   6623   6662 D DL-ConfigurationManager:  onConfigurationChanged(id=USB_HOST_DATA, value=0)
+03-13 16:44:37.030   3262  11240 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - out from remote observer `ConfigurationManager by A0.b.<init>`(#27) onConfigurationChanged (errors=[])result=0
+03-13 16:44:37.030   3262   6647 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - task run end
+03-13 16:44:37.030   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `SmartChargePropertyManager`(id #5)
+03-13 16:44:37.030   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `PowerPropertyManager`(id #12)
+03-13 16:44:37.030   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `KeyboardPropertyManager`(id #18)
+03-13 16:44:37.031   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - properties to be notified to observer `ConfigurationManager by com.datalogic.extension.netconfighelper.HelperService.onStartCommand`(id #25): {USB_HOST_DATA=0}
+03-13 16:44:37.031   3262   6647 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - wait to synchronize with notifyObserverInBackgroundSync task
+03-13 16:44:37.031   3262  11241 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - start task
+03-13 16:44:37.032   3262  11241 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - calling onConfigurationChanged of remote observer `ConfigurationManager by com.datalogic.extension.netconfighelper.HelperService.onStartCommand`(#25) (properties={USB_HOST_DATA=0})
+03-13 16:44:37.033   4277   4322 D DL-ConfigurationManager:  onConfigurationChanged(properties={USB_HOST_DATA=0}, persist=true)
+03-13 16:44:37.033   4277   4322 D DL-ConfigurationManager:  onConfigurationChanged(id=USB_HOST_DATA, value=0)
+03-13 16:44:37.033   4277   4322 D DL-Property:   onInternalChangeSet(id=USB_HOST_DATA, value=false, SUPPORTED)
+03-13 16:44:37.033   4277   5077 E DL-ConfigurationManager:  ConfigurationManager listener's callback called
+03-13 16:44:37.033   3262  11241 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - out from remote observer `ConfigurationManager by com.datalogic.extension.netconfighelper.HelperService.onStartCommand`(#25) onConfigurationChanged (errors=[])result=0
+03-13 16:44:37.034   3262   6647 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - task run end
+03-13 16:44:37.034   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `BatteryManagerService`(id #1)
+03-13 16:44:37.034   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `PosePropertyPropertyManager`(id #7)
+03-13 16:44:37.034   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `UISettingsPropertyManager`(id #15)
+03-13 16:44:37.034   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - no properties to be notified to observer `ExtendedBatterySaverPropertyManager`(id #4)
+03-13 16:44:37.034   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - properties to be notified to observer `ConfigurationManager by com.datalogic.dlsettings.usb.WhitelistUsbDeviceActivity.onCreate`(id #28): {USB_HOST_DATA=0}
+03-13 16:44:37.035   3262   6647 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - wait to synchronize with notifyObserverInBackgroundSync task
+03-13 16:44:37.035   3262  11242 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - start task
+03-13 16:44:37.035   3262  11242 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - calling onConfigurationChanged of remote observer `ConfigurationManager by com.datalogic.dlsettings.usb.WhitelistUsbDeviceActivity.onCreate`(#28) (properties={USB_HOST_DATA=0})
+03-13 16:44:37.036   6623   6662 D DL-ConfigurationManager:  onConfigurationChanged(properties={USB_HOST_DATA=0}, persist=true)
+03-13 16:44:37.036   6623   6662 D DL-ConfigurationManager:  onConfigurationChanged(id=USB_HOST_DATA, value=0)
+03-13 16:44:37.036   6623   6662 D DL-Property:   onInternalChangeSet(id=USB_HOST_DATA, value=false, SUPPORTED)
+03-13 16:44:37.037   6623  11211 E DL-ConfigurationManager:  ConfigurationManager listener's callback called
+03-13 16:44:37.037   3262  11242 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - out from remote observer `ConfigurationManager by com.datalogic.dlsettings.usb.WhitelistUsbDeviceActivity.onCreate`(#28) onConfigurationChanged (errors=[])result=0
+03-13 16:44:37.037   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.037   3262   6647 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - task run end
+03-13 16:44:37.038   3262   6647 D DL-ConfigurationManagerService:  notifyObservers - properties to be notified to observer `ConfigurationManager by com.datalogic.dlsettings.usb.WhitelistUsbDeviceActivity.onCreate`(id #30): {USB_HOST_DATA=0}
+03-13 16:44:37.038   3262   6647 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - wait to synchronize with notifyObserverInBackgroundSync task
+03-13 16:44:37.038   3262  11243 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - start task
+03-13 16:44:37.039   3262  11243 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - calling onConfigurationChanged of remote observer `ConfigurationManager by com.datalogic.dlsettings.usb.WhitelistUsbDeviceActivity.onCreate`(#30) (properties={USB_HOST_DATA=0})
+03-13 16:44:37.039   6623   6662 D DL-ConfigurationManager:  onConfigurationChanged(properties={USB_HOST_DATA=0}, persist=true)
+03-13 16:44:37.039   6623   6662 D DL-ConfigurationManager:  onConfigurationChanged(id=USB_HOST_DATA, value=0)
+03-13 16:44:37.040   6623   6662 D DL-Property:   onInternalChangeSet(id=USB_HOST_DATA, value=false, SUPPORTED)
+03-13 16:44:37.040   6623  11211 E DL-ConfigurationManager:  ConfigurationManager listener's callback called
+03-13 16:44:37.040   3262  11243 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - out from remote observer `ConfigurationManager by com.datalogic.dlsettings.usb.WhitelistUsbDeviceActivity.onCreate`(#30) onConfigurationChanged (errors=[])result=0
+03-13 16:44:37.041   3262   6647 D DL-ConfigurationManagerService:  notifyObserverInBackgroundSync - task run end
+03-13 16:44:37.041   3262   6647 D DL-ConfigurationManagerService:  commitInternal - notifyObservers result=SUCCESS
+03-13 16:44:37.041   3262   6647 D DL-ConfigurationManagerService:  commitInternal - apply SUCCEEDED
+03-13 16:44:37.041   3262   6647 D DL-ConfigurationPropertyMonitor:  commit
+03-13 16:44:37.041   3262   6647 D DL-ConfigurationPropertyMonitor:  storeToDatabase - NOTHING to BE STORED in DATABASE table MIB
+03-13 16:44:37.041   3262   6647 D DL-ConfigurationPropertyMonitor:  storeToDatabase - NOTHING to BE DELETED from DATABASE table MIB
+03-13 16:44:37.041   3262   6647 D DL-ConfigurationManagerService:  commitInternal - result=SUCCESS
+03-13 16:44:37.042   3262   6647 W ContextImpl:  Calling a method in the system process without a qualified user: android.app.ContextImpl.sendBroadcast:1249 com.datalogic.server.ConfigurationManagerService.sendBroadcastIntentConfigurationChanged:1583 com.datalogic.server.ConfigurationManagerService.commitInternal:623 com.datalogic.server.ConfigurationManagerService.saveCommitOrCommit:421 com.datalogic.server.ConfigurationManagerService.commit:414
+03-13 16:44:37.043   3262   6647 D DL-ConfigurationManagerService:  sendBroadcastIntent(action=com.datalogic.device.intent.action.configuration.CHANGED, properties={USB_HOST_DATA=0}
+03-13 16:44:37.047   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1707320, confidence = 100
+03-13 16:44:37.054   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.071   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.088   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.091   1261   1261 I QTI PowerHAL:  Power setMode: 6 to: 1
+03-13 16:44:37.091   1261   1261 E QTI PowerHAL:  Failed to acquire lock for hint_id: 10A5.
+03-13 16:44:37.104   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.107   1261   1261 I QTI PowerHAL:  Power setMode: 6 to: 0
+03-13 16:44:37.121   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.138   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.154   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.171   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.188   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.205   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.221   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.238   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.245   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1701426, confidence = 100
+03-13 16:44:37.255   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.272   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.288   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.305   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.314   1249   2919 I vendor.qti.bluetooth@1.0-ibs_handler:  ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+03-13 16:44:37.315   1249   2919 D vendor.qti.bluetooth@1.0-ibs_handler:  SerialClockVote: vote for UART CLK ON
+03-13 16:44:37.315   1249   2919 D vendor.qti.bluetooth@1.0-wake_lock:  Acquire wakelock is acquired
+03-13 16:44:37.315   1249   2919 I vendor.qti.bluetooth@1.0-ibs_handler:  ProcessIbsCmd: Writing IBS_WAKE_ACK
+03-13 16:44:37.322   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.324  10010  10213 I NearbyDiscovery:  (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+03-13 16:44:37.338   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.355   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.356   1249   2919 I vendor.qti.bluetooth@1.0-ibs_handler:  ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+03-13 16:44:37.356   1249   2919 D vendor.qti.bluetooth@1.0-ibs_handler:  SerialClockVote: vote for UART CLK OFF
+03-13 16:44:37.372   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.388   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.405   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.422   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.439   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.441   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 44 mm, shake = 1701842, confidence = 100
+03-13 16:44:37.455   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.472   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.489   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.505   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.506   1249   2751 D vendor.qti.bluetooth@1.0-wake_lock:  Release wakelock is released
+03-13 16:44:37.522   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.539   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.556   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.572   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.589   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.606   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:37.637   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1696571, confidence = 100
+03-13 16:44:37.679   1310   1458 I SDM:  DisplayBase::CommitThread: Received idle timeout
+03-13 16:44:37.692   1261   1261 I QTI PowerHAL:  Power setMode: 6 to: 1
+03-13 16:44:37.693   1261   1261 E QTI PowerHAL:  Failed to acquire lock for hint_id: 10A5.
+03-13 16:44:37.760   1261   1261 I QTI PowerHAL:  Power setMode: 6 to: 0
+03-13 16:44:37.833   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 42 mm, shake = 1697172, confidence = 100
+03-13 16:44:37.994   7528  11238 W adbd:  timed out while waiting for FUNCTIONFS_BIND, trying again
+03-13 16:44:37.994   7528  11238 I adbd:  UsbFfs: connection terminated: monitor thread finished
+03-13 16:44:37.995   7528   7528 I adbd:  UsbFfs: already offline
+03-13 16:44:37.995   7528   7528 I adbd:  destroying transport UsbFfs
+03-13 16:44:37.995   7528   7528 I adbd:  UsbFfsConnection being destroyed
+03-13 16:44:38.012   2200   8240 I libusbconfigfs:  event=1 on fd=5
+03-13 16:44:38.012   7528   7537 I adbd:  opening control endpoint /dev/usb-ffs/adb/ep0
+03-13 16:44:38.012   2200   8240 I libusbconfigfs:  event=1 on fd=5
+03-13 16:44:38.013   2200   8240 I libusbconfigfs:  event=1 on fd=5
+03-13 16:44:38.014   2200   8240 I libusbconfigfs:  event=1 on fd=5
+03-13 16:44:38.014   7528   7537 I adbd:  pausing USB due to sys.usb.adb.disabled
+03-13 16:44:38.029   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1695841, confidence = 100
+03-13 16:44:38.045   2023   2264 D WifiStaIfaceHidlImpl:  getCachedScanData is not implemented by HIDL
+03-13 16:44:38.225   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1698584, confidence = 100
+03-13 16:44:38.421   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 44 mm, shake = 1695005, confidence = 100
+03-13 16:44:38.617   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1697333, confidence = 100
+03-13 16:44:38.651   1249   2919 I vendor.qti.bluetooth@1.0-ibs_handler:  ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+03-13 16:44:38.652   1249   2919 D vendor.qti.bluetooth@1.0-ibs_handler:  SerialClockVote: vote for UART CLK ON
+03-13 16:44:38.652   1249   2919 D vendor.qti.bluetooth@1.0-wake_lock:  Acquire wakelock is acquired
+03-13 16:44:38.652   1249   2919 I vendor.qti.bluetooth@1.0-ibs_handler:  ProcessIbsCmd: Writing IBS_WAKE_ACK
+03-13 16:44:38.660  10010  10213 I NearbyDiscovery:  (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+03-13 16:44:38.675   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.680   1261   1261 I QTI PowerHAL:  Power setMode: 6 to: 1
+03-13 16:44:38.681   1261   1261 E QTI PowerHAL:  Failed to acquire lock for hint_id: 10A5.
+03-13 16:44:38.691   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.693   1249   2919 I vendor.qti.bluetooth@1.0-ibs_handler:  ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+03-13 16:44:38.693   1249   2919 D vendor.qti.bluetooth@1.0-ibs_handler:  SerialClockVote: vote for UART CLK OFF
+03-13 16:44:38.697   1261   1261 I QTI PowerHAL:  Power setMode: 6 to: 0
+03-13 16:44:38.708   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.724   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.741   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.758   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.775   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.792   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.808   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.813   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1699105, confidence = 100
+03-13 16:44:38.825   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.842   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.843   1249   2751 D vendor.qti.bluetooth@1.0-wake_lock:  Release wakelock is released
+03-13 16:44:38.858   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.875   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.892   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.909   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.925   1371   1371 W Layer:  gatherBufferInfo: Received unknown dataspace from gralloc
+03-13 16:44:38.998   1310   1458 I SDM:  DisplayBase::CommitThread: Received idle timeout
+03-13 16:44:39.010   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 44 mm, shake = 1696662, confidence = 100
+03-13 16:44:39.012   1261   1261 I QTI PowerHAL:  Power setMode: 6 to: 1
+03-13 16:44:39.013   1261   1261 E QTI PowerHAL:  Failed to acquire lock for hint_id: 10A5.
+03-13 16:44:39.050   1247   4984 D AHAL:  AudioStream: astream_out_standby: 663: enter: stream (0xb4000078efa2d040), usecase(1: low-latency-playback)
+03-13 16:44:39.051   1247   4984 D AHAL:  AudioStream: Standby: 2190: Enter
+03-13 16:44:39.051   1247   4984 I PAL:  API: pal_stream_stop: 346: Enter. Stream handle :0xb40000782fa31c70K
+03-13 16:44:39.052   1306   1306 D AGM:  graph: graph_stop: 978 entry graph_handle 0x47534c
+03-13 16:44:39.057   1306   1306 D AGM:  graph: graph_stop: 1023 exit, ret 0
+03-13 16:44:39.059   1247   4984 E PAL:  ResourceManager: voteSleepMonitor: 1593: ioctl device is not open
+03-13 16:44:39.060   1247   4984 I PAL:  SpeakerProtection: spkrProtSetSpkrStatus: 244: Speaker used last time 867
+03-13 16:44:39.060   1306   6289 D AGM:  graph: graph_stop: 978 entry graph_handle 0x147534c
+03-13 16:44:39.062   1306   6289 D AGM:  graph: graph_stop: 1023 exit, ret 0
+03-13 16:44:39.062   1306   6289 I AGM:  API: agm_session_aif_connect: 603 disconnecting aifid:11 with session id=121
+03-13 16:44:39.062   1306   6289 D AGM:  graph: graph_stop: 978 entry graph_handle 0x147534c
+03-13 16:44:39.062   1306   6289 D AGM:  metadata: metadata_print: 79 *************************Metadata*************************
+03-13 16:44:39.062   1306   6289 D AGM:  metadata: metadata_print: 80 GKV size:1
+03-13 16:44:39.062   1306   6289 D AGM:  metadata: metadata_print: 83 key:0xa3000000, value:0xa3000009
+03-13 16:44:39.062   1306   6289 D AGM:  metadata: metadata_print: 87
+03-13 16:44:39.062   1306   6289 D AGM:  metadata: CKV count:1
+03-13 16:44:39.062   1306   6289 D AGM:  metadata: metadata_print: 90 key:0xbf000000, value:0x2
+03-13 16:44:39.062   1306   6289 D AGM:  metadata: metadata_print: 92
+03-13 16:44:39.063   1306   6289 D AGM:  metadata: metadata_print: 94 Property ID:134217744
+03-13 16:44:39.063   1306   6289 D AGM:  metadata: metadata_print: 95 property count:1
+03-13 16:44:39.063   1306   6289 D AGM:  metadata: metadata_print: 98 Property Values:
+03-13 16:44:39.063   1306   6289 D AGM:  metadata: metadata_print: 100 0x2
+03-13 16:44:39.063   1306   6289 D AGM:  metadata: metadata_print: 102
+03-13 16:44:39.063   1306   6289 D AGM:  metadata: metadata_print: 103 ****************Metadata Done***************************
+03-13 16:44:39.063   1306   6289 D AGM:  metadata:
+03-13 16:44:39.063   1306   6289 I gsl:  gsl_graph_close_sgids_and_connections:2056 num_sgid= 1
+03-13 16:44:39.063   1306   6289 I gsl:  gsl_graph_close_sgids_and_connections:2057 sg list:
+03-13 16:44:39.063   1306   6289 I gsl:  gsl_graph_close_sgids_and_connections:2059 b00000d5
+03-13 16:44:39.063   1306   6289 I gsl:  gsl_print_sg_conn_info:180 num_sg_conn = 0
+03-13 16:44:39.064   1306   6289 D AGM:  graph: graph_stop: 1023 exit, ret 0
+03-13 16:44:39.065   1306   6289 I AGM:  device: device_set_metadata: 744 Setting device metadata for CODEC_DMA-LPAIF_WSA-TX-0
+03-13 16:44:39.066   1306   6289 D AGM:  metadata: metadata_print: 79 *************************Metadata*************************
+03-13 16:44:39.066   1306   6289 D AGM:  metadata: metadata_print: 80 GKV size:0
+03-13 16:44:39.066   1306   6289 D AGM:  metadata: metadata_print: 87
+03-13 16:44:39.066   1306   6289 D AGM:  metadata: CKV count:0
+03-13 16:44:39.066   1306   6289 D AGM:  metadata: metadata_print: 92
+03-13 16:44:39.066   1306   6289 D AGM:  metadata: metadata_print: 94 Property ID:134217744
+03-13 16:44:39.066   1306   6289 D AGM:  metadata: metadata_print: 95 property count:2
+03-13 16:44:39.066   1306   6289 D AGM:  metadata: metadata_print: 98 Property Values:
+03-13 16:44:39.066   1306   6289 D AGM:  metadata: metadata_print: 100 0x2
+03-13 16:44:39.066   1306   6289 D AGM:  metadata: metadata_print: 100 0x5
+03-13 16:44:39.066   1306   6289 D AGM:  metadata: metadata_print: 102
+03-13 16:44:39.066   1306   6289 D AGM:  metadata: metadata_print: 103 ****************Metadata Done***************************
+03-13 16:44:39.066   1306   6289 D AGM:  metadata:
+03-13 16:44:39.066   1247   4984 I PAL:  ResourceManager: freeFrontEndIds: 6489: stream type 1, freeing 121
+03-13 16:44:39.066   1306   6289 D AGM:  session: session_close: 1268 enter
+03-13 16:44:39.067   1306   6289 D AGM:  graph: graph_close: 809 entry handle 0x147534c
+03-13 16:44:39.067   1306   6289 D AGM:  graph: graph_close: 834 exit, ret 0
+03-13 16:44:39.067   1306   6289 D AGM:  session: session_close: 1317 exit, ret 0
+03-13 16:44:39.068   1247   4984 I PAL:  API: pal_stream_stop: 382: Exit. status 0
+03-13 16:44:39.068   1247   4984 I PAL:  API: pal_stream_close: 245: Enter. Stream handle :0xb40000782fa31c70K
+03-13 16:44:39.069   1306   6289 I AGM:  API: agm_session_aif_connect: 603 disconnecting aifid:8 with session id=117
+03-13 16:44:39.069   1306   6289 D AGM:  graph: graph_stop: 978 entry graph_handle 0x47534c
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 79 *************************Metadata*************************
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 80 GKV size:4
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 83 key:0xa1000000, value:0xa100000e
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 83 key:0xab000000, value:0x1
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 83 key:0xa2000000, value:0xa2000001
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 83 key:0xac000000, value:0xac000002
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 87
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: CKV count:4
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 90 key:0xa4000000, value:0x0
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 90 key:0xd2000000, value:0x0
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 90 key:0xa5000000, value:0xbb80
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 90 key:0xbe000000, value:0x3
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 92
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 94 Property ID:134217744
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 95 property count:3
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 98 Property Values:
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 100 0x3
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 100 0x2
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 100 0x5
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 102
+03-13 16:44:39.069   1306   6289 D AGM:  metadata: metadata_print: 103 ****************Metadata Done***************************
+03-13 16:44:39.069   1306   6289 D AGM:  metadata:
+03-13 16:44:39.069   1306   6289 I gsl:  gsl_graph_close_sgids_and_connections:2056 num_sgid= 3
+03-13 16:44:39.069   1306   6289 I gsl:  gsl_graph_close_sgids_and_connections:2057 sg list:
+03-13 16:44:39.069   1306   6289 I gsl:  gsl_graph_close_sgids_and_connections:2059 b0000002
+03-13 16:44:39.069   1306   6289 I gsl:  gsl_graph_close_sgids_and_connections:2059 b0000025
+03-13 16:44:39.069   1306   6289 I gsl:  gsl_graph_close_sgids_and_connections:2059 b0000024
+03-13 16:44:39.069   1306   6289 I gsl:  gsl_print_sg_conn_info:180 num_sg_conn = 3
+03-13 16:44:39.069   1306   6289 I gsl:  gsl_print_sg_conn_info:182 sg b0000025 has 1 children:
+03-13 16:44:39.069   1306   6289 I gsl:  gsl_print_sg_conn_info:185 b0000002,
+03-13 16:44:39.069   1306   6289 I gsl:  gsl_print_sg_conn_info:182 sg b0000024 has 1 children:
+03-13 16:44:39.069   1306   6289 I gsl:  gsl_print_sg_conn_info:185 b0000025,
+03-13 16:44:39.069   1306   6289 I gsl:  gsl_print_sg_conn_info:182 sg b0000023 has 1 children:
+03-13 16:44:39.069   1306   6289 I gsl:  gsl_print_sg_conn_info:185 b0000024,
+03-13 16:44:39.073   1306   6289 D AGM:  graph: graph_stop: 1023 exit, ret 0
+03-13 16:44:39.081   1261   1261 I QTI PowerHAL:  Power setMode: 6 to: 0
+03-13 16:44:39.094   1306   1306 I AGM:  device: device_set_metadata: 744 Setting device metadata for CODEC_DMA-LPAIF_WSA-RX-0
+03-13 16:44:39.094   1306   1306 D AGM:  metadata: metadata_print: 79 *************************Metadata*************************
+03-13 16:44:39.094   1306   1306 D AGM:  metadata: metadata_print: 80 GKV size:0
+03-13 16:44:39.094   1306   1306 D AGM:  metadata: metadata_print: 87
+03-13 16:44:39.094   1306   1306 D AGM:  metadata: CKV count:0
+03-13 16:44:39.094   1306   1306 D AGM:  metadata: metadata_print: 92
+03-13 16:44:39.094   1306   1306 D AGM:  metadata: metadata_print: 94 Property ID:134217744
+03-13 16:44:39.094   1306   1306 D AGM:  metadata: metadata_print: 95 property count:2
+03-13 16:44:39.094   1306   1306 D AGM:  metadata: metadata_print: 98 Property Values:
+03-13 16:44:39.094   1306   1306 D AGM:  metadata: metadata_print: 100 0x2
+03-13 16:44:39.094   1306   1306 D AGM:  metadata: metadata_print: 100 0x5
+03-13 16:44:39.094   1306   1306 D AGM:  metadata: metadata_print: 102
+03-13 16:44:39.094   1306   1306 D AGM:  metadata: metadata_print: 103 ****************Metadata Done***************************
+03-13 16:44:39.094   1306   1306 D AGM:  metadata:
+03-13 16:44:39.095   1306   6289 I AGM:  session: session_obj_set_sess_aif_metadata: 1758 Setting metadata for sess aif id 8
+03-13 16:44:39.095   1306   6289 D AGM:  metadata: metadata_print: 79 *************************Metadata*************************
+03-13 16:44:39.095   1306   6289 D AGM:  metadata: metadata_print: 80 GKV size:0
+03-13 16:44:39.095   1306   6289 D AGM:  metadata: metadata_print: 87
+03-13 16:44:39.095   1306   6289 D AGM:  metadata: CKV count:0
+03-13 16:44:39.095   1306   6289 D AGM:  metadata: metadata_print: 92
+03-13 16:44:39.095   1306   6289 D AGM:  metadata: metadata_print: 94 Property ID:134217744
+03-13 16:44:39.095   1306   6289 D AGM:  metadata: metadata_print: 95 property count:1
+03-13 16:44:39.095   1306   6289 D AGM:  metadata: metadata_print: 98 Property Values:
+03-13 16:44:39.095   1306   6289 D AGM:  metadata: metadata_print: 100 0x3
+03-13 16:44:39.095   1306   6289 D AGM:  metadata: metadata_print: 102
+03-13 16:44:39.095   1306   6289 D AGM:  metadata: metadata_print: 103 ****************Metadata Done***************************
+03-13 16:44:39.095   1306   6289 D AGM:  metadata:
+03-13 16:44:39.095   1306   6289 I AGM:  session: session_obj_set_sess_aif_metadata: 1778 Exit
+03-13 16:44:39.096   1306   6289 D AGM:  session: session_close: 1268 enter
+03-13 16:44:39.096   1306   6289 D AGM:  graph: graph_close: 809 entry handle 0x47534c
+03-13 16:44:39.096   1306   6289 I gsl:  gsl_graph_close_sgids_and_connections:2056 num_sgid= 1
+03-13 16:44:39.096   1306   6289 I gsl:  gsl_graph_close_sgids_and_connections:2057 sg list:
+03-13 16:44:39.096   1306   6289 I gsl:  gsl_graph_close_sgids_and_connections:2059 b0000023
+03-13 16:44:39.096   1306   6289 I gsl:  gsl_print_sg_conn_info:180 num_sg_conn = 0
+03-13 16:44:39.098   1306   6289 D AGM:  graph: graph_close: 834 exit, ret 0
+03-13 16:44:39.098   1306   6289 D AGM:  session: session_close: 1317 exit, ret 0
+03-13 16:44:39.100   1247   4984 I PAL:  ResourceManager: freeFrontEndIds: 6489: stream type 1, freeing 117
+03-13 16:44:39.100   1247   4984 I PAL:  Device: close: 478: Enter. deviceCount 1 for device id 3 (PAL_DEVICE_OUT_SPEAKER)
+03-13 16:44:39.102   1247   4984 I PAL:  Device: close: 490: Exit. deviceCount 0 for device id 3 (PAL_DEVICE_OUT_SPEAKER), exit status 0
+03-13 16:44:39.102   1247   4984 I PAL:  ResourceManager: GetConcurrencyInfo: 4757: stream type 1 Tx conc 0, Rx conc 0, concurrency allowed
+03-13 16:44:39.102   1247   4984 I PAL:  ResourceManager: GetConcurrencyInfo: 4757: stream type 1 Tx conc 0, Rx conc 0, concurrency allowed
+03-13 16:44:39.102   1247   4984 I PAL:  ResourceManager: GetConcurrencyInfo: 4757: stream type 1 Tx conc 0, Rx conc 0, concurrency allowed
+03-13 16:44:39.102   1247   4984 I PAL:  ResourceManager: deregisterStream: 2889: stream type 1
+03-13 16:44:39.103   1247   4984 I PAL:  API: pal_stream_close: 280: Exit. status 0
+03-13 16:44:39.103   1247   4984 D AHAL:  AudioStream: Standby: 2280: Exit ret: 0
+03-13 16:44:39.103   1247   4984 D AHAL:  AudioStream: astream_out_standby: 671: Exit ret: 0
+03-13 16:44:39.208   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 42 mm, shake = 1692745, confidence = 100
+03-13 16:44:39.404   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 44 mm, shake = 1703438, confidence = 100
+03-13 16:44:39.600   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1695873, confidence = 100
+03-13 16:44:39.796   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 42 mm, shake = 1699006, confidence = 100
+03-13 16:44:39.993   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1698530, confidence = 100
+03-13 16:44:40.132   1249   2919 I vendor.qti.bluetooth@1.0-ibs_handler:  ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+03-13 16:44:40.132   1249   2919 D vendor.qti.bluetooth@1.0-ibs_handler:  SerialClockVote: vote for UART CLK ON
+03-13 16:44:40.132   1249   2919 D vendor.qti.bluetooth@1.0-wake_lock:  Acquire wakelock is acquired
+03-13 16:44:40.132   1249   2919 I vendor.qti.bluetooth@1.0-ibs_handler:  ProcessIbsCmd: Writing IBS_WAKE_ACK
+03-13 16:44:40.141  10010  10213 I NearbyDiscovery:  (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+03-13 16:44:40.174   1249   2919 I vendor.qti.bluetooth@1.0-ibs_handler:  ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+03-13 16:44:40.174   1249   2919 D vendor.qti.bluetooth@1.0-ibs_handler:  SerialClockVote: vote for UART CLK OFF
+03-13 16:44:40.187   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1691977, confidence = 100
+03-13 16:44:40.325   1249   2751 D vendor.qti.bluetooth@1.0-wake_lock:  Release wakelock is released
+03-13 16:44:40.385   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1697950, confidence = 100
+03-13 16:44:40.581   3262   3262 D DL-TimeOfFlightManager:  ToF measurement distance = 43 mm, shake = 1695955, confidence = 100

@@ -1,0 +1,9 @@
+# Exclude large/unnecessary directories from Docker build context
+build/
+deploy/app/
+deploy/linuxdeploy-x86_64.AppImage
+deploy/linuxdeploy-plugin-qt-x86_64.AppImage
+deploy/ToolLogPro-x86_64.AppImage
+*.md
+*.user
+.git/

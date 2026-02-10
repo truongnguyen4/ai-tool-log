@@ -1,0 +1,2241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1400</width>
+    <height>917</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>ToolLogPro</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">/* Dark theme stylesheet */
+QMainWindow {
+    background-color: #1e1e1e;
+    color: #cccccc;
+}
+
+QWidget {
+    background-color: #1e1e1e;
+    color: #cccccc;
+}
+
+QLineEdit {
+    background-color: #2d2d30;
+    border: 1px solid #3e3e42;
+    border-radius: 3px;
+    padding: 5px;
+    color: #cccccc;
+}
+
+QLineEdit:focus {
+    border: 1px solid #007acc;
+}
+
+QPushButton {
+    background-color: #3e3e42;
+    border: 1px solid #555555;
+    border-radius: 2px;
+    padding: 5px 10px;
+    color: #cccccc;
+}
+
+QPushButton:hover {
+    background-color: #505053;
+    border: 1px solid #6a6a6f;
+}
+
+QPushButton:pressed {
+    background-color: #2d2d30;
+}
+
+QPushButton:checked {
+    background-color: #0e639c;
+    border: 1px solid #0e639c;
+    color: white;
+}
+
+QPushButton#btnResume {
+    background-color: #0e639c;
+    border: 1px solid #0e639c;
+    color: white;
+}
+
+QPushButton#btnResume:hover {
+    background-color: #1177bb;
+    border: 1px solid #1177bb;
+}
+
+QPushButton#btnAutoScroll:checked {
+    background-color: #0e639c;
+    border: 1px solid #0e639c;
+}
+
+QComboBox {
+    background-color: #2d2d30;
+    border: 1px solid #3e3e42;
+    border-radius: 3px;
+    padding: 5px;
+    color: #cccccc;
+}
+
+QComboBox::drop-down {
+    border: none;
+}
+
+QComboBox::down-arrow {
+    image: none;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid #cccccc;
+    width: 0;
+    height: 0;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #2d2d30;
+    color: #cccccc;
+    selection-background-color: #0e639c;
+    selection-color: white;
+    border: 1px solid #3e3e42;
+    outline: none;
+}
+
+QComboBox QAbstractItemView::item {
+    background-color: #2d2d30;
+    color: #cccccc;
+    padding: 5px;
+    min-height: 25px;
+}
+
+QComboBox QAbstractItemView::item:hover {
+    background-color: #3e3e42;
+}
+
+QComboBox QAbstractItemView::item:selected {
+    background-color: #0e639c;
+    color: white;
+}
+
+QTableView {
+    background-color: #1e1e1e;
+    alternate-background-color: #2a2a2a;
+    gridline-color: #3e3e42;
+    color: #cccccc;
+    border: none;
+}
+
+QTableView::item {
+    padding: 4px;
+}
+
+QTableView::item:selected {
+    background-color: #4a2d7a;
+}
+
+QTableView::item:focus {
+    background-color: #4a2d7a;
+    outline: none;
+}
+
+QHeaderView::section {
+    background-color: #2d2d30;
+    color: #cccccc;
+    padding: 6px;
+    border: none;
+    border-right: 1px solid #3e3e42;
+    border-bottom: 1px solid #3e3e42;
+}
+
+QRadioButton {
+    color: #cccccc;
+    spacing: 5px;
+}
+
+QRadioButton::indicator {
+    width: 13px;
+    height: 13px;
+}
+
+QRadioButton::indicator::unchecked {
+    border: 1px solid #3e3e42;
+    border-radius: 7px;
+    background-color: #2d2d30;
+}
+
+QRadioButton::indicator::checked {
+    border: 1px solid #007acc;
+    border-radius: 7px;
+    background-color: #007acc;
+}
+
+QLabel {
+    color: #cccccc;
+}
+
+QGroupBox {
+    border: 1px solid #3e3e42;
+    border-radius: 3px;
+    margin-top: 10px;
+    padding-top: 10px;
+    color: #cccccc;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+}
+
+QSplitter::handle {
+    background-color: #3e3e42;
+}
+
+QScrollBar:vertical {
+    border: none;
+    background-color: #1e1e1e;
+    width: 12px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #3e3e42;
+    border-radius: 6px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #4e4e52;
+}
+
+QScrollBar:horizontal {
+    border: none;
+    background-color: #1e1e1e;
+    height: 12px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #3e3e42;
+    border-radius: 6px;
+    min-width: 20px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: #4e4e52;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line {
+    border: none;
+    background: none;
+}
+
+QTabWidget::pane {
+    border: 1px solid #3e3e42;
+    background-color: #1e1e1e;
+}
+
+QTabWidget::tab-bar {
+    left: 0px;
+}
+
+QTabBar::tab {
+    background-color: #2d2d30;
+    color: #cccccc;
+    border: 1px solid #3e3e42;
+    padding: 8px 12px;
+    margin: 1px;
+}
+
+QTabBar::tab:selected {
+    background-color: #0e639c;
+    color: white;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: #3e3e42;
+}
+
+/* Vertical tabs (West position) specific styling */
+QTabBar::tab:left {
+    min-width: 120px;
+    min-height: 40px;
+    margin-right: 2px;
+    padding: 10px 15px;
+}
+
+/* Log level label colors */
+QRadioButton#radioVerbosePlus, QRadioButton#radioV { color: #aaaaaa; }
+QRadioButton#radioD { color: #5c9bd6; }
+QRadioButton#radioI { color: #4caa4c; }
+QRadioButton#radioW { color: #d4a017; }
+QRadioButton#radioE { color: #cc3300; }
+QRadioButton#radioA { color: #990033; }
+QRadioButton#radioVerbosePlus::indicator:checked,
+QRadioButton#radioV::indicator:checked { background-color: #808080; border-color: #808080; }
+QRadioButton#radioD::indicator:checked { background-color: #5c9bd6; border-color: #5c9bd6; }
+QRadioButton#radioI::indicator:checked { background-color: #4caa4c; border-color: #4caa4c; }
+QRadioButton#radioW::indicator:checked { background-color: #d4a017; border-color: #d4a017; }
+QRadioButton#radioE::indicator:checked { background-color: #cc3300; border-color: #cc3300; }
+QRadioButton#radioA::indicator:checked { background-color: #990033; border-color: #990033; }
+
+QStatusBar {
+    background-color: #007acc;
+    color: white;
+}
+            </string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_device">
+      <property name="spacing">
+       <number>5</number>
+      </property>
+      <property name="leftMargin">
+       <number>10</number>
+      </property>
+      <property name="topMargin">
+       <number>5</number>
+      </property>
+      <property name="rightMargin">
+       <number>10</number>
+      </property>
+      <property name="bottomMargin">
+       <number>5</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Device:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cmbDevice">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblDeviceStatus">
+        <property name="styleSheet">
+         <string notr="true">color: #00ff00; font-size: 16px;</string>
+        </property>
+        <property name="text">
+         <string>●</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnToggleTerminal">
+        <property name="maximumSize">
+         <size>
+          <width>35</width>
+          <height>35</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+          <normaloff>:/icons/terminal.svg</normaloff>:/icons/terminal.svg</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnAppSettings">
+        <property name="maximumSize">
+         <size>
+          <width>35</width>
+          <height>35</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+          <normaloff>:/icons/settings.svg</normaloff>:/icons/settings.svg</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QSplitter" name="splitterMain">
+      <property name="orientation">
+       <enum>Qt::Orientation::Vertical</enum>
+      </property>
+      <property name="childrenCollapsible">
+       <bool>false</bool>
+      </property>
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="tabAdbLogcat">
+        <attribute name="title">
+         <string>ADB Logcat</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_13">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QSplitter" name="splitter">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <widget class="QWidget" name="leftPanel" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>250</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>400</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <property name="spacing">
+              <number>10</number>
+             </property>
+             <property name="leftMargin">
+              <number>10</number>
+             </property>
+             <property name="topMargin">
+              <number>10</number>
+             </property>
+             <property name="rightMargin">
+              <number>10</number>
+             </property>
+             <property name="bottomMargin">
+              <number>10</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="lblLogFilters">
+               <property name="font">
+                <font>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>LOG FILTERS</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="lblFilterCount">
+               <property name="text">
+                <string>Showing: 38 / 489</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBoxHighlight">
+               <property name="title">
+                <string>Highlight</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_highlight">
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_highlightNav">
+                  <item>
+                   <widget class="QLineEdit" name="txtHighlight">
+                    <property name="placeholderText">
+                     <string>e.g. Android||Com  (Enter = next)</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <layout class="QVBoxLayout" name="verticalLayout_7">
+                    <item>
+                     <widget class="QPushButton" name="btnHighlightPrev">
+                      <property name="maximumSize">
+                       <size>
+                        <width>14</width>
+                        <height>14</height>
+                       </size>
+                      </property>
+                      <property name="toolTip">
+                       <string>Scroll to previous highlight match</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                        <normaloff>:/icons/arrow-up.svg</normaloff>:/icons/arrow-up.svg</iconset>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>10</width>
+                        <height>10</height>
+                       </size>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="btnHighlightNext">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>10</width>
+                        <height>10</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>14</width>
+                        <height>14</height>
+                       </size>
+                      </property>
+                      <property name="toolTip">
+                       <string>Scroll to next highlight match</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                        <normaloff>:/icons/arrow-down.svg</normaloff>:/icons/arrow-down.svg</iconset>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>10</width>
+                        <height>10</height>
+                       </size>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBoxKeyword">
+               <property name="title">
+                <string>Text</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_keyword">
+                <item>
+                 <widget class="QLineEdit" name="txtKeyword">
+                  <property name="placeholderText">
+                   <string>Regex e.g. (?=.*camera)(?=.*service)</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_5">
+               <property name="title">
+                <string>Message</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_8">
+                <item>
+                 <widget class="QLineEdit" name="txtFindMessage">
+                  <property name="placeholderText">
+                   <string>e.g. Camera||Com</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox">
+               <property name="title">
+                <string>Tag</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_4">
+                <item>
+                 <widget class="QLineEdit" name="txtTagFilter">
+                  <property name="placeholderText">
+                   <string>e.g. CameraService||Android</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_2">
+               <property name="title">
+                <string>Package</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_5">
+                <item>
+                 <widget class="QLineEdit" name="txtPackageFilter">
+                  <property name="placeholderText">
+                   <string>e.g. com.google.android||android.com</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_3">
+               <property name="title">
+                <string>PID</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_6">
+                <item>
+                 <widget class="QLineEdit" name="txtPidFilter">
+                  <property name="placeholderText">
+                   <string>e.g. 14502||12345</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_6">
+               <property name="title">
+                <string>Time Range</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_9">
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout">
+                  <item>
+                   <widget class="QLineEdit" name="txtStartTime">
+                    <property name="placeholderText">
+                     <string>Start HH:mm:ss</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="txtEndTime">
+                    <property name="placeholderText">
+                     <string>End HH:mm:ss</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_4">
+               <property name="title">
+                <string>Minimum Level</string>
+               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_7">
+                <item>
+                 <widget class="QRadioButton" name="radioVerbosePlus">
+                  <property name="text">
+                   <string>V+</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioV">
+                  <property name="text">
+                   <string>V</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioD">
+                  <property name="text">
+                   <string>D</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioI">
+                  <property name="text">
+                   <string>I</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioW">
+                  <property name="text">
+                   <string>W</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioE">
+                  <property name="text">
+                   <string>E</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioA">
+                  <property name="text">
+                   <string>A</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Orientation::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="rightPanel" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>5</number>
+             </property>
+             <property name="topMargin">
+              <number>5</number>
+             </property>
+             <property name="rightMargin">
+              <number>5</number>
+             </property>
+             <property name="bottomMargin">
+              <number>5</number>
+             </property>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <property name="spacing">
+                <number>5</number>
+               </property>
+               <item>
+                <widget class="QPushButton" name="btnStart">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>1</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>35</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Logcat</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnKernel">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>1</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>35</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Kernel</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnAutoScroll">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>35</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Auto-Scroll</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnColumns">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>35</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>⚙ Columns</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnToggleCellContent">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>35</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Cell Content</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnClear">
+                 <property name="maximumSize">
+                  <size>
+                   <width>35</width>
+                   <height>35</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                   <normaloff>:/icons/edit-delete.svg</normaloff>:/icons/edit-delete.svg</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnSave">
+                 <property name="maximumSize">
+                  <size>
+                   <width>35</width>
+                   <height>35</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                   <normaloff>:/icons/document-save.svg</normaloff>:/icons/document-save.svg</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Orientation::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_file">
+               <property name="spacing">
+                <number>5</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="lblFilePath">
+                 <property name="text">
+                  <string>File:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="txtFilePath">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>35</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Enter or browse for a log file path...</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnOpen">
+                 <property name="maximumSize">
+                  <size>
+                   <width>35</width>
+                   <height>35</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                   <normaloff>:/icons/folder-open.svg</normaloff>:/icons/folder-open.svg</iconset>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QTextEdit" name="txtCellContent">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>90</height>
+                </size>
+               </property>
+               <property name="visible">
+                <bool>false</bool>
+               </property>
+               <property name="lineWrapMode">
+                <enum>QTextEdit::LineWrapMode::WidgetWidth</enum>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="placeholderText">
+                <string>Click on a cell to view its content...</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSplitter" name="splitterLogTables">
+               <property name="orientation">
+                <enum>Qt::Orientation::Vertical</enum>
+               </property>
+               <widget class="QTableView" name="tableLog">
+                <property name="alternatingRowColors">
+                 <bool>true</bool>
+                </property>
+                <property name="selectionBehavior">
+                 <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+                </property>
+                <property name="sortingEnabled">
+                 <bool>false</bool>
+                </property>
+               </widget>
+               <widget class="QWidget" name="markLogContainer" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_markLog">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QWidget" name="markLogHeader" native="true">
+                   <property name="styleSheet">
+                    <string notr="true">background-color: #2d2d30; border-bottom: 1px solid #3e3e42;</string>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_markLogHeader">
+                    <property name="spacing">
+                     <number>2</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="lblMarkLog">
+                      <property name="styleSheet">
+                       <string notr="true">color: #cccccc; font-weight: bold; padding: 3px 6px;</string>
+                      </property>
+                      <property name="text">
+                       <string>Marked</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_markLog">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="btnClearAllMarked">
+                      <property name="styleSheet">
+                       <string notr="true">QPushButton { background: transparent; border: none; border-radius: 3px; } QPushButton:hover { background-color: #3e3e42; }</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                        <normaloff>:/icons/edit-delete.svg</normaloff>:/icons/edit-delete.svg</iconset>
+                      </property>
+                      <property name="fixedSize" stdset="0">
+                       <size>
+                        <width>22</width>
+                        <height>22</height>
+                       </size>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QTableView" name="tableMarkLog">
+                   <property name="alternatingRowColors">
+                    <bool>true</bool>
+                   </property>
+                   <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+                   </property>
+                   <property name="sortingEnabled">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tabConfiguration">
+        <attribute name="title">
+         <string>Android</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_config">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QSplitter" name="splitterConfig">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <widget class="QWidget" name="leftConfigPanel" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_leftConfig">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QSplitter" name="splitterConfigTables">
+               <property name="orientation">
+                <enum>Qt::Orientation::Vertical</enum>
+               </property>
+               <widget class="QWidget" name="settingsPanel" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_settings">
+                 <property name="spacing">
+                  <number>10</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>10</number>
+                 </property>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_settingsHeader">
+                   <item>
+                    <widget class="QLabel" name="lblSettings">
+                     <property name="font">
+                      <font>
+                       <pointsize>12</pointsize>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Settings</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="horizontalSpacer_settings">
+                     <property name="orientation">
+                      <enum>Qt::Orientation::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="btnRefreshSettings">
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="icon">
+                      <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                       <normaloff>:/icons/refresh.svg</normaloff>:/icons/refresh.svg</iconset>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_filterSettings">
+                   <item>
+                    <widget class="QLineEdit" name="txtFilterSettings">
+                     <property name="placeholderText">
+                      <string>Filter by name...</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLineEdit" name="txtFilterSettingsValue">
+                     <property name="placeholderText">
+                      <string>Filter by value...</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <widget class="QTableView" name="tableSettings">
+                   <property name="alternatingRowColors">
+                    <bool>true</bool>
+                   </property>
+                   <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+                   </property>
+                   <property name="sortingEnabled">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="propertiesPanel" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_properties">
+                 <property name="spacing">
+                  <number>10</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>10</number>
+                 </property>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_propertiesHeader">
+                   <item>
+                    <widget class="QLabel" name="lblProperties">
+                     <property name="font">
+                      <font>
+                       <pointsize>12</pointsize>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Properties</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="horizontalSpacer_properties">
+                     <property name="orientation">
+                      <enum>Qt::Orientation::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="btnRefreshProperties">
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                     <property name="icon">
+                      <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                       <normaloff>:/icons/refresh.svg</normaloff>:/icons/refresh.svg</iconset>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_filterProperties">
+                   <item>
+                    <widget class="QLineEdit" name="txtFilterProperties">
+                     <property name="placeholderText">
+                      <string>Filter by name...</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLineEdit" name="txtFilterPropertiesValue">
+                     <property name="placeholderText">
+                      <string>Filter by value...</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <widget class="QTableView" name="tableProperties">
+                   <property name="alternatingRowColors">
+                    <bool>true</bool>
+                   </property>
+                   <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+                   </property>
+                   <property name="sortingEnabled">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="dumpsysPanel" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_dumpsys">
+             <property name="spacing">
+              <number>8</number>
+             </property>
+             <property name="leftMargin">
+              <number>10</number>
+             </property>
+             <property name="topMargin">
+              <number>10</number>
+             </property>
+             <property name="rightMargin">
+              <number>10</number>
+             </property>
+             <property name="bottomMargin">
+              <number>10</number>
+             </property>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_dumpsysHeader">
+               <item>
+                <widget class="QLabel" name="lblDumpsys">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Dumpsys</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_dumpsys">
+                 <property name="orientation">
+                  <enum>Qt::Orientation::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_dumpsysService">
+               <item>
+                <widget class="QLabel" name="lblDumpsysService">
+                 <property name="text">
+                  <string>Service:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="txtDumpsysService">
+                 <property name="minimumSize">
+                  <size>
+                   <width>160</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Service name...</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnDumpsysRefresh">
+                 <property name="maximumSize">
+                  <size>
+                   <width>28</width>
+                   <height>28</height>
+                  </size>
+                 </property>
+                 <property name="toolTip">
+                  <string>Refresh dumpsys output</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                   <normaloff>:/icons/refresh.svg</normaloff>:/icons/refresh.svg</iconset>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>16</width>
+                   <height>16</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblDumpsysPkg">
+                 <property name="text">
+                  <string>Package:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="txtDumpsysPackage">
+                 <property name="placeholderText">
+                  <string>com.example.app (optional)</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_dumpsysSearch">
+               <item>
+                <widget class="QLabel" name="lblDumpsysFind">
+                 <property name="text">
+                  <string>Find:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="txtDumpsysSearch">
+                 <property name="placeholderText">
+                  <string>Search in output...</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayout_dumpsysNav">
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QPushButton" name="btnDumpsysSearchPrev">
+                   <property name="maximumSize">
+                    <size>
+                     <width>14</width>
+                     <height>14</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>Previous match</string>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                     <normaloff>:/icons/arrow-up.svg</normaloff>:/icons/arrow-up.svg</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>10</width>
+                     <height>10</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="btnDumpsysSearchNext">
+                   <property name="maximumSize">
+                    <size>
+                     <width>14</width>
+                     <height>14</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>Next match</string>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                     <normaloff>:/icons/arrow-down.svg</normaloff>:/icons/arrow-down.svg</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>10</width>
+                     <height>10</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QPlainTextEdit" name="txtDumpsysOutput">
+               <property name="font">
+                <font>
+                 <family>Monospace</family>
+                 <pointsize>9</pointsize>
+                </font>
+               </property>
+               <property name="lineWrapMode">
+                <enum>QPlainTextEdit::LineWrapMode::NoWrap</enum>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tabSDK">
+        <attribute name="title">
+         <string>SDK</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="horizontalLayout_sdk_main">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QTabWidget" name="tabWidgetSDK">
+           <property name="currentIndex">
+            <number>1</number>
+           </property>
+           <widget class="QWidget" name="tabSDKConfiguration">
+            <attribute name="title">
+             <string>Configuration</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_sdk_config">
+             <property name="spacing">
+              <number>10</number>
+             </property>
+             <property name="leftMargin">
+              <number>10</number>
+             </property>
+             <property name="topMargin">
+              <number>10</number>
+             </property>
+             <property name="rightMargin">
+              <number>10</number>
+             </property>
+             <property name="bottomMargin">
+              <number>10</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="lblSDKTitle">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>PROPERTY DEFINITIONS</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_propertySearch">
+               <item>
+                <widget class="QLineEdit" name="txtPropertySearch">
+                 <property name="placeholderText">
+                  <string>Search property name...</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnAddProperty">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                   <normaloff>:/icons/plus.svg</normaloff>:/icons/plus.svg</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnClearAllProperties">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                   <normaloff>:/icons/edit-delete.svg</normaloff>:/icons/edit-delete.svg</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnFetchPropertyDefs">
+                 <property name="maximumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                   <normaloff>:/icons/refresh.svg</normaloff>:/icons/refresh.svg</iconset>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QTableView" name="tablePropertyDefinitions">
+               <property name="alternatingRowColors">
+                <bool>true</bool>
+               </property>
+               <property name="selectionBehavior">
+                <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+               </property>
+               <property name="sortingEnabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tabSDKCradle">
+            <attribute name="title">
+             <string>Cradle</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_cradle">
+             <property name="spacing">
+              <number>8</number>
+             </property>
+             <property name="leftMargin">
+              <number>8</number>
+             </property>
+             <property name="topMargin">
+              <number>8</number>
+             </property>
+             <property name="rightMargin">
+              <number>8</number>
+             </property>
+             <property name="bottomMargin">
+              <number>8</number>
+             </property>
+             <item>
+              <widget class="QGroupBox" name="grpCradleInfo">
+               <property name="title">
+                <string>Cradle Information</string>
+               </property>
+               <layout class="QHBoxLayout" name="hLayoutCradleInfo">
+                <property name="spacing">
+                 <number>6</number>
+                </property>
+                <property name="leftMargin">
+                 <number>8</number>
+                </property>
+                <property name="topMargin">
+                 <number>6</number>
+                </property>
+                <property name="rightMargin">
+                 <number>8</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>6</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="lblCradleKey">
+                  <property name="toolTip">
+                   <string>Optional key name — leave empty to fetch all info</string>
+                  </property>
+                  <property name="text">
+                   <string>Key:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="txtCradleKey">
+                  <property name="toolTip">
+                   <string>Specific key to query, e.g. firmware_version  (adb shell cmd cradle_manager get [KEY])</string>
+                  </property>
+                  <property name="placeholderText">
+                   <string>Leave empty for all info</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btnCradleGet">
+                  <property name="toolTip">
+                   <string>Run: adb shell cmd cradle_manager get [KEY]</string>
+                  </property>
+                  <property name="text">
+                   <string>Get Info</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="grpCradleFirmware">
+               <property name="title">
+                <string>Firmware</string>
+               </property>
+               <layout class="QVBoxLayout" name="vLayoutCradleFirmware">
+                <property name="spacing">
+                 <number>6</number>
+                </property>
+                <property name="leftMargin">
+                 <number>8</number>
+                </property>
+                <property name="topMargin">
+                 <number>6</number>
+                </property>
+                <property name="rightMargin">
+                 <number>8</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>6</number>
+                </property>
+                <item>
+                 <layout class="QHBoxLayout" name="hLayoutCradleFwSource">
+                  <property name="spacing">
+                   <number>6</number>
+                  </property>
+                  <item>
+                   <widget class="QRadioButton" name="radioDefaultFirmware">
+                    <property name="toolTip">
+                     <string>Use default firmware from enterprise partition (--default-firmware)</string>
+                    </property>
+                    <property name="text">
+                     <string>Default firmware</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QRadioButton" name="radioCustomFirmware">
+                    <property name="toolTip">
+                     <string>Specify a path to a firmware file on the device (--path)</string>
+                    </property>
+                    <property name="text">
+                     <string>Custom path:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="txtCradleFwPath">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="toolTip">
+                     <string>Full path to firmware file on the device</string>
+                    </property>
+                    <property name="placeholderText">
+                     <string>/data/local/tmp/fw.zip</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="hLayoutCradleFwType">
+                  <property name="spacing">
+                   <number>10</number>
+                  </property>
+                  <item>
+                   <widget class="QLabel" name="lblCradleFwType">
+                    <property name="toolTip">
+                     <string>Firmware component types to update (-t / --type). Leave all unchecked to update all types.</string>
+                    </property>
+                    <property name="text">
+                     <string>Types (update only):</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="chkFwTypeApplication">
+                    <property name="text">
+                     <string>Application</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="chkFwTypeBootloader">
+                    <property name="text">
+                     <string>Bootloader</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="chkFwTypePreloader">
+                    <property name="text">
+                     <string>Preloader</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="chkFwTypeWlc">
+                    <property name="text">
+                     <string>WLC</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="hSpacer_cradleFwType">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="hLayoutCradleFwBtns">
+                  <property name="spacing">
+                   <number>6</number>
+                  </property>
+                  <item>
+                   <widget class="QPushButton" name="btnCradleQueryFirmware">
+                    <property name="toolTip">
+                     <string>Run: adb shell cmd cradle_manager query-firmware [source]</string>
+                    </property>
+                    <property name="text">
+                     <string>Query Firmware</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btnCradleUpdateFirmware">
+                    <property name="toolTip">
+                     <string>Run: adb shell cmd cradle_manager update-firmware [source] [-t TYPE...]</string>
+                    </property>
+                    <property name="text">
+                     <string>Update Firmware</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="hSpacer_cradleFwBtns">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="grpCradleSchedule">
+               <property name="title">
+                <string>Firmware Update Schedule</string>
+               </property>
+               <layout class="QVBoxLayout" name="vLayoutCradleSchedule">
+                <property name="spacing">
+                 <number>6</number>
+                </property>
+                <property name="leftMargin">
+                 <number>8</number>
+                </property>
+                <property name="topMargin">
+                 <number>6</number>
+                </property>
+                <property name="rightMargin">
+                 <number>8</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>6</number>
+                </property>
+                <item>
+                 <layout class="QHBoxLayout" name="hLayoutCradleDays">
+                  <property name="spacing">
+                   <number>8</number>
+                  </property>
+                  <item>
+                   <widget class="QLabel" name="lblCradleDays">
+                    <property name="text">
+                     <string>Days:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="chkCradleMon">
+                    <property name="text">
+                     <string>Mon</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="chkCradleTue">
+                    <property name="text">
+                     <string>Tue</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="chkCradleWed">
+                    <property name="text">
+                     <string>Wed</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="chkCradleThu">
+                    <property name="text">
+                     <string>Thu</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="chkCradleFri">
+                    <property name="text">
+                     <string>Fri</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="chkCradleSat">
+                    <property name="text">
+                     <string>Sat</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="chkCradleSun">
+                    <property name="text">
+                     <string>Sun</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="hSpacer_cradleDays">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btnCradleQuerySchedule">
+                    <property name="toolTip">
+                     <string>Run: adb shell cmd cradle_manager query-schedule -d [days...]</string>
+                    </property>
+                    <property name="text">
+                     <string>Query Schedule</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="grpCradleOutput">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>1</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="title">
+                <string>Command Output</string>
+               </property>
+               <layout class="QVBoxLayout" name="vLayoutCradleOutput">
+                <property name="spacing">
+                 <number>4</number>
+                </property>
+                <property name="leftMargin">
+                 <number>8</number>
+                </property>
+                <property name="topMargin">
+                 <number>6</number>
+                </property>
+                <property name="rightMargin">
+                 <number>8</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>6</number>
+                </property>
+                <item>
+                 <layout class="QHBoxLayout" name="hLayoutCradleOutputHdr">
+                  <property name="spacing">
+                   <number>6</number>
+                  </property>
+                  <item>
+                   <widget class="QLabel" name="lblCradleCmd">
+                    <property name="text">
+                     <string>Last command:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="lblCradleLastCmd">
+                    <property name="toolTip">
+                     <string>The last command that was run</string>
+                    </property>
+                    <property name="text">
+                     <string>—</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="hSpacer_cradleOutput">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btnCradleClearOutput">
+                    <property name="maximumSize">
+                     <size>
+                      <width>60</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Clear</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QPlainTextEdit" name="txtCradleOutput">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>1</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="lineWrapMode">
+                   <enum>QPlainTextEdit::LineWrapMode::NoWrap</enum>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                  <property name="placeholderText">
+                   <string>Command output will appear here…</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="terminalContainer" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <layout class="QVBoxLayout" name="terminalLayout">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="styleSheet">
+    <string notr="true">background-color: #007acc; color: white;</string>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>
