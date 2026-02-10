@@ -17,7 +17,7 @@ int MarkLogModel::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
-    return 7; // Time, PID, TID, Package, Lvl, Tag, Message
+    return 8; // Date, Time, PID, TID, Package, Lvl, Tag, Message
 }
 
 QVariant MarkLogModel::data(const QModelIndex &index, int role) const
@@ -29,20 +29,21 @@ QVariant MarkLogModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole) {
         switch (index.column()) {
-            case 0: return entry.time;
-            case 1: return entry.pid;
-            case 2: return entry.tid;
-            case 3: return entry.package;
-            case 4: return entry.level;
-            case 5: return entry.tag;
-            case 6: return entry.message;
+            case 0: return entry.date;
+            case 1: return entry.time;
+            case 2: return entry.pid;
+            case 3: return entry.tid;
+            case 4: return entry.package;
+            case 5: return entry.level;
+            case 6: return entry.tag;
+            case 7: return entry.message;
         }
     }
-    else if (role == Qt::ForegroundRole && index.column() == 4) {
+    else if (role == Qt::ForegroundRole && index.column() == 5) {
         // Color code log levels
         return getLevelColor(entry.level);
     }
-    else if (role == Qt::FontRole && index.column() == 4) {
+    else if (role == Qt::FontRole && index.column() == 5) {
         // Bold font for log level
         QFont font;
         font.setBold(true);
@@ -59,13 +60,14 @@ QVariant MarkLogModel::headerData(int section, Qt::Orientation orientation, int 
 
     if (orientation == Qt::Horizontal) {
         switch (section) {
-            case 0: return "Time";
-            case 1: return "PID";
-            case 2: return "TID";
-            case 3: return "Package";
-            case 4: return "Lvl";
-            case 5: return "Tag";
-            case 6: return "Message";
+            case 0: return "Date";
+            case 1: return "Time";
+            case 2: return "PID";
+            case 3: return "TID";
+            case 4: return "Package";
+            case 5: return "Lvl";
+            case 6: return "Tag";
+            case 7: return "Message";
         }
     }
     else {
@@ -84,14 +86,22 @@ void MarkLogModel::addMarkedLog(const LogEntry &entry, int originalIndex)
         }
     }
 
-    int row = m_markedLogs.size();
-    beginInsertRows(QModelIndex(), row, row);
-    
     MarkedLogEntry markedEntry;
     markedEntry.entry = entry;
     markedEntry.originalIndex = originalIndex;
-    m_markedLogs.append(markedEntry);
     
+    // Find the correct position to insert based on time (sorted order)
+    int insertPos = 0;
+    for (int i = 0; i < m_markedLogs.size(); ++i) {
+        if (entry.time < m_markedLogs[i].entry.time) {
+            insertPos = i;
+            break;
+        }
+        insertPos = i + 1;
+    }
+    
+    beginInsertRows(QModelIndex(), insertPos, insertPos);
+    m_markedLogs.insert(insertPos, markedEntry);
     endInsertRows();
 }
 

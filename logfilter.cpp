@@ -2,10 +2,9 @@
 
 bool LogFilter::passesFilter(const LogEntry &entry, const FilterCriteria &criteria) const
 {
-    // Message filter (regex)
+    // Message filter (OR/AND logic like tag and package)
     if (!criteria.messageFilter.isEmpty()) {
-        QRegularExpression regex(criteria.messageFilter, QRegularExpression::CaseInsensitiveOption);
-        if (!regex.match(entry.message).hasMatch()) {
+        if (!matchesStringFilter(entry.message, criteria.messageFilter, criteria.messageOperator)) {
             return false;
         }
     }

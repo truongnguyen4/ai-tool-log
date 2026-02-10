@@ -102,7 +102,7 @@ bool FileManager::saveToFile(const QString &filePath,
     
     // Write header
     out << "# Log file saved by ToolLogPro\n";
-    out << "# Format: Time | PID | TID | Package | Level | Tag | Message\n";
+    out << "# Format: MM-DD HH:MM:SS.mmm PID TID LEVEL TAG: message (threadtime format)\n";
     out << "# Total entries: " << logs.size() << "\n";
     out << "\n";
     
@@ -176,14 +176,40 @@ int FileManager::getLastParsedCount() const
 
 QString FileManager::formatLogEntry(const LogEntry &entry) const
 {
-    // Format: Time PID TID LEVEL TAG: message
-    // Similar to threadtime format
+    // Format: MM-DD HH:MM:SS.mmm PID TID LEVEL TAG: message
+    // This matches the threadtime format that converters can parse
     QString formatted;
     
+    // Extract MM-DD from date (handles both YYYY-MM-DD and MM-DD formats)
+    QString dateStr;
+    if (!entry.date.isEmpty()) {
+        if (entry.date.contains('-')) {
+            QStringList dateParts = entry.date.split('-');
+            if (dateParts.size() == 3) {
+                // Format: YYYY-MM-DD, extract MM-DD
+                dateStr = QString("%1-%2").arg(dateParts[1]).arg(dateParts[2]);
+            } else if (dateParts.size() == 2) {
+                // Already in MM-DD format
+                dateStr = entry.date;
+            }
+        } else {
+            dateStr = entry.date;
+        }
+    }
+    
+    if (!dateStr.isEmpty()) {
+        formatted += dateStr;
+    } else {
+        formatted += "01-01";
+    }
+    
+    formatted += " ";
+    
+    // Add time
     if (!entry.time.isEmpty()) {
         formatted += entry.time;
     } else {
-        formatted += "------ --:--:--.---";
+        formatted += "00:00:00.000";
     }
     
     formatted += "  ";

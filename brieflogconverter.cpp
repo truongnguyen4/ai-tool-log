@@ -20,8 +20,10 @@ LogEntry BriefLogConverter::convert(const QString &line) const
         entry.pid = match.captured(3);
         entry.message = match.captured(4);
         
-        // Brief format doesn't have time or TID, generate current time
-        entry.time = QDateTime::currentDateTime().toString("MM-dd hh:mm:ss.zzz");
+        // Brief format doesn't have time or TID, generate current date and time
+        QDateTime now = QDateTime::currentDateTime();
+        entry.date = now.toString("yyyy-MM-dd");
+        entry.time = now.toString("hh:mm:ss.zzz");
         entry.tid = "";
         entry.package = "";
     }

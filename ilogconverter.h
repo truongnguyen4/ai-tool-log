@@ -5,6 +5,7 @@
 #include <QSharedPointer>
 
 struct LogEntry {
+    QString date;
     QString time;
     QString pid;
     QString tid;

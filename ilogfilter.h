@@ -11,6 +11,7 @@ enum class FilterOperator {
 
 struct FilterCriteria {
     QString messageFilter;
+    FilterOperator messageOperator = FilterOperator::OR;
     QString startTime;
     QString endTime;
     QString tagFilter;

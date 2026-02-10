@@ -27,6 +27,18 @@ qt_add_executable(ToolLogPro
     logfilter.h
     marklogmodel.cpp
     marklogmodel.h
+    settingsmodel.cpp
+    settingsmodel.h
+    propertiesmodel.cpp
+    propertiesmodel.h
+    propertydefinition.h
+    propertydefinitionmodel.cpp
+    propertydefinitionmodel.h
+    iconfigfilter.h
+    configfilter.cpp
+    configfilter.h
+    valuedelegate.cpp
+    valuedelegate.h
 )
 
 target_link_libraries(ToolLogPro
