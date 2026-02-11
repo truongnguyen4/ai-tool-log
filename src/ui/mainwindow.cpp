@@ -48,10 +48,6 @@ MainWindow::MainWindow(QWidget *parent)
     // Setup main log table view with model
     ui->tableLog->setModel(m_logModel);
     ui->tableLog->horizontalHeader()->setStretchLastSection(true);
-    ui->tableLog->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->tableLog->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    ui->tableLog->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tableLog->setAlternatingRowColors(true);
     
     // Set marked rows pointer to model for highlighting
     m_logModel->setMarkedRows(&m_markedRows);
@@ -68,10 +64,6 @@ MainWindow::MainWindow(QWidget *parent)
     // Setup mark log table view with model
     ui->tableMarkLog->setModel(m_markLogModel);
     ui->tableMarkLog->horizontalHeader()->setStretchLastSection(true);
-    ui->tableMarkLog->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->tableMarkLog->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->tableMarkLog->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tableMarkLog->setAlternatingRowColors(true);
     
     // Set column widths for mark log table
     ui->tableMarkLog->setColumnWidth(0, 100); // Date
@@ -87,7 +79,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->splitterLogTables->setSizes(QList<int>() << 600 << 200);
     
     // Enable context menu for main log table
-    ui->tableLog->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->tableLog, &QTableView::customContextMenuRequested, this, &MainWindow::onTableContextMenu);
     
     // Connect double-click for marking logs
@@ -161,9 +152,8 @@ void MainWindow::setupConnections()
     connect(ui->radioA, &QRadioButton::toggled, this, &MainWindow::onFilterChanged);
     
     // Button connections
-    connect(ui->btnResume, &QPushButton::clicked, this, &MainWindow::onResumeClicked);
+    connect(ui->btnStart, &QPushButton::clicked, this, &MainWindow::onStartClicked);
     connect(ui->btnClear, &QPushButton::clicked, this, &MainWindow::onClearClicked);
-    connect(ui->btnCopy, &QPushButton::clicked, this, &MainWindow::onCopyClicked);
     connect(ui->btnSave, &QPushButton::clicked, this, &MainWindow::onSaveFileClicked);
     connect(ui->btnColumns, &QPushButton::clicked, this, &MainWindow::onColumnsClicked);
     connect(ui->btnAutoScroll, &QPushButton::toggled, this, &MainWindow::onAutoScrollToggled);
@@ -173,53 +163,6 @@ void MainWindow::setupConnections()
     // File path input - load file when Enter is pressed
     connect(ui->txtFilePath, &QLineEdit::returnPressed, this, &MainWindow::onLoadFileClicked);
     connect(ui->btnOpen, &QPushButton::clicked, this, &MainWindow::onOpenFileClicked);
-}
-
-void MainWindow::addSampleLogs()
-{
-    // Add sample log entries based on the screenshot
-    allLogs.append({"2026-02-10", "06:58:01.159", "4523", "3898", "com.android.systemui", "V", "CameraService", "Request requires android.permission.MANAGE_USERS"});
-    allLogs.append({"2026-02-10", "06:58:10.759", "1224", "1954", "com.android.phone", "I", "CameraService", "Displayed com.android.settings/.Settings: +350ms"});
-    allLogs.append({"2026-02-10", "06:58:18.759", "5955", "4469", "com.android.systemui", "I", "CameraService", "Displayed com.android.settings/.Settings: +350ms"});
-    allLogs.append({"2026-02-10", "06:58:23.559", "5410", "5334", "com.instagram.android", "D", "CameraService", "Attempting to reconnect to WiFi..."});
-    allLogs.append({"2026-02-10", "06:58:28.359", "2642", "4272", "com.instagram.android", "I", "CameraService", "killing 1293:com.google.android.gms/u0a12 (adj 900): empty #17 [EXTRA_DATA]"});
-    allLogs.append({"2026-02-10", "06:58:37.159", "3462", "4051", "com.instagram.android", "D", "CameraService", "Starting activity: Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] } [EXTRA_DATA]"});
-    allLogs.append({"2026-02-10", "06:58:49.959", "5034", "1688", "com.example.app", "D", "CameraService", "killing 1293:com.google.android.gms/u0a12 (adj 900): empty #17"});
-    allLogs.append({"2026-02-10", "06:59:09.159", "4301", "3805", "com.spotify.music", "I", "CameraService", "Displayed com.android.settings/.Settings: +350ms"});
-    allLogs.append({"2026-02-10", "06:59:21.959", "3781", "5915", "com.google.android.gms", "I", "CameraService", "Attempting to reconnect to WiFi..."});
-    allLogs.append({"2026-02-10", "06:59:53.959", "5861", "2692", "com.google.android.gms", "I", "CameraService", "killing 1293:com.google.android.gms/u0a12 (adj 900): empty #17 [EXTRA_DATA]"});
-    allLogs.append({"2026-02-10", "06:59:54.359", "5017", "1340", "com.android.phone", "I", "CameraService", "Connected to process 14502 [EXTRA_DATA]"});
-    allLogs.append({"2026-02-10", "06:59:41.159", "1400", "2642", "com.example.app", "D", "CameraService", "Connected to process 14502 [EXTRA_DATA]"});
-    allLogs.append({"2026-02-10", "06:59:42.759", "1624", "3436", "com.spotify.music", "D", "CameraService", "Heap transition to process 4520 [EXTRA_DATA]"});
-    allLogs.append({"2026-02-10", "06:59:53.959", "5861", "2692", "com.google.android.gms", "I", "CameraService", "Attempting to reconnect to WiFi..."});
-    allLogs.append({"2026-02-10", "06:59:54.359", "5017", "1340", "com.android.phone", "I", "CameraService", "Connected to process 14502 [EXTRA_DATA]"});
-    allLogs.append({"2026-02-10", "07:00:04.759", "4414", "2872", "com.spotify.music", "V", "CameraService", "Starting activity: Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] }"});
-    allLogs.append({"2026-02-10", "07:00:27.559", "2284", "5068", "android.process.media", "D", "CameraService", "BufferedQueueProducer: [com.example.app/MainActivity] disconnect: api=1"});
-    allLogs.append({"2026-02-10", "07:00:32.359", "1134", "2855", "com.spotify.music", "I", "CameraService", "Connected to process 14502"});
-    allLogs.append({"2026-02-10", "07:00:38.759", "5914", "2969", "com.android.phone", "D", "CameraService", "Connected to process 14502"});
-    allLogs.append({"2026-02-10", "07:00:42.759", "4892", "1548", "com.android.systemui", "I", "CameraService", "Starting activity: Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] } [EXTRA_DATA]"});
-    allLogs.append({"2026-02-10", "07:00:45.159", "3100", "2199", "com.whatsapp", "I", "CameraService", "Starting activity: Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] } [EXTRA_DATA]"});
-    allLogs.append({"2026-02-10", "07:00:53.959", "5051", "5698", "android.process.media", "D", "CameraService", "BufferedQueueProducer: [com.example.app/MainActivity] disconnect: api=1 [EXTRA_DATA]"});
-    allLogs.append({"2026-02-10", "07:01:06.759", "1233", "5843", "android.process.media", "I", "CameraService", "Access denied finding property \"ro.serialno\" [EXTRA_DATA]"});
-    
-    // Add more entries to reach 489 total
-    for (int i = 0; i < 466; i++) {
-        QString packages[] = {"com.android.systemui", "com.google.android.gms", "com.spotify.music", "com.whatsapp", "com.example.app"};
-        QString levels[] = {"V", "D", "I", "W", "E"};
-        QString tags[] = {"CameraService", "ActivityManager", "WindowManager", "PackageManager"};
-        
-        LogEntry entry;
-        entry.date = "2026-02-10";
-        entry.time = QString("07:%1:%2.%3").arg(i/60, 2, 10, QChar('0')).arg(i%60, 2, 10, QChar('0')).arg(rand()%1000, 3, 10, QChar('0'));
-        entry.pid = QString::number(1000 + rand() % 9000);
-        entry.tid = QString::number(1000 + rand() % 9000);
-        entry.package = packages[rand() % 5];
-        entry.level = levels[rand() % 5];
-        entry.tag = tags[rand() % 4];
-        entry.message = "Sample log message for testing " + QString::number(i);
-        
-        allLogs.append(entry);
-    }
 }
 
 void MainWindow::setupConfigurationTables()
@@ -270,21 +213,32 @@ void MainWindow::setupSDKTab()
     ui->tablePropertyDefinitions->setColumnWidth(6, 90);   // Read Only
     ui->tablePropertyDefinitions->setColumnWidth(7, 80);   // Optional
     ui->tablePropertyDefinitions->setColumnWidth(8, 100);  // Persistence
-    ui->tablePropertyDefinitions->setColumnWidth(9, 120);  // eManager
-    ui->tablePropertyDefinitions->horizontalHeader()->setSectionResizeMode(10, QHeaderView::Stretch); // VALUE - stretch to max
-    ui->tablePropertyDefinitions->setColumnWidth(11, 50);  // Set button
-    ui->tablePropertyDefinitions->setColumnWidth(12, 50);  // Get button
-    ui->tablePropertyDefinitions->setColumnWidth(13, 60);  // Remove button
+    ui->tablePropertyDefinitions->horizontalHeader()->setSectionResizeMode(9, QHeaderView::Stretch); // VALUE - stretch to max
+    ui->tablePropertyDefinitions->setColumnWidth(10, 50);  // Set button
+    ui->tablePropertyDefinitions->setColumnWidth(11, 50);  // Get button
+    ui->tablePropertyDefinitions->setColumnWidth(12, 60);  // Remove button
     
     // Setup VALUE column delegate for editing with margin 1
     ValueDelegate *valueDelegate = new ValueDelegate(this);
-    ui->tablePropertyDefinitions->setItemDelegateForColumn(10, valueDelegate);
+    ui->tablePropertyDefinitions->setItemDelegateForColumn(9, valueDelegate);
     
     // Setup completer for property search (will be populated when property definitions are fetched)
     QCompleter *completer = new QCompleter(this);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
     completer->setFilterMode(Qt::MatchContains);
     completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
+    
+    // Style the completer popup with dark theme
+    completer->popup()->setStyleSheet(
+        "QListView {"
+        "    background-color: #2d2d30;"
+        "    color: #cccccc;"
+        "    border: 1px solid #3e3e42;"
+        "    selection-background-color: #0e639c;"
+        "    selection-color: #ffffff;"
+        "}"
+    );
+    
     ui->txtPropertySearch->setCompleter(completer);
 }
 
@@ -357,7 +311,7 @@ void MainWindow::recreatePropertyDefinitionButtons()
         btnSet->setMaximumSize(45, 25);
         btnSet->setStyleSheet("QPushButton { font-size: 12px; padding: 2px; }");
         btnSet->setToolTip("Set property value");
-        ui->tablePropertyDefinitions->setIndexWidget(m_propertyDefinitionModel->index(row, 11), btnSet);
+        ui->tablePropertyDefinitions->setIndexWidget(m_propertyDefinitionModel->index(row, 10), btnSet);
         
         connect(btnSet, &QPushButton::clicked, this, [this, row]() {
             onSetPropertyDefinitionClicked(row);
@@ -368,7 +322,7 @@ void MainWindow::recreatePropertyDefinitionButtons()
         btnGet->setMaximumSize(45, 25);
         btnGet->setStyleSheet("QPushButton { font-size: 12px; padding: 2px; }");
         btnGet->setToolTip("Get property value");
-        ui->tablePropertyDefinitions->setIndexWidget(m_propertyDefinitionModel->index(row, 12), btnGet);
+        ui->tablePropertyDefinitions->setIndexWidget(m_propertyDefinitionModel->index(row, 11), btnGet);
         
         connect(btnGet, &QPushButton::clicked, this, [this, row]() {
             onGetPropertyDefinitionClicked(row);
@@ -379,7 +333,7 @@ void MainWindow::recreatePropertyDefinitionButtons()
         btnRemove->setMaximumSize(50, 25);
         btnRemove->setStyleSheet("QPushButton { font-size: 12px; padding: 2px; }");
         btnRemove->setToolTip("Remove property from list");
-        ui->tablePropertyDefinitions->setIndexWidget(m_propertyDefinitionModel->index(row, 13), btnRemove);
+        ui->tablePropertyDefinitions->setIndexWidget(m_propertyDefinitionModel->index(row, 12), btnRemove);
         
         connect(btnRemove, &QPushButton::clicked, this, [this, row]() {
             onRemovePropertyDefinitionClicked(row);
@@ -617,11 +571,12 @@ void MainWindow::updateStatusBar()
     ui->statusbar->showMessage(status);
 }
 
-void MainWindow::onResumeClicked()
+void MainWindow::onStartClicked()
 {
     isPaused = !isPaused;
-    ui->btnResume->setText(isPaused ? "▶ RESUME" : "⏸ PAUSE");
+    ui->btnStart->setText(isPaused ? "START" : "STOP");
     updateStatusBar();
+    qDebug() << "Log capturing " << (isPaused ? "paused" : "resumed");
 }
 
 void MainWindow::onClearClicked()
@@ -631,26 +586,6 @@ void MainWindow::onClearClicked()
     m_logModel->clear();
     updateFilterCount();
     updateStatusBar();
-}
-
-void MainWindow::onCopyClicked()
-{
-    QModelIndexList selectedIndexes = ui->tableLog->selectionModel()->selectedRows();
-    if (selectedIndexes.isEmpty())
-        return;
-    
-    QStringList selectedText;
-    
-    for (const QModelIndex &index : selectedIndexes) {
-        QStringList rowData;
-        for (int col = 0; col < m_logModel->columnCount(); ++col) {
-            QModelIndex cellIndex = m_logModel->index(index.row(), col);
-            rowData << m_logModel->data(cellIndex, Qt::DisplayRole).toString();
-        }
-        selectedText.append(rowData.join("\t"));
-    }
-    
-    QApplication::clipboard()->setText(selectedText.join("\n"));
 }
 
 void MainWindow::onColumnsClicked()
@@ -1262,7 +1197,7 @@ void MainWindow::onAddPropertyDefinition()
         btnSet->setMaximumSize(45, 25);
         btnSet->setStyleSheet("QPushButton { font-size: 12px; padding: 2px; }");
         btnSet->setToolTip("Set property value");
-        ui->tablePropertyDefinitions->setIndexWidget(m_propertyDefinitionModel->index(row, 11), btnSet);
+        ui->tablePropertyDefinitions->setIndexWidget(m_propertyDefinitionModel->index(row, 10), btnSet);
         
         connect(btnSet, &QPushButton::clicked, this, [this, row]() {
             onSetPropertyDefinitionClicked(row);
@@ -1273,7 +1208,7 @@ void MainWindow::onAddPropertyDefinition()
         btnGet->setMaximumSize(45, 25);
         btnGet->setStyleSheet("QPushButton { font-size: 12px; padding: 2px; }");
         btnGet->setToolTip("Get property value");
-        ui->tablePropertyDefinitions->setIndexWidget(m_propertyDefinitionModel->index(row, 12), btnGet);
+        ui->tablePropertyDefinitions->setIndexWidget(m_propertyDefinitionModel->index(row, 11), btnGet);
         
         connect(btnGet, &QPushButton::clicked, this, [this, row]() {
             onGetPropertyDefinitionClicked(row);
@@ -1284,7 +1219,7 @@ void MainWindow::onAddPropertyDefinition()
         btnRemove->setMaximumSize(50, 25);
         btnRemove->setStyleSheet("QPushButton { font-size: 12px; padding: 2px; }");
         btnRemove->setToolTip("Remove property from list");
-        ui->tablePropertyDefinitions->setIndexWidget(m_propertyDefinitionModel->index(row, 13), btnRemove);
+        ui->tablePropertyDefinitions->setIndexWidget(m_propertyDefinitionModel->index(row, 12), btnRemove);
         
         connect(btnRemove, &QPushButton::clicked, this, [this, row]() {
             onRemovePropertyDefinitionClicked(row);
@@ -1341,7 +1276,7 @@ void MainWindow::onGetPropertyDefinitionClicked(int row)
     
     if (success) {
         // Update the VALUE column in the model
-        m_propertyDefinitionModel->setData(m_propertyDefinitionModel->index(row, 10), value, Qt::EditRole);
+        m_propertyDefinitionModel->setData(m_propertyDefinitionModel->index(row, 9), value, Qt::EditRole);
         
         QMessageBox::information(this, "Property Value", 
             QString("Property: %1\nValue: %2").arg(propDef.name, value));
@@ -1366,40 +1301,21 @@ void MainWindow::onSetPropertyDefinitionClicked(int row)
     const PropertyDefinition &propDef = properties[row];
     
     // Check if property is read-only
-    if (propDef.read_only) {
+    if (propDef.readOnly) {
         QMessageBox::warning(this, "Read-Only Property", 
             QString("Property '%1' is marked as read-only and cannot be modified.").arg(propDef.name));
         return;
     }
     
-    // Get current value from the VALUE column (column 10)
-    QString currentValue = m_propertyDefinitionModel->data(m_propertyDefinitionModel->index(row, 10), Qt::DisplayRole).toString();
+    // Get current value from the VALUE column (column 9)
+    QString value = m_propertyDefinitionModel->data(m_propertyDefinitionModel->index(row, 9), Qt::DisplayRole).toString();
     
-    // Prompt user for new value
-    bool ok;
-    QString newValue = QInputDialog::getText(this, "Set Property Value",
-        QString("Enter new value for '%1' (ID: %2):").arg(propDef.name, propDef.id),
-        QLineEdit::Normal, currentValue, &ok);
-    
-    if (!ok || newValue.isEmpty()) {
-        return;
-    }
-    
+    // Set the property value
     QString error;
-    bool success = AdbManager::instance().setPropertyDefinitionValue(m_currentDeviceId, propDef.id, newValue, error);
+    bool success = AdbManager::instance().setPropertyDefinitionValue(m_currentDeviceId, propDef.id, value, error);
     
     if (success) {
-        // Update the VALUE column in the model
-        m_propertyDefinitionModel->setData(m_propertyDefinitionModel->index(row, 10), newValue, Qt::EditRole);
-        
-        QString message = QString("Successfully set %1 = %2").arg(propDef.name, newValue);
-        
-        if (propDef.need_reboot) {
-            message += "\n\nNote: This property requires a device reboot to take effect.";
-        }
-        
-        QMessageBox::information(this, "Property Set", message);
-        ui->statusbar->showMessage(QString("Set %1 = %2").arg(propDef.name, newValue), 3000);
+        ui->statusbar->showMessage(QString("Set %1 = %2").arg(propDef.name, value), 3000);
     } else {
         QMessageBox::warning(this, "Failed to Set Value", 
             QString("Failed to set %1:\n%2").arg(propDef.name, error));
@@ -1469,128 +1385,4 @@ void MainWindow::updatePropertyNamesCompleter()
             completer->setModel(model);
         }
     }
-}
-
-void MainWindow::createSampleSettings()
-{
-    QVector<SettingEntry> settings;
-    settings.append({"1", "Global", "phenotype_boot_count", "9"});
-    settings.append({"2", "Global", "phenotype_flags", "classifier_consta..."});
-    settings.append({"3", "Global", "_boot_Phenotype_flags", ""});
-    settings.append({"4", "Global", "activity_starts_logging_enabled", "1"});
-    settings.append({"5", "Global", "adb_enabled", "1"});
-    settings.append({"6", "Global", "adb_wifi_enabled", "0"});
-    settings.append({"7", "Global", "add_users_when_locked", "0"});
-    settings.append({"8", "Global", "airplane_mode_on", "0"});
-    settings.append({"9", "Global", "airplane_mode_radios", "cell,bluetooth,wi..."});
-    settings.append({"10", "Global", "airplane_mode_toggleable_radios", "bluetooth,wifi"});
-    settings.append({"11", "Global", "alarm_manager_constants", ""});
-    settings.append({"12", "Global", "alarm_manager_dummy_flags", "null"});
-    settings.append({"13", "Global", "alt_bypass_wifi_requirement_time_...", "0"});
-    settings.append({"14", "Global", "always_on_display_constants", "null"});
-    settings.append({"15", "Global", "ambient_enabled", "1"});
-}
-
-void MainWindow::createSampleProperties()
-{
-    QVector<PropertyEntry> properties;
-    properties.append({"1", "DEVICE_PROVISIONED", "1"});
-    properties.append({"2", "aaudio.hw_burst_min_usec", "2000"});
-    properties.append({"3", "aaudio.mmap_exclusive_policy", "2"});
-    properties.append({"4", "aaudio.mmap_policy", "2"});
-    properties.append({"5", "af.fast_track_multiplier", "1"});
-    properties.append({"6", "apex.all.ready", "true"});
-    properties.append({"7", "apexd.status", "ready"});
-    properties.append({"8", "arm64.memtag.process.system_server", "off"});
-    properties.append({"9", "audio.deep_buffer.media", "true"});
-    properties.append({"10", "audio.offload.min.duration.secs", "30"});
-    properties.append({"11", "audio.offload.video", "true"});
-    properties.append({"12", "audio.sys.mute.latency.factor", "2"});
-    properties.append({"13", "audio.sys.noisy.broadcast.delay", "500"});
-    properties.append({"14", "audio.sys.offload.pstimeout.secs", "3"});
-    properties.append({"15", "audio.sys.routing.latency", "0"});
-}
-
-void MainWindow::createSamplePropertyDefinitions()
-{
-    QVector<PropertyDefinition> samplePropertyDefs;
-    
-    PropertyDefinition prop1;
-    prop1.id = "1";
-    prop1.name = "persist.sys.usb.config";
-    prop1.isSupported = true;
-    prop1.isLoaded = true;
-    prop1.need_reboot = false;
-    prop1.volatile_ = false;
-    prop1.read_only = false;
-    prop1.optional = false;
-    prop1.persistence = "persist";
-    prop1.eManager = "SystemManager";
-    prop1.value = "";
-    samplePropertyDefs.append(prop1);
-    
-    PropertyDefinition prop2;
-    prop2.id = "2";
-    prop2.name = "ro.build.version.sdk";
-    prop2.isSupported = true;
-    prop2.isLoaded = true;
-    prop2.need_reboot = false;
-    prop2.volatile_ = false;
-    prop2.read_only = true;
-    prop2.optional = false;
-    prop2.persistence = "readonly";
-    prop2.eManager = "BuildManager";
-    prop2.value = "";
-    samplePropertyDefs.append(prop2);
-    
-    PropertyDefinition prop3;
-    prop3.id = "3";
-    prop3.name = "debug.hwui.renderer";
-    prop3.isSupported = true;
-    prop3.isLoaded = false;
-    prop3.need_reboot = true;
-    prop3.volatile_ = false;
-    prop3.read_only = false;
-    prop3.optional = true;
-    prop3.persistence = "persist";
-    prop3.eManager = "GraphicsManager";
-    prop3.value = "";
-    samplePropertyDefs.append(prop3);
-    
-    PropertyDefinition prop4;
-    prop4.id = "4";
-    prop4.name = "sys.boot_completed";
-    prop4.isSupported = true;
-    prop4.isLoaded = true;
-    prop4.need_reboot = false;
-    prop4.volatile_ = true;
-    prop4.read_only = false;
-    prop4.optional = false;
-    prop4.persistence = "runtime";
-    prop4.eManager = "SystemManager";
-    prop4.value = "";
-    samplePropertyDefs.append(prop4);
-    
-    PropertyDefinition prop5;
-    prop5.id = "5";
-    prop5.name = "persist.sys.timezone";
-    prop5.isSupported = true;
-    prop5.isLoaded = true;
-    prop5.need_reboot = false;
-    prop5.volatile_ = false;
-    prop5.read_only = false;
-    prop5.optional = false;
-    prop5.persistence = "persist";
-    prop5.eManager = "TimeManager";
-    prop5.value = "";
-    samplePropertyDefs.append(prop5);
-    
-    // Store sample property definitions for auto-complete (table starts empty)
-    m_availablePropertyDefinitions = samplePropertyDefs;
-    QStringList propertyNames;
-    for (const PropertyDefinition &propDef : samplePropertyDefs) {
-        propertyNames.append(propDef.name);
-    }
-    // QStringListModel *completerModel = new QStringListModel(propertyNames, completer);
-    // completer->setModel(completerModel);
 }

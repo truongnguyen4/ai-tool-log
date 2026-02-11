@@ -3,21 +3,7 @@
 
 #include <QString>
 #include <QSharedPointer>
-
-struct LogEntry {
-    QString date;
-    QString time;
-    QString pid;
-    QString tid;
-    QString package;
-    QString level;
-    QString tag;
-    QString message;
-    
-    bool isValid() const {
-        return !level.isEmpty() && !message.isEmpty();
-    }
-};
+#include "logentry.h"
 
 /**
  * Interface for log line converters

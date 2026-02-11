@@ -16,8 +16,8 @@ int PropertyDefinitionModel::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
-    // Columns: Name, ID, Supported, Loaded, Need Reboot, Volatile, Read Only, Optional, Persistence, eManager, Value, Set, Get, Remove
-    return 14;
+    // Columns: Name, ID, Supported, Loaded, Need Reboot, Volatile, Read Only, Optional, Persistence, Value, Set, Get, Remove
+    return 13;
 }
 
 QVariant PropertyDefinitionModel::data(const QModelIndex &index, int role) const
@@ -33,16 +33,15 @@ QVariant PropertyDefinitionModel::data(const QModelIndex &index, int role) const
             case 1: return prop.id;
             case 2: return prop.isSupported ? "Yes" : "No";
             case 3: return prop.isLoaded ? "Yes" : "No";
-            case 4: return prop.need_reboot ? "Yes" : "No";
-            case 5: return prop.volatile_ ? "Yes" : "No";
-            case 6: return prop.read_only ? "Yes" : "No";
+            case 4: return prop.needReboot ? "Yes" : "No";
+            case 5: return prop.isVolatile ? "Yes" : "No";
+            case 6: return prop.readOnly ? "Yes" : "No";
             case 7: return prop.optional ? "Yes" : "No";
             case 8: return prop.persistence;
-            case 9: return prop.eManager;
-            case 10: return prop.value; // VALUE column - editable
-            case 11: return ""; // Set button column
-            case 12: return ""; // Get button column
-            case 13: return ""; // Remove button column
+            case 9: return prop.value; // VALUE column - editable
+            case 10: return ""; // Set button column
+            case 11: return ""; // Get button column
+            case 12: return ""; // Remove button column
         }
     }
     else if (role == Qt::TextAlignmentRole) {
@@ -70,11 +69,10 @@ QVariant PropertyDefinitionModel::headerData(int section, Qt::Orientation orient
             case 6: return "Read Only";
             case 7: return "Optional";
             case 8: return "Persistence";
-            case 9: return "eManager";
-            case 10: return "Value";
-            case 11: return "Set";
-            case 12: return "Get";
-            case 13: return "Remove";
+            case 9: return "Value";
+            case 10: return "Set";
+            case 11: return "Get";
+            case 12: return "Remove";
         }
     }
     
@@ -125,8 +123,8 @@ Qt::ItemFlags PropertyDefinitionModel::flags(const QModelIndex &index) const
     if (!index.isValid())
         return Qt::NoItemFlags;
     
-    // VALUE column (column 10) is editable
-    if (index.column() == 10) {
+    // VALUE column (column 9) is editable
+    if (index.column() == 9) {
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
     }
     
@@ -138,8 +136,8 @@ bool PropertyDefinitionModel::setData(const QModelIndex &index, const QVariant &
     if (!index.isValid() || index.row() >= m_properties.size() || role != Qt::EditRole)
         return false;
     
-    // Only VALUE column (column 10) is editable
-    if (index.column() == 10) {
+    // Only VALUE column (column 9) is editable
+    if (index.column() == 9) {
         m_properties[index.row()].value = value.toString();
         emit dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
         return true;

@@ -606,9 +606,53 @@ QStatusBar {
                <number>5</number>
               </property>
               <item>
-               <widget class="QPushButton" name="btnResume">
+               <widget class="QPushButton" name="btnStart">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>1</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>35</height>
+                 </size>
+                </property>
                 <property name="text">
-                 <string>▶ RESUME</string>
+                 <string>START</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnAutoScroll">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>35</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Auto-Scroll</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnColumns">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>35</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>⚙ Columns</string>
                 </property>
                </widget>
               </item>
@@ -617,7 +661,7 @@ QStatusBar {
                 <property name="maximumSize">
                  <size>
                   <width>35</width>
-                  <height>16777215</height>
+                  <height>35</height>
                  </size>
                 </property>
                 <property name="text">
@@ -629,27 +673,11 @@ QStatusBar {
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="btnCopy">
-                <property name="maximumSize">
-                 <size>
-                  <width>35</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset theme="QIcon::ThemeIcon::AddressBookNew"/>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="QPushButton" name="btnSave">
                 <property name="maximumSize">
                  <size>
                   <width>35</width>
-                  <height>16777215</height>
+                  <height>35</height>
                  </size>
                 </property>
                 <property name="text">
@@ -657,26 +685,6 @@ QStatusBar {
                 </property>
                 <property name="icon">
                  <iconset theme="QIcon::ThemeIcon::DocumentSave"/>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btnColumns">
-                <property name="text">
-                 <string>⚙ Columns</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btnAutoScroll">
-                <property name="text">
-                 <string>Auto-Scroll</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -695,8 +703,14 @@ QStatusBar {
               </item>
               <item>
                <widget class="QLineEdit" name="txtFilePath">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>35</height>
+                 </size>
+                </property>
                 <property name="text">
-                 <string>C:\\Users\\ttnguyen4\\Downloads\\output.log</string>
+                 <string>/home/truongnguyen/Working/fake/output.txt</string>
                 </property>
                 <property name="placeholderText">
                  <string>Enter log file path...</string>
@@ -708,7 +722,7 @@ QStatusBar {
                 <property name="maximumSize">
                  <size>
                   <width>35</width>
-                  <height>16777215</height>
+                  <height>35</height>
                  </size>
                 </property>
                 <property name="text">

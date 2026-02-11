@@ -1,4 +1,5 @@
 #include "adbmanager.h"
+#include "adbcommand.h"
 #include <QDebug>
 #include <QRegularExpression>
 
@@ -40,7 +41,7 @@ QList<AdbDevice> AdbManager::getConnectedDevices()
 void AdbManager::detectDevices()
 {
     QProcess process;
-    process.start(m_adbPath, QStringList() << "devices" << "-l");
+    process.start(m_adbPath, AdbCommand::listDevices());
     
     if (!process.waitForFinished(3000)) {
         emit errorOccurred("Failed to execute adb devices command");
@@ -121,7 +122,7 @@ void AdbManager::parseDeviceList(const QString &output)
 QString AdbManager::getDeviceName(const QString &deviceId)
 {
     QProcess process;
-    process.start(m_adbPath, QStringList() << "-s" << deviceId << "shell" << "getprop" << "ro.product.model");
+    process.start(m_adbPath, AdbCommand::getDeviceModel(deviceId));
     
     if (process.waitForFinished(2000)) {
         QString name = process.readAllStandardOutput().trimmed();
@@ -180,11 +181,7 @@ bool AdbManager::startLogcat(const QString &deviceId)
     });
     
     // Start logcat with time format
-    QStringList args;
-    args << "-s" << deviceId << "logcat" << "-v" << "time";
-    
-    m_logcatProcess->start(m_adbPath, args);
-    
+    m_logcatProcess->start(m_adbPath, AdbCommand::startLogcat(deviceId));
     if (!m_logcatProcess->waitForStarted(3000)) {
         emit errorOccurred("Failed to start logcat");
         delete m_logcatProcess;
@@ -234,10 +231,8 @@ void AdbManager::fetchSettings(const QString &deviceId)
     
     for (const QString &ns : namespaces) {
         QProcess process;
-        QStringList args;
-        args << "-s" << deviceId << "shell" << "settings" << "list" << ns;
         
-        process.start(m_adbPath, args);
+        process.start(m_adbPath, AdbCommand::listSettings(deviceId, ns));
         if (!process.waitForFinished(5000)) {
             emit errorOccurred(QString("Failed to fetch %1 settings").arg(ns));
             continue;
@@ -280,10 +275,8 @@ void AdbManager::fetchProperties(const QString &deviceId)
     QVector<PropertyEntry> properties;
     
     QProcess process;
-    QStringList args;
-    args << "-s" << deviceId << "shell" << "getprop";
     
-    process.start(m_adbPath, args);
+    process.start(m_adbPath, AdbCommand::listProperties(deviceId));
     if (!process.waitForFinished(5000)) {
         emit errorOccurred("Failed to fetch system properties");
         return;
@@ -325,11 +318,9 @@ void AdbManager::fetchProperties(const QString &deviceId)
 bool AdbManager::setSetting(const QString &deviceId, const QString &group, const QString &setting, const QString &value, QString &error)
 {
     QProcess process;
-    QStringList args;
     QString namespace_ = group.toLower();
-    args << "-s" << deviceId << "shell" << "settings" << "put" << namespace_ << setting << value;
     
-    process.start(m_adbPath, args);
+    process.start(m_adbPath, AdbCommand::putSetting(deviceId, namespace_, setting, value));
     if (!process.waitForFinished(5000)) {
         error = "Timeout while setting value";
         return false;
@@ -354,10 +345,8 @@ bool AdbManager::setSetting(const QString &deviceId, const QString &group, const
 bool AdbManager::setProperty(const QString &deviceId, const QString &property, const QString &value, QString &error)
 {
     QProcess process;
-    QStringList args;
-    args << "-s" << deviceId << "shell" << "setprop" << property << value;
     
-    process.start(m_adbPath, args);
+    process.start(m_adbPath, AdbCommand::setProperty(deviceId, property, value));
     if (!process.waitForFinished(5000)) {
         error = "Timeout while setting property";
         return false;
@@ -382,11 +371,9 @@ bool AdbManager::setProperty(const QString &deviceId, const QString &property, c
 QString AdbManager::verifySetting(const QString &deviceId, const QString &group, const QString &setting)
 {
     QProcess process;
-    QStringList args;
     QString namespace_ = group.toLower();
-    args << "-s" << deviceId << "shell" << "settings" << "get" << namespace_ << setting;
     
-    process.start(m_adbPath, args);
+    process.start(m_adbPath, AdbCommand::getSetting(deviceId, namespace_, setting));
     if (!process.waitForFinished(3000)) {
         return QString(); // Return empty on timeout
     }
@@ -398,10 +385,8 @@ QString AdbManager::verifySetting(const QString &deviceId, const QString &group,
 QString AdbManager::verifyProperty(const QString &deviceId, const QString &property)
 {
     QProcess process;
-    QStringList args;
-    args << "-s" << deviceId << "shell" << "getprop" << property;
     
-    process.start(m_adbPath, args);
+    process.start(m_adbPath, AdbCommand::getProperty(deviceId, property));
     if (!process.waitForFinished(3000)) {
         return QString(); // Return empty on timeout
     }
@@ -413,7 +398,7 @@ QString AdbManager::verifyProperty(const QString &deviceId, const QString &prope
 void AdbManager::fetchPropertyDefinitions(const QString &deviceId)
 {
     QProcess process;
-    process.start(m_adbPath, QStringList() << "-s" << deviceId << "shell" << "cmd" << "cradle" << "get");
+    process.start(m_adbPath, AdbCommand::getPropertyDefinitions(deviceId));
     
     if (!process.waitForFinished(5000)) {
         emit errorOccurred("Failed to fetch property definitions: timeout");
@@ -427,59 +412,79 @@ void AdbManager::fetchPropertyDefinitions(const QString &deviceId)
         qDebug() << "Property definition fetch error:" << errorOutput;
     }
     
-    // Parse the output
+    // Parse the output - format: id: 142, name: PROP_NAME, optional: true, persistence: false, ...
     QVector<PropertyDefinition> propertyDefinitions;
     QStringList lines = output.split('\n', Qt::SkipEmptyParts);
-    
-    PropertyDefinition currentProp;
-    int lineNumber = 1;
     
     for (const QString &line : lines) {
         QString trimmed = line.trimmed();
         
-        // Skip empty lines or separator lines
-        if (trimmed.isEmpty() || trimmed.startsWith("---") || trimmed.startsWith("===")) {
-            // If we have a complete property, add it
-            if (currentProp.isValid()) {
-                propertyDefinitions.append(currentProp);
-                currentProp = PropertyDefinition();
-            }
+        // Skip empty lines
+        if (trimmed.isEmpty()) {
             continue;
         }
         
-        // Parse property attributes
-        if (trimmed.contains(":")) {
-            QStringList parts = trimmed.split(':', Qt::SkipEmptyParts);
-            if (parts.size() >= 2) {
-                QString key = parts[0].trimmed().toLower();
-                QString value = parts[1].trimmed();
+        PropertyDefinition prop;
+        
+        // Split by comma to get key:value pairs
+        QStringList pairs = trimmed.split(',');
+        
+        for (const QString &pair : pairs) {
+            QString pairTrimmed = pair.trimmed();
+            
+            // Split by first colon only
+            int colonPos = pairTrimmed.indexOf(':');
+            if (colonPos > 0) {
+                QString key = pairTrimmed.left(colonPos).trimmed().toLower();
+                QString value = pairTrimmed.mid(colonPos + 1).trimmed();
                 
-                if (key == "name") {
-                    // If we already have a name, this is a new property
-                    if (currentProp.isValid()) {
-                        propertyDefinitions.append(currentProp);
-                        currentProp = PropertyDefinition();
-                    }
-                    currentProp.name = value;
+                // Parse each attribute
+                if (key == PropertyDefinition::KEY_ID) {
+                    prop.id = value;
                 }
-                else if (key == "id") currentProp.id = value;
-                else if (key == "issupported" || key == "is_supported") currentProp.isSupported = (value.toLower() == "true" || value == "1");
-                else if (key == "isloaded" || key == "is_loaded") currentProp.isLoaded = (value.toLower() == "true" || value == "1");
-                else if (key == "need_reboot" || key == "needreboot") currentProp.need_reboot = (value.toLower() == "true" || value == "1");
-                else if (key == "volatile") currentProp.volatile_ = (value.toLower() == "true" || value == "1");
-                else if (key == "read_only" || key == "readonly") currentProp.read_only = (value.toLower() == "true" || value == "1");
-                else if (key == "optional") currentProp.optional = (value.toLower() == "true" || value == "1");
-                else if (key == "persistence") currentProp.persistence = value;
-                else if (key == "emanager" || key == "eManager") currentProp.eManager = value;
+                else if (key == PropertyDefinition::KEY_NAME) {
+                    prop.name = value;
+                }
+                else if (key == PropertyDefinition::KEY_OPTIONAL) {
+                    prop.optional = (value.toLower() == "true");
+                }
+                else if (key == PropertyDefinition::KEY_PERSISTENCE) {
+                    // Handle both boolean and string formats
+                    if (value.toLower() == "true" || value.toLower() == "false") {
+                        prop.persistence = value.toLower();
+                    } else {
+                        prop.persistence = value;
+                    }
+                }
+                else if (key == PropertyDefinition::KEY_VOLATILE) {
+                    prop.isVolatile = (value.toLower() == "true");
+                }
+                else if (key == PropertyDefinition::KEY_IS_SUPPORTED || key == PropertyDefinition::KEY_IS_SUPPORTED_ALT) {
+                    prop.isSupported = (value.toLower() == "true");
+                }
+                else if (key == PropertyDefinition::KEY_VALUE) {
+                    // Handle null values
+                    if (value.toLower() != "null") {
+                        prop.value = value;
+                    }
+                }
+                else if (key == PropertyDefinition::KEY_NEED_REBOOT || key == PropertyDefinition::KEY_NEED_REBOOT_ALT) {
+                    prop.needReboot = (value.toLower() == "true");
+                }
+                else if (key == PropertyDefinition::KEY_READ_ONLY || key == PropertyDefinition::KEY_READ_ONLY_ALT) {
+                    prop.readOnly = (value.toLower() == "true");
+                }
+                else if (key == PropertyDefinition::KEY_IS_LOADED || key == PropertyDefinition::KEY_IS_LOADED_ALT) {
+                    prop.isLoaded = (value.toLower() == "true");
+                }
+                // Ignore: default, type, and other unknown fields
             }
         }
         
-        lineNumber++;
-    }
-    
-    // Add the last property if valid
-    if (currentProp.isValid()) {
-        propertyDefinitions.append(currentProp);
+        // Add property if it has at minimum a name
+        if (prop.isValid()) {
+            propertyDefinitions.append(prop);
+        }
     }
     
     qDebug() << "Fetched" << propertyDefinitions.size() << "property definitions";
@@ -490,7 +495,7 @@ void AdbManager::fetchPropertyDefinitions(const QString &deviceId)
 bool AdbManager::getPropertyDefinitionValue(const QString &deviceId, const QString &propertyId, QString &value, QString &error)
 {
     QProcess process;
-    process.start(m_adbPath, QStringList() << "-s" << deviceId << "shell" << "cmd" << "cradle" << "get" << propertyId);
+    process.start(m_adbPath, AdbCommand::getCradleProperty(deviceId, propertyId));
     
     if (!process.waitForFinished(3000)) {
         error = "Command timeout";
@@ -511,7 +516,7 @@ bool AdbManager::getPropertyDefinitionValue(const QString &deviceId, const QStri
 bool AdbManager::setPropertyDefinitionValue(const QString &deviceId, const QString &propertyId, const QString &value, QString &error)
 {
     QProcess process;
-    process.start(m_adbPath, QStringList() << "-s" << deviceId << "shell" << "cmd" << "cradle" << "set" << propertyId << value);
+    process.start(m_adbPath, AdbCommand::setCradleProperty(deviceId, propertyId, value));
     
     if (!process.waitForFinished(3000)) {
         error = "Command timeout";

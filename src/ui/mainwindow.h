@@ -40,15 +40,13 @@ private slots:
     void onPropertiesFilterChanged();
     void onRefreshSettingsClicked();
     void onRefreshPropertiesClicked();
-    void onResumeClicked();
+    void onStartClicked();
     void onClearClicked();
-    void onCopyClicked();
     void onColumnsClicked();
     void onAutoScrollToggled(bool checked);
     void onSettingsClicked();
     void onDeviceChanged(int index);
     void updateStatusBar();
-    void addSampleLogs();
     void onTableContextMenu(const QPoint &pos);
     void addToFilter(const QString &filterType, const QString &value, FilterOperator op);
     void onDevicesChanged(const QList<AdbDevice> &devices);
@@ -108,9 +106,6 @@ private:
     void recreatePropertyDefinitionButtons();
     void recreateSettingsButtons();
     void recreatePropertiesButtons();
-    void createSampleSettings();
-    void createSampleProperties();
-    void createSamplePropertyDefinitions();
     void updatePropertyNamesCompleter();
     void applyFilters();
     void updateFilterCount();
