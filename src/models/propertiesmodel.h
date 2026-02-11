@@ -23,6 +23,7 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     
     void setProperties(const QVector<PropertyEntry> &properties);
+    void updateProperties(const QVector<PropertyEntry> &properties);  // Update values without clearing filter
     const QVector<PropertyEntry>& getProperties() const;
     
     void applyFilter(const QString &filterText);
@@ -33,6 +34,7 @@ private:
     QVector<PropertyEntry> m_filteredProperties;
     ConfigFilter m_filter;
     bool m_isFiltered;
+    QString m_currentFilterText;  // Store current filter text to reapply after update
 };
 
 #endif // PROPERTIESMODEL_H

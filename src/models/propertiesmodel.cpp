@@ -108,6 +108,43 @@ void PropertiesModel::setProperties(const QVector<PropertyEntry> &properties)
     endResetModel();
 }
 
+void PropertiesModel::updateProperties(const QVector<PropertyEntry> &properties)
+{
+    // Store current filter state
+    bool wasFiltered = m_isFiltered;
+    QString filterText = m_currentFilterText;
+    
+    // Update or add properties in m_allProperties
+    for (const PropertyEntry &newEntry : properties) {
+        bool found = false;
+        
+        // Find existing entry by property name
+        for (int i = 0; i < m_allProperties.size(); ++i) {
+            if (m_allProperties[i].property == newEntry.property) {
+                // Update existing entry
+                m_allProperties[i].value = newEntry.value;
+                m_allProperties[i].line = newEntry.line;
+                found = true;
+                break;
+            }
+        }
+        
+        // If not found, add new entry
+        if (!found) {
+            m_allProperties.append(newEntry);
+        }
+    }
+    
+    // Reapply filter if it was active
+    if (wasFiltered) {
+        applyFilter(filterText);
+    } else {
+        // No filter, just notify model changed
+        beginResetModel();
+        endResetModel();
+    }
+}
+
 const QVector<PropertyEntry>& PropertiesModel::getProperties() const
 {
     return m_allProperties;
@@ -116,6 +153,8 @@ const QVector<PropertyEntry>& PropertiesModel::getProperties() const
 void PropertiesModel::applyFilter(const QString &filterText)
 {
     beginResetModel();
+    
+    m_currentFilterText = filterText;  // Store filter text
     
     if (filterText.isEmpty()) {
         m_isFiltered = false;

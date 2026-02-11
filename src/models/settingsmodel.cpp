@@ -110,6 +110,44 @@ void SettingsModel::setSettings(const QVector<SettingEntry> &settings)
     endResetModel();
 }
 
+void SettingsModel::updateSettings(const QVector<SettingEntry> &settings)
+{
+    // Store current filter state
+    bool wasFiltered = m_isFiltered;
+    QString filterText = m_currentFilterText;
+    
+    // Update or add settings in m_allSettings
+    for (const SettingEntry &newEntry : settings) {
+        bool found = false;
+        
+        // Find existing entry by group and setting name
+        for (int i = 0; i < m_allSettings.size(); ++i) {
+            if (m_allSettings[i].group == newEntry.group && 
+                m_allSettings[i].setting == newEntry.setting) {
+                // Update existing entry
+                m_allSettings[i].value = newEntry.value;
+                m_allSettings[i].line = newEntry.line;
+                found = true;
+                break;
+            }
+        }
+        
+        // If not found, add new entry
+        if (!found) {
+            m_allSettings.append(newEntry);
+        }
+    }
+    
+    // Reapply filter if it was active
+    if (wasFiltered) {
+        applyFilter(filterText);
+    } else {
+        // No filter, just notify model changed
+        beginResetModel();
+        endResetModel();
+    }
+}
+
 const QVector<SettingEntry>& SettingsModel::getSettings() const
 {
     return m_allSettings;
@@ -118,6 +156,8 @@ const QVector<SettingEntry>& SettingsModel::getSettings() const
 void SettingsModel::applyFilter(const QString &filterText)
 {
     beginResetModel();
+    
+    m_currentFilterText = filterText;  // Store filter text
     
     if (filterText.isEmpty()) {
         m_isFiltered = false;

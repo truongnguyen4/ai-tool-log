@@ -313,25 +313,12 @@ QStatusBar {
         </property>
        </spacer>
       </item>
-      <item>
-       <widget class="QPushButton" name="btnSettings">
-        <property name="maximumSize">
-         <size>
-          <width>40</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>⚙</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabAdbLogcat">
        <attribute name="title">
@@ -836,22 +823,6 @@ QStatusBar {
                 </property>
                 <property name="text">
                  <string>Configuration</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btnRefreshConfig">
-                <property name="maximumSize">
-                 <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset theme="QIcon::ThemeIcon::ViewRefresh"/>
                 </property>
                </widget>
               </item>

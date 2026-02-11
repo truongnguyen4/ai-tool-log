@@ -164,7 +164,6 @@ void MainWindow::setupConnections()
     connect(ui->btnSave, &QPushButton::clicked, this, &MainWindow::onSaveFileClicked);
     connect(ui->btnColumns, &QPushButton::clicked, this, &MainWindow::onColumnsClicked);
     connect(ui->btnAutoScroll, &QPushButton::toggled, this, &MainWindow::onAutoScrollToggled);
-    connect(ui->btnSettings, &QPushButton::clicked, this, &MainWindow::onSettingsClicked);
     connect(ui->cmbDevice, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onDeviceChanged);
     
     // File path input - load file when Enter is pressed
@@ -181,7 +180,7 @@ void MainWindow::setupConfigurationTables()
     ui->tableSettings->setColumnWidth(1, 120);  // GROUP
     ui->tableSettings->setColumnWidth(2, 250);  // SETTING
     ui->tableSettings->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch); // VALUE - stretch to max
-    ui->tableSettings->setColumnWidth(4, 40);   // Download button
+    ui->tableSettings->setColumnWidth(4, 60);   // Save button
     
     // Setup VALUE column delegate for editing with margin 1
     ValueDelegate *settingsDelegate = new ValueDelegate(this);
@@ -193,7 +192,7 @@ void MainWindow::setupConfigurationTables()
     ui->tableProperties->setColumnWidth(0, 50);   // LINE
     ui->tableProperties->setColumnWidth(1, 300);  // PROPERTY
     ui->tableProperties->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch); // VALUE - stretch to max
-    ui->tableProperties->setColumnWidth(3, 40);   // Download button
+    ui->tableProperties->setColumnWidth(3, 60);   // Save button
     
     // Setup VALUE column delegate for editing with margin 1
     ValueDelegate *propertiesDelegate = new ValueDelegate(this);
@@ -223,7 +222,7 @@ void MainWindow::setupSDKTab()
     ui->tablePropertyDefinitions->horizontalHeader()->setSectionResizeMode(9, QHeaderView::Stretch); // VALUE - stretch to max
     ui->tablePropertyDefinitions->setColumnWidth(10, 50);  // Set button
     ui->tablePropertyDefinitions->setColumnWidth(11, 50);  // Get button
-    ui->tablePropertyDefinitions->setColumnWidth(12, 60);  // Remove button
+    ui->tablePropertyDefinitions->setColumnWidth(12, 75);  // Remove button
     
     // Setup VALUE column delegate for editing with margin 1
     ValueDelegate *valueDelegate = new ValueDelegate(this);
@@ -252,10 +251,11 @@ void MainWindow::setupSDKTab()
 void MainWindow::recreateSettingsButtons()
 {
     // Clear existing buttons to prevent memory leaks and crashes
-    const QVector<SettingEntry> &settings = m_settingsModel->getSettings();
+    // Use rowCount to respect filtered view
+    int rowCount = m_settingsModel->rowCount();
     
     // Remove all existing index widgets
-    for (int i = 0; i < m_settingsModel->rowCount(); i++) {
+    for (int i = 0; i < rowCount; i++) {
         QWidget *oldWidget = ui->tableSettings->indexWidget(m_settingsModel->index(i, 4));
         if (oldWidget) {
             ui->tableSettings->setIndexWidget(m_settingsModel->index(i, 4), nullptr);
@@ -263,11 +263,11 @@ void MainWindow::recreateSettingsButtons()
         }
     }
     
-    // Add save buttons for each setting
-    for (int i = 0; i < settings.size(); i++) {
-        QPushButton *btnSave = new QPushButton("💾");
-        btnSave->setMaximumSize(30, 30);
-        btnSave->setStyleSheet("QPushButton { font-size: 14px; }");
+    // Add save buttons for each visible row
+    for (int i = 0; i < rowCount; i++) {
+        QPushButton *btnSave = new QPushButton("Save");
+        btnSave->setMaximumSize(50, 25);
+        btnSave->setStyleSheet("QPushButton { font-size: 12px; padding: 2px; }");
         btnSave->setToolTip("Save this setting to device");
         ui->tableSettings->setIndexWidget(m_settingsModel->index(i, 4), btnSave);
         
@@ -281,10 +281,11 @@ void MainWindow::recreateSettingsButtons()
 void MainWindow::recreatePropertiesButtons()
 {
     // Clear existing buttons to prevent memory leaks and crashes
-    const QVector<PropertyEntry> &properties = m_propertiesModel->getProperties();
+    // Use rowCount to respect filtered view
+    int rowCount = m_propertiesModel->rowCount();
     
     // Remove all existing index widgets
-    for (int i = 0; i < m_propertiesModel->rowCount(); i++) {
+    for (int i = 0; i < rowCount; i++) {
         QWidget *oldWidget = ui->tableProperties->indexWidget(m_propertiesModel->index(i, 3));
         if (oldWidget) {
             ui->tableProperties->setIndexWidget(m_propertiesModel->index(i, 3), nullptr);
@@ -292,11 +293,11 @@ void MainWindow::recreatePropertiesButtons()
         }
     }
     
-    // Add save buttons for each property
-    for (int i = 0; i < properties.size(); i++) {
-        QPushButton *btnSave = new QPushButton("💾");
-        btnSave->setMaximumSize(30, 30);
-        btnSave->setStyleSheet("QPushButton { font-size: 14px; }");
+    // Add save buttons for each visible row
+    for (int i = 0; i < rowCount; i++) {
+        QPushButton *btnSave = new QPushButton("Save");
+        btnSave->setMaximumSize(50, 25);
+        btnSave->setStyleSheet("QPushButton { font-size: 12px; padding: 2px; }");
         btnSave->setToolTip("Save this property to device");
         ui->tableProperties->setIndexWidget(m_propertiesModel->index(i, 3), btnSave);
         
@@ -336,8 +337,8 @@ void MainWindow::recreatePropertyDefinitionButtons()
         });
         
         // Add Remove button
-        QPushButton *btnRemove = new QPushButton("❌");
-        btnRemove->setMaximumSize(50, 25);
+        QPushButton *btnRemove = new QPushButton("Remove");
+        btnRemove->setMaximumSize(70, 25);
         btnRemove->setStyleSheet("QPushButton { font-size: 12px; padding: 2px; }");
         btnRemove->setToolTip("Remove property from list");
         ui->tablePropertyDefinitions->setIndexWidget(m_propertyDefinitionModel->index(row, 12), btnRemove);
@@ -358,12 +359,14 @@ void MainWindow::onSettingsFilterChanged()
 {
     QString filterText = ui->txtFilterSettings->text();
     m_settingsModel->applyFilter(filterText);
+    recreateSettingsButtons();  // Recreate buttons for filtered view
 }
 
 void MainWindow::onPropertiesFilterChanged()
 {
     QString filterText = ui->txtFilterProperties->text();
     m_propertiesModel->applyFilter(filterText);
+    recreatePropertiesButtons();  // Recreate buttons for filtered view
 }
 
 void MainWindow::onRefreshSettingsClicked()
@@ -373,8 +376,9 @@ void MainWindow::onRefreshSettingsClicked()
         return;
     }
     
-    ui->txtFilterSettings->clear();
-    m_settingsModel->clearFilter();
+    // Don't clear filter - preserve it when refreshing
+    // ui->txtFilterSettings->clear();
+    // m_settingsModel->clearFilter();
     
     // Fetch settings from device via ADB
     AdbManager::instance().fetchSettings(m_currentDeviceId);
@@ -387,8 +391,9 @@ void MainWindow::onRefreshPropertiesClicked()
         return;
     }
     
-    ui->txtFilterProperties->clear();
-    m_propertiesModel->clearFilter();
+    // Don't clear filter - preserve it when refreshing
+    // ui->txtFilterProperties->clear();
+    // m_propertiesModel->clearFilter();
     
     // Fetch properties from device via ADB
     AdbManager::instance().fetchProperties(m_currentDeviceId);
@@ -396,13 +401,13 @@ void MainWindow::onRefreshPropertiesClicked()
 
 void MainWindow::onSettingsFetched(const QVector<SettingEntry> &settings)
 {
-    m_settingsModel->setSettings(settings);
+    m_settingsModel->updateSettings(settings);  // Update instead of replace to preserve filter
     recreateSettingsButtons();
 }
 
 void MainWindow::onPropertiesFetched(const QVector<PropertyEntry> &properties)
 {
-    m_propertiesModel->setProperties(properties);
+    m_propertiesModel->updateProperties(properties);  // Update instead of replace to preserve filter
     recreatePropertiesButtons();
 }
 
@@ -413,34 +418,35 @@ void MainWindow::onSaveSettingClicked(int row)
         return;
     }
     
-    // Get the setting entry from model
-    const QVector<SettingEntry> &settings = m_settingsModel->getSettings();
-    if (row < 0 || row >= settings.size()) {
+    // Validate row index
+    if (row < 0 || row >= m_settingsModel->rowCount()) {
         return;
     }
     
-    const SettingEntry &entry = settings[row];
+    // Get the setting data from model (handles filtered view correctly)
+    QString group = m_settingsModel->data(m_settingsModel->index(row, 1), Qt::DisplayRole).toString();
+    QString setting = m_settingsModel->data(m_settingsModel->index(row, 2), Qt::DisplayRole).toString();
     QString newValue = m_settingsModel->data(m_settingsModel->index(row, 3), Qt::DisplayRole).toString();
     
     // Set the value via ADB
     QString error;
-    bool success = AdbManager::instance().setSetting(m_currentDeviceId, entry.group, entry.setting, newValue, error);
+    bool success = AdbManager::instance().setSetting(m_currentDeviceId, group, setting, newValue, error);
     
     if (!success) {
         QMessageBox::warning(this, "Failed to Set Value", 
-            QString("Failed to set %1.%2:\n%3").arg(entry.group, entry.setting, error));
+            QString("Failed to set %1.%2:\n%3").arg(group, setting, error));
         return;
     }
     
     // Verify the value was actually set
-    QString verifiedValue = AdbManager::instance().verifySetting(m_currentDeviceId, entry.group, entry.setting);
+    QString verifiedValue = AdbManager::instance().verifySetting(m_currentDeviceId, group, setting);
     
     if (verifiedValue != newValue) {
         QMessageBox::warning(this, "Value Not Set", 
             QString("Setting %1.%2 could not be set.\nExpected: %3\nActual: %4\n\nThis setting may be read-only or require special permissions.")
-                .arg(entry.group, entry.setting, newValue, verifiedValue.isEmpty() ? "(null)" : verifiedValue));
+                .arg(group, setting, newValue, verifiedValue.isEmpty() ? "(null)" : verifiedValue));
     } else {
-        ui->statusbar->showMessage(QString("Successfully set %1.%2 = %3").arg(entry.group, entry.setting, newValue), 3000);
+        ui->statusbar->showMessage(QString("Successfully set %1.%2 = %3").arg(group, setting, newValue), 3000);
     }
 }
 
@@ -451,34 +457,34 @@ void MainWindow::onSavePropertyClicked(int row)
         return;
     }
     
-    // Get the property entry from model
-    const QVector<PropertyEntry> &properties = m_propertiesModel->getProperties();
-    if (row < 0 || row >= properties.size()) {
+    // Validate row index
+    if (row < 0 || row >= m_propertiesModel->rowCount()) {
         return;
     }
     
-    const PropertyEntry &entry = properties[row];
+    // Get the property data from model (handles filtered view correctly)
+    QString property = m_propertiesModel->data(m_propertiesModel->index(row, 1), Qt::DisplayRole).toString();
     QString newValue = m_propertiesModel->data(m_propertiesModel->index(row, 2), Qt::DisplayRole).toString();
     
     // Set the value via ADB
     QString error;
-    bool success = AdbManager::instance().setProperty(m_currentDeviceId, entry.property, newValue, error);
+    bool success = AdbManager::instance().setProperty(m_currentDeviceId, property, newValue, error);
     
     if (!success) {
         QMessageBox::warning(this, "Failed to Set Property", 
-            QString("Failed to set %1:\n%2").arg(entry.property, error));
+            QString("Failed to set %1:\n%2").arg(property, error));
         return;
     }
     
     // Verify the value was actually set
-    QString verifiedValue = AdbManager::instance().verifyProperty(m_currentDeviceId, entry.property);
+    QString verifiedValue = AdbManager::instance().verifyProperty(m_currentDeviceId, property);
     
     if (verifiedValue != newValue) {
         QMessageBox::warning(this, "Property Not Set", 
             QString("Property %1 could not be set.\nExpected: %2\nActual: %3\n\nThis property may be read-only or require special permissions.")
-                .arg(entry.property, newValue, verifiedValue.isEmpty() ? "(null)" : verifiedValue));
+                .arg(property, newValue, verifiedValue.isEmpty() ? "(null)" : verifiedValue));
     } else {
-        ui->statusbar->showMessage(QString("Successfully set %1 = %2").arg(entry.property, newValue), 3000);
+        ui->statusbar->showMessage(QString("Successfully set %1 = %2").arg(property, newValue), 3000);
     }
 }
 
@@ -642,10 +648,12 @@ void MainWindow::onColumnsClicked()
         "QPushButton:hover { background-color: #1177bb; }"
     );
     
-    // Show dialog and apply changes
+    // Show dialog and apply changes to both tables
     if (dialog.exec() == QDialog::Accepted) {
         for (int i = 0; i < checkboxes.size(); ++i) {
-            ui->tableLog->setColumnHidden(i, !checkboxes[i]->isChecked());
+            bool hidden = !checkboxes[i]->isChecked();
+            ui->tableLog->setColumnHidden(i, hidden);
+            ui->tableMarkLog->setColumnHidden(i, hidden);
         }
     }
 }
@@ -1223,8 +1231,8 @@ void MainWindow::onAddPropertyDefinition()
         });
         
         // Add Remove button
-        QPushButton *btnRemove = new QPushButton("❌");
-        btnRemove->setMaximumSize(50, 25);
+        QPushButton *btnRemove = new QPushButton("Remove");
+        btnRemove->setMaximumSize(70, 25);
         btnRemove->setStyleSheet("QPushButton { font-size: 12px; padding: 2px; }");
         btnRemove->setToolTip("Remove property from list");
         ui->tablePropertyDefinitions->setIndexWidget(m_propertyDefinitionModel->index(row, 12), btnRemove);

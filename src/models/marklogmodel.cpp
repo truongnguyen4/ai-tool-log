@@ -39,6 +39,10 @@ QVariant MarkLogModel::data(const QModelIndex &index, int role) const
             case 7: return entry.message;
         }
     }
+    else if (role == Qt::TextAlignmentRole && index.column() == 0) {
+        // Center align the Date column
+        return Qt::AlignCenter;
+    }
     else if (role == Qt::ForegroundRole && index.column() == 5) {
         // Color code log levels
         return getLevelColor(entry.level);
