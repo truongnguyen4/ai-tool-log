@@ -16,6 +16,7 @@
 #include "propertiesmodel.h"
 #include "propertydefinitionmodel.h"
 #include "valuedelegate.h"
+#include "highlightdelegate.h"
 #include "ilogfilter.h"
 #include "logfilter.h"
 #include "QLineEdit"
@@ -94,6 +95,10 @@ private:
     FileManager m_fileManager;
     LogFilter m_logFilter;
     
+    // Highlight delegates for Tag and Message columns
+    HighlightDelegate *m_tagHighlightDelegate;
+    HighlightDelegate *m_messageHighlightDelegate;
+    
     // Filter history management
     QMap<QLineEdit*, QStringList> m_filterHistory;
     QMap<QLineEdit*, int> m_historyIndex;
@@ -113,5 +118,6 @@ private:
     FilterCriteria buildFilterCriteria() const;
     void saveToHistory(QLineEdit *lineEdit);
     void navigateHistory(QLineEdit *lineEdit, bool up);
+    void updateHighlightKeywords();  // Update keywords for highlighting in Tag and Message columns
 };
 #endif // MAINWINDOW_H

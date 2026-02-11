@@ -5,6 +5,7 @@
 #include "settingsmodel.h"
 #include "propertiesmodel.h"
 #include "propertydefinitionmodel.h"
+#include "highlightdelegate.h"
 #include <QClipboard>
 #include <QApplication>
 #include <QTableWidgetItem>
@@ -73,6 +74,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tableMarkLog->setColumnWidth(4, 200); // Package
     ui->tableMarkLog->setColumnWidth(5, 35);  // Lvl
     ui->tableMarkLog->setColumnWidth(6, 150); // Tag
+    
+    // Setup highlight delegates for Tag (column 6) and Message (column 7) columns
+    m_tagHighlightDelegate = new HighlightDelegate(this);
+    m_messageHighlightDelegate = new HighlightDelegate(this);
+    ui->tableLog->setItemDelegateForColumn(6, m_tagHighlightDelegate);
+    ui->tableLog->setItemDelegateForColumn(7, m_messageHighlightDelegate);
     
     // Setup splitters
     ui->splitter->setSizes(QList<int>() << 250 << 1150);
@@ -344,6 +351,7 @@ void MainWindow::recreatePropertyDefinitionButtons()
 void MainWindow::onFilterChanged()
 {
     applyFilters();
+    updateHighlightKeywords();  // Update highlighting when filters change
 }
 
 void MainWindow::onSettingsFilterChanged()
@@ -1385,4 +1393,65 @@ void MainWindow::updatePropertyNamesCompleter()
             completer->setModel(model);
         }
     }
+}
+
+void MainWindow::updateHighlightKeywords()
+{
+    // Parse tag filter to extract keywords
+    QString tagFilter = ui->txtTagFilter->text().trimmed();
+    QStringList tagKeywords;
+    
+    if (!tagFilter.isEmpty()) {
+        // Split by || and && operators
+        if (tagFilter.contains("&&")) {
+            tagKeywords = tagFilter.split("&&", Qt::SkipEmptyParts);
+        } else if (tagFilter.contains("||")) {
+            tagKeywords = tagFilter.split("||", Qt::SkipEmptyParts);
+        } else {
+            tagKeywords.append(tagFilter);
+        }
+        
+        // Trim whitespace from each keyword
+        for (QString &keyword : tagKeywords) {
+            keyword = keyword.trimmed();
+        }
+        tagKeywords.removeAll("");  // Remove empty strings
+    }
+    
+    // Parse message filter to extract keywords
+    QString messageFilter = ui->txtFindMessage->text().trimmed();
+    QStringList messageKeywords;
+    
+    if (!messageFilter.isEmpty()) {
+        // Split by || and && operators
+        if (messageFilter.contains("&&")) {
+            messageKeywords = messageFilter.split("&&", Qt::SkipEmptyParts);
+        } else if (messageFilter.contains("||")) {
+            messageKeywords = messageFilter.split("||", Qt::SkipEmptyParts);
+        } else {
+            messageKeywords.append(messageFilter);
+        }
+        
+        // Trim whitespace from each keyword
+        for (QString &keyword : messageKeywords) {
+            keyword = keyword.trimmed();
+        }
+        messageKeywords.removeAll("");  // Remove empty strings
+    }
+    
+    // Update delegates
+    if (tagKeywords.isEmpty()) {
+        m_tagHighlightDelegate->clearKeywords();
+    } else {
+        m_tagHighlightDelegate->setKeywords(tagKeywords);
+    }
+    
+    if (messageKeywords.isEmpty()) {
+        m_messageHighlightDelegate->clearKeywords();
+    } else {
+        m_messageHighlightDelegate->setKeywords(messageKeywords);
+    }
+    
+    // Force repaint of the table to show/update highlights
+    ui->tableLog->viewport()->update();
 }

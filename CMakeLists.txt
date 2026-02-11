@@ -17,6 +17,10 @@ qt_add_executable(ToolLogPro
     src/ui/valuedelegate.cpp
     src/ui/valuedelegate.h
     
+    # Delegates
+    src/delegates/highlightdelegate.cpp
+    src/delegates/highlightdelegate.h
+    
     # Managers
     src/managers/adbmanager.cpp
     src/managers/adbmanager.h
@@ -66,6 +70,7 @@ target_include_directories(ToolLogPro PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces
     ${CMAKE_CURRENT_SOURCE_DIR}/src/models
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/delegates
     ${CMAKE_CURRENT_SOURCE_DIR}/src/converters
     ${CMAKE_CURRENT_SOURCE_DIR}/src/filters
     ${CMAKE_CURRENT_SOURCE_DIR}/src/managers
