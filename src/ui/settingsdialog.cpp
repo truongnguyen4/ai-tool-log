@@ -1,4 +1,5 @@
 #include "settingsdialog.h"
+#include "tableconfig.h"
 
 #include <QTabWidget>
 #include <QFontComboBox>
@@ -11,6 +12,8 @@
 #include <QDialogButtonBox>
 #include <QGroupBox>
 #include <QApplication>
+#include <QPushButton>
+#include <QMessageBox>
 
 SettingsDialog::SettingsDialog(const QFont &currentFont,
                                const QVector<bool> &columnVisibility,
@@ -60,6 +63,7 @@ void SettingsDialog::setupUi()
     setupFontTab();
     setupColumnsTab();
     setupPropDefColumnsTab();
+    setupDatabaseTab();
 
     mainLayout->addWidget(m_tabWidget);
 
@@ -124,16 +128,17 @@ void SettingsDialog::setupColumnsTab()
     auto *colGroup  = new QGroupBox(tr("Visible Log Table Columns"), colTab);
     auto *grpLayout = new QVBoxLayout(colGroup);
 
-    // Column names match TableConfig::LogColumns order (indices 0-7)
+    // Column names are sourced from TableConfig::LogColumns::Names to ensure consistency
+    using namespace TableConfig::LogColumns;
     const QStringList colNames = {
-        tr("Date"),    // 0
-        tr("Time"),    // 1
-        tr("PID"),     // 2
-        tr("TID"),     // 3
-        tr("Package"), // 4
-        tr("Level"),   // 5
-        tr("Tag"),     // 6
-        tr("Message"), // 7
+        tr(Names::DATE),    // 0
+        tr(Names::TIME),    // 1
+        tr(Names::PID),     // 2
+        tr(Names::TID),     // 3
+        tr(Names::PACKAGE), // 4
+        tr(Names::LEVEL),   // 5
+        tr(Names::TAG),     // 6
+        tr(Names::MESSAGE), // 7
     };
 
     m_columnCheckboxes.clear();
@@ -155,7 +160,7 @@ void SettingsDialog::setupColumnsTab()
     colLayout->addWidget(colGroup);
     colLayout->addStretch();
 
-    m_tabWidget->addTab(colTab, tr("Columns"));
+    m_tabWidget->addTab(colTab, tr("Log Table Columns"));
 }
 
 void SettingsDialog::setupPropDefColumnsTab()
@@ -166,19 +171,20 @@ void SettingsDialog::setupPropDefColumnsTab()
     auto *group     = new QGroupBox(tr("Visible Property Definition Columns"), tab);
     auto *grpLayout = new QVBoxLayout(group);
 
-    // Column names match TableConfig::PropertyDefColumns order (indices 0-10)
+    // Column names are sourced from TableConfig::PropertyDefColumns::Names to ensure consistency
+    using namespace TableConfig::PropertyDefColumns;
     const QStringList colNames = {
-        tr("ID"),          // 0
-        tr("Name"),        // 1
-        tr("Supported"),   // 2
-        tr("Need Reboot"), // 3
-        tr("Type"),        // 4
-        tr("Read Only"),   // 5
-        tr("Default"),     // 6
-        tr("Value"),       // 7
-        tr("Set"),         // 8
-        tr("Get"),         // 9
-        tr("Remove"),      // 10
+        tr(Names::ID),            // 0
+        tr(Names::NAME),          // 1
+        tr(Names::SUPPORTED),     // 2
+        tr(Names::NEED_REBOOT),   // 3
+        tr(Names::TYPE),          // 4
+        tr(Names::READ_ONLY),     // 5
+        tr(Names::DEFAULT),       // 6
+        tr(Names::VALUE),         // 7
+        tr(Names::SET_BUTTON),    // 8
+        tr(Names::GET_BUTTON),    // 9
+        tr(Names::REMOVE_BUTTON), // 10
     };
 
     m_propDefColumnCheckboxes.clear();
@@ -193,10 +199,68 @@ void SettingsDialog::setupPropDefColumnsTab()
     layout->addWidget(group);
     layout->addStretch();
 
-    m_tabWidget->addTab(tab, tr("SDK Columns"));
+    m_tabWidget->addTab(tab, tr("Property Definition Columns"));
 }
 
 void SettingsDialog::updatePreview()
 {
     m_previewLabel->setFont(selectedFont());
+}
+
+QStringList SettingsDialog::keysToReset() const
+{
+    QStringList keys;
+    for (const DbEntry &e : m_dbEntries)
+        if (e.cb && e.cb->isChecked())
+            keys.append(e.key);
+    return keys;
+}
+
+void SettingsDialog::setupDatabaseTab()
+{
+    auto *tab    = new QWidget;
+    auto *layout = new QVBoxLayout(tab);
+
+    auto *group     = new QGroupBox(tr("Filter History to Reset"), tab);
+    auto *grpLayout = new QVBoxLayout(group);
+
+    // Define which history groups exist and their friendly names
+    m_dbEntries = {
+        { tr("Logcat — Keyword filter"),          QStringLiteral("keyword")        },
+        { tr("Logcat — Tag filter"),              QStringLiteral("tag")            },
+        { tr("Logcat — PID filter"),              QStringLiteral("pid")            },
+        { tr("Logcat — Package filter"),          QStringLiteral("package")        },
+        { tr("Logcat — Find in message"),         QStringLiteral("findMessage")    },
+        { tr("Settings table — Key filter"),      QStringLiteral("settingsKey")    },
+        { tr("Settings table — Value filter"),    QStringLiteral("settingsValue")  },
+        { tr("System properties — Key filter"),   QStringLiteral("propertiesKey")  },
+        { tr("System properties — Value filter"), QStringLiteral("propertiesValue")},
+    };
+
+    for (DbEntry &e : m_dbEntries) {
+        e.cb = new QCheckBox(e.label, group);
+        grpLayout->addWidget(e.cb);
+    }
+
+    auto *btnRow        = new QHBoxLayout;
+    auto *btnSelectAll  = new QPushButton(tr("Select All"),  group);
+    auto *btnSelectNone = new QPushButton(tr("Select None"), group);
+    btnRow->addWidget(btnSelectAll);
+    btnRow->addWidget(btnSelectNone);
+    btnRow->addStretch();
+
+    connect(btnSelectAll,  &QPushButton::clicked, this, [this]() {
+        for (DbEntry &e : m_dbEntries) if (e.cb) e.cb->setChecked(true);
+    });
+    connect(btnSelectNone, &QPushButton::clicked, this, [this]() {
+        for (DbEntry &e : m_dbEntries) if (e.cb) e.cb->setChecked(false);
+    });
+
+    grpLayout->addLayout(btnRow);
+    layout->addWidget(group);
+    layout->addWidget(new QLabel(
+        tr("Checked items will be cleared when you click OK."), tab));
+    layout->addStretch();
+
+    m_tabWidget->addTab(tab, tr("Database"));
 }

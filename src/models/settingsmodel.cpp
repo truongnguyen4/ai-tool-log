@@ -1,5 +1,6 @@
 #include "settingsmodel.h"
 #include "tableconfig.h"
+#include <QDebug>
 
 SettingsModel::SettingsModel(QObject *parent)
     : QAbstractTableModel(parent), m_isFiltered(false)
@@ -53,11 +54,11 @@ QVariant SettingsModel::headerData(int section, Qt::Orientation orientation, int
     if (orientation == Qt::Horizontal) {
         using namespace TableConfig::SettingsColumns;
         switch (section) {
-        case LINE: return "LINE";
-        case GROUP: return "GROUP";
-        case SETTING: return "SETTING";
-        case VALUE: return "VALUE";
-        case ACTION: return "";
+        case LINE:    return Names::LINE;
+        case GROUP:   return Names::GROUP;
+        case SETTING: return Names::SETTING;
+        case VALUE:   return Names::VALUE;
+        case ACTION:  return Names::ACTION;
         default: return QVariant();
         }
     }
@@ -109,44 +110,65 @@ void SettingsModel::setSettings(const QVector<SettingEntry> &settings)
     beginResetModel();
     m_allSettings = settings;
     m_filteredSettings.clear();
-    m_isFiltered = false;
+    // Do NOT reset m_isFiltered — preserve filter state so that reapplyFilter()
+    // applies the existing filter when new data arrives after a device reconnect.
     endResetModel();
 }
 
-void SettingsModel::updateSettings(const QVector<SettingEntry> &settings)
+void SettingsModel::updateSettings(const QVector<SettingEntry> &settings, bool allowInsert)
 {
-    // Store current filter state
-    bool wasFiltered = m_isFiltered;
-    
-    // Update or add settings in m_allSettings
+    bool changed = false;
+
     for (const SettingEntry &newEntry : settings) {
         bool found = false;
-        
-        // Find existing entry by group and setting name
         for (int i = 0; i < m_allSettings.size(); ++i) {
-            if (m_allSettings[i].group == newEntry.group && 
-                m_allSettings[i].setting == newEntry.setting) {
-                // Update existing entry
+            const bool match = allowInsert
+                ? (m_allSettings[i].group == newEntry.group && m_allSettings[i].setting == newEntry.setting)
+                : (m_allSettings[i].setting == newEntry.setting);
+
+            if (match) {
                 m_allSettings[i].value = newEntry.value;
-                m_allSettings[i].line = newEntry.line;
-                found = true;
+                if (allowInsert)
+                    m_allSettings[i].line = newEntry.line;
+                found   = true;
+                changed = true;
                 break;
             }
         }
-        
-        // If not found, add new entry
-        if (!found) {
+        if (!found && allowInsert) {
             m_allSettings.append(newEntry);
+            changed = true;
         }
     }
-    
-    // Reapply filter if it was active
-    if (wasFiltered) {
-        applyFilter(m_currentNameFilter, m_currentValueFilter);
+
+    if (!changed)
+        return;
+
+    if (allowInsert) {
+        // Full upsert path: rebuild filter and reset view.
+        if (m_isFiltered)
+            applyFilter(m_currentNameFilter, m_currentValueFilter);
+        else {
+            beginResetModel();
+            endResetModel();
+        }
     } else {
-        // No filter, just notify model changed
-        beginResetModel();
-        endResetModel();
+        // Value-only socket path: sync filtered list and emit targeted dataChanged.
+        if (m_isFiltered) {
+            for (SettingEntry &fe : m_filteredSettings) {
+                for (const SettingEntry &e : m_allSettings) {
+                    if (e.setting == fe.setting) {
+                        fe.value = e.value;
+                        break;
+                    }
+                }
+            }
+        }
+        const int rows = rowCount();
+        if (rows > 0) {
+            emit dataChanged(index(0, TableConfig::SettingsColumns::VALUE),
+                             index(rows - 1, TableConfig::SettingsColumns::VALUE));
+        }
     }
 }
 
@@ -183,6 +205,12 @@ void SettingsModel::applyFilter(const QString &nameFilter, const QString &valueF
     }
     
     endResetModel();
+}
+
+void SettingsModel::reapplyFilter()
+{
+    if (m_isFiltered)
+        applyFilter(m_currentNameFilter, m_currentValueFilter);
 }
 
 void SettingsModel::clearFilter()

@@ -92,6 +92,15 @@ inline QStringList cradleCommand(const QString &deviceId, const QStringList &arg
     return QStringList() << "-s" << deviceId << "shell" << "cmd" << "cradle_manager" << args;
 }
 
+// Reverse port: `adb reverse tcp:<devicePort> tcp:<hostPort>`
+// Routes connections from device:devicePort → host:hostPort
+inline QStringList reversePort(const QString &deviceId, quint16 devicePort, quint16 hostPort)
+{
+    return QStringList() << "-s" << deviceId << "reverse"
+                         << QString("tcp:%1").arg(devicePort)
+                         << QString("tcp:%1").arg(hostPort);
+}
+
 } // namespace AdbCommand
 
 #endif // ADBCOMMAND_H

@@ -425,13 +425,37 @@ void AdbManager::fetchPropertyDefinitions(const QString &deviceId)
             return;
         }
         const QString errOut = process.readAllStandardError();
-        if (!errOut.isEmpty())
+        if (!errOut.isEmpty()) {
             qDebug() << "Property definition fetch error:" << errOut;
+            emit errorOccurred("Failed to fetch property definitions: " + errOut);
+            return;
+        }
 
         const QVector<PropertyDefinition> defs =
             PropertyDefinitionConverter::parseOutput(process.readAllStandardOutput());
         qDebug() << "Fetched" << defs.size() << "property definitions";
         emit propertyDefinitionsFetched(defs);
+    });
+}
+
+void AdbManager::runRawAdbCommand(const QString &command)
+{
+    const QString adbPath = m_adbPath;
+    QtConcurrent::run([this, adbPath, command]() {
+        // Split the full command string into args, skipping leading "adb" token if present
+        QStringList parts = command.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+        if (!parts.isEmpty() && parts.first().compare("adb", Qt::CaseInsensitive) == 0)
+            parts.removeFirst();
+
+        QProcess process;
+        process.start(adbPath, parts);
+        if (!process.waitForFinished(30000)) {
+            emit errorOccurred(QStringLiteral("adb command timed out: ") + command);
+            return;
+        }
+        const QString out = QString::fromUtf8(process.readAllStandardOutput());
+        const QString err = QString::fromUtf8(process.readAllStandardError());
+        emit rawAdbCommandFinished(out.isEmpty() && !err.isEmpty() ? err : out);
     });
 }
 
@@ -490,6 +514,38 @@ void AdbManager::runCradleCommand(const QString &deviceId, const QStringList &ar
         const QString errOut = QString::fromUtf8(process.readAllStandardError()).trimmed();
         emit cradleCommandFinished(out, errOut);
     });
+}
+
+void AdbManager::setupReversePort(const QString &deviceId, quint16 devicePort, quint16 hostPort)
+{
+    const QString adbPath = m_adbPath;
+    QtConcurrent::run([adbPath, deviceId, devicePort, hostPort]() {
+        QProcess process;
+        process.start(adbPath, AdbCommand::reversePort(deviceId, devicePort, hostPort));
+        if (!process.waitForFinished(5000)) {
+            qWarning() << "AdbManager::setupReversePort: timed out";
+            return;
+        }
+        const QByteArray err = process.readAllStandardError().trimmed();
+        if (!err.isEmpty())
+            qWarning() << "AdbManager::setupReversePort:" << err;
+        else
+            qDebug() << "AdbManager::setupReversePort: device port" << devicePort
+                     << "-> host port" << hostPort;
+    });
+}
+
+void AdbManager::removeReversePort(const QString &deviceId, quint16 devicePort)
+{
+    const QString adbPath = m_adbPath;
+    QProcess process;
+    process.start(adbPath, QStringList() << "-s" << deviceId
+                                        << "reverse" << "--remove"
+                                        << QString("tcp:%1").arg(devicePort));
+    if (!process.waitForFinished(3000))
+        qWarning() << "AdbManager::removeReversePort: timed out";
+    else
+        qDebug() << "AdbManager::removeReversePort: removed device port" << devicePort;
 }
 
 bool AdbManager::getPropertyDefinitionValue(const QString &deviceId, const QString &propertyName, QString &value, QString &error)

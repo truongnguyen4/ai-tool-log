@@ -59,7 +59,7 @@ QVariant LogModel::data(const QModelIndex &index, int role) const
     else if (role == Qt::BackgroundRole) {
         // Highlight marked rows
         if (m_markedRows && m_markedRows->contains(index.row())) {
-            return QColor("#30567a"); // Slightly lighter than normal for marked rows
+            return QColor("#1a3a80"); // Navy — matches the table selection palette
         }
     }
 
@@ -74,14 +74,14 @@ QVariant LogModel::headerData(int section, Qt::Orientation orientation, int role
     if (orientation == Qt::Horizontal) {
         using namespace TableConfig::LogColumns;
         switch (section) {
-            case DATE:    return "Date";
-            case TIME:    return "Time";
-            case PID:     return "PID";
-            case TID:     return "TID";
-            case PACKAGE: return "Package";
-            case LEVEL:   return "Lvl";
-            case TAG:     return "Tag";
-            case MESSAGE: return "Message";
+            case DATE:    return Names::DATE;
+            case TIME:    return Names::TIME;
+            case PID:     return Names::PID;
+            case TID:     return Names::TID;
+            case PACKAGE: return Names::PACKAGE;
+            case LEVEL:   return Names::LEVEL;
+            case TAG:     return Names::TAG;
+            case MESSAGE: return Names::MESSAGE;
         }
     }
     else {

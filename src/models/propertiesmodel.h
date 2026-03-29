@@ -23,10 +23,14 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     
     void setProperties(const QVector<PropertyEntry> &properties);
-    void updateProperties(const QVector<PropertyEntry> &properties);  // Update values without clearing filter
+    // Update values in the model.
+    // allowInsert=true (default): add entries not yet present (adb fetch path).
+    // allowInsert=false: update value-only for existing entries, no insertion (socket path).
+    void updateProperties(const QVector<PropertyEntry> &properties, bool allowInsert = true);
     const QVector<PropertyEntry>& getProperties() const;
     
     void applyFilter(const QString &nameFilter, const QString &valueFilter = QString());
+    void reapplyFilter();
     void clearFilter();
 
 private:

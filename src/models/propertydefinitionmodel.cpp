@@ -62,17 +62,17 @@ QVariant PropertyDefinitionModel::headerData(int section, Qt::Orientation orient
     if (orientation == Qt::Horizontal) {
         using namespace TableConfig::PropertyDefColumns;
         switch (section) {
-            case NAME: return "Name";
-            case ID: return "ID";
-            case SUPPORTED: return "Supported";
-            case VALUE: return "Value";
-            case DEFAULT: return "Default";
-            case NEED_REBOOT: return "Need Reboot";
-            case TYPE: return "Type";
-            case READ_ONLY: return "Read Only";
-            case SET_BUTTON: return "";
-            case GET_BUTTON: return "";
-            case REMOVE_BUTTON: return "";
+            case NAME:          return Names::NAME;
+            case ID:            return Names::ID;
+            case SUPPORTED:     return Names::SUPPORTED;
+            case VALUE:         return Names::VALUE;
+            case DEFAULT:       return Names::DEFAULT;
+            case NEED_REBOOT:   return Names::NEED_REBOOT;
+            case TYPE:          return Names::TYPE;
+            case READ_ONLY:     return Names::READ_ONLY;
+            case SET_BUTTON:    return "";  // icon-only button column; no header text
+            case GET_BUTTON:    return "";  // icon-only button column; no header text
+            case REMOVE_BUTTON: return "";  // icon-only button column; no header text
         }
     }
     
@@ -99,6 +99,44 @@ void PropertyDefinitionModel::addPropertyDefinition(const PropertyDefinition &pr
     beginInsertRows(QModelIndex(), m_properties.size(), m_properties.size());
     m_properties.append(property);
     endInsertRows();
+}
+
+void PropertyDefinitionModel::updatePropertyDefinitions(const QVector<PropertyDefinition> &properties, bool allowInsert)
+{
+    bool changed = false;
+
+    for (const PropertyDefinition &newEntry : properties) {
+        bool found = false;
+        for (int i = 0; i < m_properties.size(); ++i) {
+            if (m_properties[i].id == newEntry.id) {
+                if (allowInsert) {
+                    m_properties[i] = newEntry;
+                } else {
+                    m_properties[i].value = newEntry.value;
+                }
+                found   = true;
+                changed = true;
+                break;
+            }
+        }
+        if (!found && allowInsert) {
+            m_properties.append(newEntry);
+            changed = true;
+        }
+    }
+
+    if (!changed)
+        return;
+
+    if (allowInsert) {
+        beginResetModel();
+        endResetModel();
+    } else {
+        m_updatingFromSocket = true;
+        emit dataChanged(index(0, TableConfig::PropertyDefColumns::VALUE),
+                         index(rowCount() - 1, TableConfig::PropertyDefColumns::VALUE));
+        m_updatingFromSocket = false;
+    }
 }
 
 void PropertyDefinitionModel::updatePropertyDefinition(int row, const PropertyDefinition &property)

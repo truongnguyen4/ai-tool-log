@@ -19,17 +19,24 @@ public:
     
     void setPropertyDefinitions(const QVector<PropertyDefinition> &properties);
     void addPropertyDefinition(const PropertyDefinition &property);
+    // Update a batch of property definitions.
+    // allowInsert=true (default): update existing or insert new entries.
+    // allowInsert=false: update value-only for existing entries matched by id (socket path).
+    void updatePropertyDefinitions(const QVector<PropertyDefinition> &properties, bool allowInsert = true);
     void updatePropertyDefinition(int row, const PropertyDefinition &property);
     void removePropertyDefinition(int row);
     void clear();
     
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-    
+
+    bool isUpdatingFromSocket() const { return m_updatingFromSocket; }
+
     const QVector<PropertyDefinition>& getPropertyDefinitions() const { return m_properties; }
-    
+
 private:
     QVector<PropertyDefinition> m_properties;
+    bool m_updatingFromSocket = false;
 };
 
 #endif // PROPERTYDEFINITIONMODEL_H

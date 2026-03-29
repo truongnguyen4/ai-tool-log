@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QFont>
 #include <QVector>
+#include <QStringList>
 
 class QTabWidget;
 class QFontComboBox;
@@ -25,11 +26,15 @@ public:
     QVector<bool> columnVisibility()        const;
     QVector<bool> propDefColumnVisibility() const;
 
+    /** Returns the QSettings keys the user wants cleared in the Database tab. */
+    QStringList   keysToReset()             const;
+
 private:
     void setupUi();
     void setupFontTab();
     void setupColumnsTab();
     void setupPropDefColumnsTab();
+    void setupDatabaseTab();
     void updatePreview();
 
     QTabWidget    *m_tabWidget       = nullptr;
@@ -42,6 +47,10 @@ private:
     QVector<bool> m_initPropDefColVis;
     QVector<QCheckBox *> m_columnCheckboxes;
     QVector<QCheckBox *> m_propDefColumnCheckboxes;
+
+    // Database tab — one checkbox per stored history group
+    struct DbEntry { QString label; QString key; QCheckBox *cb = nullptr; };
+    QVector<DbEntry> m_dbEntries;
 };
 
 #endif // SETTINGSDIALOG_H

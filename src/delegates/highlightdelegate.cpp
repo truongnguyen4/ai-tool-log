@@ -52,13 +52,48 @@ QColor HighlightDelegate::getColorForKeyword(int index) const
     return HIGHLIGHT_COLORS[index % HIGHLIGHT_COLOR_COUNT];
 }
 
+void HighlightDelegate::paintMarkedBackground(QPainter *painter,
+                                              const QStyleOptionViewItem &opt,
+                                              const QModelIndex &index) const
+{
+    // Qt's stylesheet engine ignores Qt::BackgroundRole when any ::item
+    // background-color rule exists in the QSS.  We read it explicitly and
+    // paint it here — AFTER style->drawControl — so it sits on top of the
+    // stylesheet's normal/hover fill but below keyword spans and text.
+    if (opt.state & QStyle::State_Selected)
+        return;   // selection highlight takes precedence; don't overlay
+    const QVariant bg = index.data(Qt::BackgroundRole);
+    if (!bg.isValid()) return;
+    QColor bgColor = bg.value<QColor>();
+    if (!bgColor.isValid()) return;
+    bgColor.setAlpha(210);
+    painter->fillRect(opt.rect, bgColor);
+}
+
 void HighlightDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                               const QModelIndex &index) const
 {
     // ── No keywords ────────────────────────────────────────────────────────
     if (m_keywords.isEmpty()) {
         if (!m_wordWrap) {
-            QStyledItemDelegate::paint(painter, option, index);
+            // QStyledItemDelegate::paint() calls style->drawControl() which ignores
+            // Qt::BackgroundRole when a QSS ::item rule is active.  Draw manually.
+            QStyleOptionViewItem opt = option;
+            initStyleOption(&opt, index);
+            const QString text = opt.text;
+            opt.text.clear();
+            const QWidget *widget = opt.widget;
+            QStyle *style = widget ? widget->style() : QApplication::style();
+            style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, widget);
+            paintMarkedBackground(painter, opt, index);  // overlay marked row color
+            painter->save();
+            painter->setFont(opt.font);
+            const bool sel = opt.state & QStyle::State_Selected;
+            painter->setPen(sel ? opt.palette.highlightedText().color()
+                                : opt.palette.text().color());
+            painter->drawText(opt.rect.adjusted(6, 0, -6, 0),
+                              Qt::AlignLeft | Qt::AlignVCenter, text);
+            painter->restore();
             return;
         }
         // Word-wrap, no highlights
@@ -69,6 +104,7 @@ void HighlightDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
         const QWidget *widget = opt.widget;
         QStyle *style = widget ? widget->style() : QApplication::style();
         style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, widget);
+        paintMarkedBackground(painter, opt, index);  // overlay marked row color
 
         painter->save();
         painter->setFont(opt.font);
@@ -94,6 +130,7 @@ void HighlightDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
     QStyle *style = widget ? widget->style() : QApplication::style();
     opt.text = "";
     style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, widget);
+    paintMarkedBackground(painter, opt, index);  // overlay marked row color
 
     const bool isSelected = option.state & QStyle::State_Selected;
 

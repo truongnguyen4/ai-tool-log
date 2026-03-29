@@ -88,15 +88,15 @@ QVariant MarkLogModel::headerData(int section, Qt::Orientation orientation, int 
     if (orientation == Qt::Horizontal) {
         using namespace TableConfig::LogColumns;
         switch (section) {
-            case DATE:    return "Date";
-            case TIME:    return "Time";
-            case PID:     return "PID";
-            case TID:     return "TID";
-            case PACKAGE: return "Package";
-            case LEVEL:   return "Lvl";
-            case TAG:     return "Tag";
-            case MESSAGE: return "Message";
-            case DELTA:   return "\u0394Time";
+            case DATE:    return Names::DATE;
+            case TIME:    return Names::TIME;
+            case PID:     return Names::PID;
+            case TID:     return Names::TID;
+            case PACKAGE: return Names::PACKAGE;
+            case LEVEL:   return Names::LEVEL;
+            case TAG:     return Names::TAG;
+            case MESSAGE: return Names::MESSAGE;
+            case DELTA:   return Names::DELTA;
         }
     }
     else {

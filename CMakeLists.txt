@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(ToolLogPro LANGUAGES CXX)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Concurrent)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Concurrent Sql Network)
 
 qt_standard_project_setup()
 
@@ -17,6 +17,8 @@ qt_add_executable(ToolLogPro
     src/ui/mainwindow.cpp
     src/ui/mainwindow.h
     src/ui/mainwindow.ui
+    src/ui/uimanager.cpp
+    src/ui/uimanager.h
     src/ui/settingsdialog.cpp
     src/ui/settingsdialog.h
     src/ui/tooltips.h
@@ -35,6 +37,8 @@ qt_add_executable(ToolLogPro
     src/managers/filemanager.h
     src/managers/filterhistorymanager.cpp
     src/managers/filterhistorymanager.h
+    src/managers/propertydefinitionbackend.cpp
+    src/managers/propertydefinitionbackend.h
     
     # Models
     src/models/logmodel.cpp
@@ -66,6 +70,19 @@ qt_add_executable(ToolLogPro
     src/interfaces/ilogconverter.h
     src/interfaces/ilogfilter.h
     src/interfaces/iconfigfilter.h
+    src/interfaces/ipropertydefinitiondatabase.h
+    src/interfaces/ipropertydefinitionexporter.h
+    src/interfaces/isocketdatahandler.h
+
+    # Socket
+    src/socket/socketserver.h
+    src/socket/socketserver.cpp
+    src/socket/settingssockethandler.h
+    src/socket/settingssockethandler.cpp
+    src/socket/systempropertysockethandler.h
+    src/socket/systempropertysockethandler.cpp
+    src/socket/propertydefinitionsockethandler.h
+    src/socket/propertydefinitionsockethandler.cpp
     
     # Data
     src/data/propertydefinition.h
@@ -85,8 +102,7 @@ target_include_directories(ToolLogPro PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/converters
     ${CMAKE_CURRENT_SOURCE_DIR}/src/filters
     ${CMAKE_CURRENT_SOURCE_DIR}/src/managers
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/data
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/qtermwidget/lib
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/data    ${CMAKE_CURRENT_SOURCE_DIR}/src/socket    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/qtermwidget/lib
     ${CMAKE_CURRENT_BINARY_DIR}/third_party/qtermwidget/lib
 )
 
@@ -106,6 +122,7 @@ qt_add_resources(ToolLogPro "app_icons"
         src/resources/icons/arrow-down.svg
         src/resources/icons/plus.svg
         src/resources/icons/download.svg
+        src/resources/icons/upload.svg
 )
 
 target_link_libraries(ToolLogPro
@@ -113,6 +130,8 @@ target_link_libraries(ToolLogPro
         Qt::Core
         Qt::Widgets
         Qt::Concurrent
+        Qt::Sql
+        Qt::Network
         qtermwidget6
 )
 

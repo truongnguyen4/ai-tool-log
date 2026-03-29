@@ -55,7 +55,15 @@ private:
      */
     void drawHighlightedText(QPainter *painter, const QStyleOptionViewItem &option,
                             const QString &text, bool isSelected) const;
-    
+
+    /**
+     * @brief Overlay Qt::BackgroundRole color for marked rows.
+     * Qt's stylesheet engine ignores BackgroundRole when any ::item background
+     * rule is active, so we must paint it manually after style->drawControl.
+     */
+    void paintMarkedBackground(QPainter *painter, const QStyleOptionViewItem &opt,
+                               const QModelIndex &index) const;
+
     /**
      * @brief Generate a distinct color for a keyword based on its index
      */

@@ -10,10 +10,12 @@ PropertyDefinition PropertyDefinitionConverter::parseLine(const QString &line)
 
     // Key normalisation: toLower().remove('_') collapses is_supported→issupported etc.
     // Only the canonical camelCase forms need to appear in the pattern.
+    // Pattern matches: key: value, where value is everything up to the next ", key:" or end
     static const QString KEYS =
         "id|name|isSupported|value|default|needReboot|type|readOnly";
+    // .*? (instead of [^,]*?) lets values contain commas; \b in lookahead prevents partial key matches
     static const QRegularExpression re(
-        QString(R"(\b(%1)\s*:\s*(.+?)(?=\s*,\s*\b(?:%1)\s*:|$))").arg(KEYS),
+        QString(R"(\b(%1)\s*:\s*(.*?)(?=\s*,\s*(?:%1)\b\s*:|$))").arg(KEYS),
         QRegularExpression::CaseInsensitiveOption);
 
     QHash<QString, QString> kv;
@@ -32,12 +34,8 @@ PropertyDefinition PropertyDefinitionConverter::parseLine(const QString &line)
     if (kv.contains("id"))          prop.id          = kv["id"];
     if (kv.contains("name"))        prop.name        = kv["name"];
     if (kv.contains("issupported")) prop.isSupported = boolVal(kv["issupported"]);
-    const QString val = kv.value("value");
-    if (!val.isEmpty() && val.toLower() != "null")
-        prop.value = val;
-    const QString def = kv.value("default");
-    if (!def.isEmpty() && def.toLower() != "null")
-        prop.defaultValue = def;
+    if (kv.contains("value"))       prop.value       = kv["value"];
+    if (kv.contains("default"))     prop.defaultValue = kv["default"];
     if (kv.contains("needreboot"))  prop.needReboot  = boolVal(kv["needreboot"]);
     if (kv.contains("type"))        prop.type        = kv["type"];
     if (kv.contains("readonly"))    prop.readOnly    = boolVal(kv["readonly"]);

@@ -52,10 +52,10 @@ QVariant PropertiesModel::headerData(int section, Qt::Orientation orientation, i
     if (orientation == Qt::Horizontal) {
         using namespace TableConfig::PropertiesColumns;
         switch (section) {
-        case LINE: return "LINE";
-        case PROPERTY: return "PROPERTY";
-        case VALUE: return "VALUE";
-        case ACTION: return "";
+        case LINE:     return Names::LINE;
+        case PROPERTY: return Names::PROPERTY;
+        case VALUE:    return Names::VALUE;
+        case ACTION:   return Names::ACTION;
         default: return QVariant();
         }
     }
@@ -107,43 +107,59 @@ void PropertiesModel::setProperties(const QVector<PropertyEntry> &properties)
     beginResetModel();
     m_allProperties = properties;
     m_filteredProperties.clear();
-    m_isFiltered = false;
+    // Do NOT reset m_isFiltered — preserve filter state so that reapplyFilter()
+    // applies the existing filter when new data arrives after a device reconnect.
     endResetModel();
 }
 
-void PropertiesModel::updateProperties(const QVector<PropertyEntry> &properties)
+void PropertiesModel::updateProperties(const QVector<PropertyEntry> &properties, bool allowInsert)
 {
-    // Store current filter state
-    bool wasFiltered = m_isFiltered;
-    
-    // Update or add properties in m_allProperties
+    bool changed = false;
+
     for (const PropertyEntry &newEntry : properties) {
         bool found = false;
-        
-        // Find existing entry by property name
         for (int i = 0; i < m_allProperties.size(); ++i) {
             if (m_allProperties[i].property == newEntry.property) {
-                // Update existing entry
                 m_allProperties[i].value = newEntry.value;
-                m_allProperties[i].line = newEntry.line;
-                found = true;
+                if (allowInsert)
+                    m_allProperties[i].line = newEntry.line;
+                found   = true;
+                changed = true;
                 break;
             }
         }
-        
-        // If not found, add new entry
-        if (!found) {
+        if (!found && allowInsert) {
             m_allProperties.append(newEntry);
+            changed = true;
         }
     }
-    
-    // Reapply filter if it was active
-    if (wasFiltered) {
-        applyFilter(m_currentNameFilter, m_currentValueFilter);
+
+    if (!changed)
+        return;
+
+    if (allowInsert) {
+        if (m_isFiltered)
+            applyFilter(m_currentNameFilter, m_currentValueFilter);
+        else {
+            beginResetModel();
+            endResetModel();
+        }
     } else {
-        // No filter, just notify model changed
-        beginResetModel();
-        endResetModel();
+        if (m_isFiltered) {
+            for (PropertyEntry &fe : m_filteredProperties) {
+                for (const PropertyEntry &e : m_allProperties) {
+                    if (e.property == fe.property) {
+                        fe.value = e.value;
+                        break;
+                    }
+                }
+            }
+        }
+        const int rows = rowCount();
+        if (rows > 0) {
+            emit dataChanged(index(0, TableConfig::PropertiesColumns::VALUE),
+                             index(rows - 1, TableConfig::PropertiesColumns::VALUE));
+        }
     }
 }
 
@@ -179,6 +195,12 @@ void PropertiesModel::applyFilter(const QString &nameFilter, const QString &valu
     }
     
     endResetModel();
+}
+
+void PropertiesModel::reapplyFilter()
+{
+    if (m_isFiltered)
+        applyFilter(m_currentNameFilter, m_currentValueFilter);
 }
 
 void PropertiesModel::clearFilter()

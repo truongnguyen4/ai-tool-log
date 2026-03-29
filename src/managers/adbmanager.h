@@ -50,10 +50,17 @@ public:
     void fetchPropertyDefinitions(const QString &deviceId);
     // Run `adb shell dumpsys <args>` asynchronously (args = service + optional package)
     void fetchDumpsys(const QString &deviceId, const QString &args);
+    // Run a raw adb command string asynchronously, e.g. "adb -s X shell cmd foo bar"
+    void runRawAdbCommand(const QString &command);
     // Fetch list of available dumpsys services via `adb shell dumpsys -l`
     void fetchDumpsysList(const QString &deviceId);
     // Run `adb shell cmd cradle_manager <args>` asynchronously
     void runCradleCommand(const QString &deviceId, const QStringList &args);
+
+    // Run `adb reverse tcp:<devicePort> tcp:<hostPort>` so the Android device
+    // can reach our SocketServer.  Fire-and-forget: errors are logged only.
+    void setupReversePort(const QString &deviceId, quint16 devicePort = 8080, quint16 hostPort = 5555);
+    void removeReversePort(const QString &deviceId, quint16 devicePort = 8080);
 
     // --- Async save operations (Issue #7) ---
     void saveSettingAsync(int row, const QString &deviceId,
@@ -90,6 +97,7 @@ signals:
     void propertyDefinitionsFetched(const QVector<PropertyDefinition> &propertyDefinitions);
     void dumpsysFetched(const QString &output);
     void dumpsysListFetched(const QStringList &services);
+    void rawAdbCommandFinished(const QString &output);
     void cradleCommandFinished(const QString &output, const QString &error);
 
     // Async save results
