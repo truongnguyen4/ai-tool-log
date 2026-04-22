@@ -19,6 +19,8 @@ qt_add_executable(ToolLogPro
     src/ui/mainwindow.ui
     src/ui/uimanager.cpp
     src/ui/uimanager.h
+    src/ui/toggleswitch.cpp
+    src/ui/toggleswitch.h
     src/ui/settingsdialog.cpp
     src/ui/settingsdialog.h
     src/ui/tooltips.h
@@ -33,6 +35,8 @@ qt_add_executable(ToolLogPro
     src/managers/adbmanager.cpp
     src/managers/adbmanager.h
     src/managers/adbcommand.h
+    src/managers/devicesmanager.cpp
+    src/managers/devicesmanager.h
     src/managers/filemanager.cpp
     src/managers/filemanager.h
     src/managers/filterhistorymanager.cpp

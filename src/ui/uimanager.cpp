@@ -1,6 +1,8 @@
 #include "uimanager.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "devicesmanager.h"
+#include "adbcommand.h"
 #include "threadtimelogconverter.h"
 #include "brieflogconverter.h"
 #include "propertydefinitionconverter.h"
@@ -22,6 +24,7 @@
 #include <QScrollBar>
 #include <QRegularExpression>
 #include <QDialog>
+#include <QFormLayout>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QCheckBox>
@@ -47,7 +50,18 @@
 #include <QInputDialog>
 #include <QListWidget>
 #include <QtConcurrent>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QScrollArea>
+#include <QProgressBar>
+#include <QGroupBox>
+#include <QFrame>
+#include <QGridLayout>
+#include <QDrag>
+#include <QMimeData>
 #include <algorithm>
+#include "toggleswitch.h"
 
 // Row-resize threshold: below this count every row is sized to content on each
 // resize pass; above it only the visible viewport is measured for performance.
@@ -85,6 +99,7 @@ void UiManager::initialize()
     setupTooltips();
     setupFilterHistory();
     setupSplittersAndMisc();
+    setupDevicesTab();
 
     // ── Wire up all signal/slot connections ───────────────────────────────────
     connectAdbManagerSignals();
@@ -477,6 +492,898 @@ void UiManager::setupSocketListener()
     }
     qDebug() << "UiManager: SocketServer started on port" << kHostPort;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECTION: Devices Tab
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Helper: build a DeviceInfo from an AdbDevice + its group assignment.
+static UiManager::DeviceInfo makeDeviceInfo(const AdbDevice &d, const QString &group)
+{
+    UiManager::DeviceInfo info;
+    info.serial = d.id;
+    info.name   = d.name;
+    info.group  = group;
+    info.online = d.isOnline;
+    return info;
+}
+
+void UiManager::setupDevicesTab()
+{
+    // Connect DevicesManager -> refresh the sidebar whenever anything changes.
+    connect(&DevicesManager::instance(), &DevicesManager::devicesOrGroupsChanged,
+            this, &UiManager::onDevicesOrGroupsChanged, Qt::UniqueConnection);
+
+    // Connect DevicesManager -> update dashboard when device details arrive.
+    connect(&DevicesManager::instance(), &DevicesManager::deviceDetailsFetched,
+            this, &UiManager::onDeviceDetailsFetched, Qt::UniqueConnection);
+
+    // Hide the "New Group" button (no longer used).
+    m_ui->devBtnAddGroup->hide();
+
+    // ── Quick-action button connections ──────────────────────────────────────
+    // Returns all target serials: either the single selected device,
+    // or all online devices in the selected group.
+    auto selectedSerials = [this]() -> QStringList {
+        // Return all checked devices that are currently online
+        if (!m_checkedDevices.isEmpty()) {
+            QStringList serials;
+            DevicesManager &dm = DevicesManager::instance();
+            const QList<AdbDevice> connected = dm.connectedDevices();
+            QSet<QString> onlineIds;
+            for (const AdbDevice &d : connected)
+                if (d.isOnline) onlineIds.insert(d.id);
+            for (const QString &id : m_checkedDevices)
+                if (onlineIds.contains(id)) serials.append(id);
+            return serials;
+        }
+        // Fallback: single selected device
+        if (!m_selectedDeviceRow) return {};
+        const QString s = m_deviceRowMap.value(m_selectedDeviceRow).serial;
+        return s.isEmpty() ? QStringList{} : QStringList{s};
+    };
+
+    auto selectedSerial = [this]() -> QString {
+        if (!m_selectedDeviceRow) return {};
+        return m_deviceRowMap.value(m_selectedDeviceRow).serial;
+    };
+
+    // Reboot device
+    connect(m_ui->devBtnReboot, &QPushButton::clicked, this, [=]() {
+        for (const QString &s : selectedSerials())
+            DevicesManager::instance().runAdbCommand(AdbCommand::rebootDevice(s));
+    });
+
+    // Reboot sideload
+    connect(m_ui->devBtnForceStop, &QPushButton::clicked, this, [=]() {
+        for (const QString &s : selectedSerials())
+            DevicesManager::instance().runAdbCommand(AdbCommand::rebootSideload(s));
+    });
+
+    // Reboot bootloader
+    connect(m_ui->devBtnClearCache, &QPushButton::clicked, this, [=]() {
+        for (const QString &s : selectedSerials())
+            DevicesManager::instance().runAdbCommand(AdbCommand::rebootBootloader(s));
+    });
+
+    // Volume up
+    connect(m_ui->devBtnSyslog, &QPushButton::clicked, this, [=]() {
+        for (const QString &s : selectedSerials())
+            DevicesManager::instance().runAdbCommand(AdbCommand::volumeUp(s));
+    });
+
+    // Volume down
+    connect(m_ui->devBtnUnlock, &QPushButton::clicked, this, [=]() {
+        for (const QString &s : selectedSerials())
+            DevicesManager::instance().runAdbCommand(AdbCommand::volumeDown(s));
+    });
+
+    // Connect WiFi (uses static input fields in devInfoGrid)
+    {
+        auto &mgr = DevicesManager::instance();
+        m_ui->devWifiSsidEdit->setText(mgr.savedWifiSsid());
+        m_ui->devWifiPassEdit->setText(mgr.savedWifiPassword());
+    }
+    connect(m_ui->devBtnConnectWifi, &QPushButton::clicked, this, [this, selectedSerials]() {
+        const QStringList serials = selectedSerials();
+        if (serials.isEmpty()) return;
+
+        const QString ssid = m_ui->devWifiSsidEdit->text().trimmed();
+        const QString pass = m_ui->devWifiPassEdit->text();
+        if (ssid.isEmpty()) return;
+
+        auto &mgr = DevicesManager::instance();
+        mgr.saveWifiCredentials(ssid, pass);
+        for (const QString &serial : serials)
+            mgr.runAdbCommand(AdbCommand::connectWifi(serial, ssid, pass));
+    });
+
+    // Browse firmware path
+    connect(m_ui->devBtnBrowseFirmware, &QPushButton::clicked, this, [this]() {
+        const QString dir = QFileDialog::getExistingDirectory(
+            m_mainWindow, tr("Select Firmware Directory"),
+            m_ui->devFirmwarePathEdit->text().isEmpty()
+                ? QDir::homePath()
+                : m_ui->devFirmwarePathEdit->text());
+        if (!dir.isEmpty())
+            m_ui->devFirmwarePathEdit->setText(dir);
+    });
+
+    // All action buttons start disabled (enabled when devices are checked)
+    for (QPushButton *btn : {m_ui->devBtnReboot,
+                              m_ui->devBtnSyslog, m_ui->devBtnClearCache,
+                              m_ui->devBtnUnlock,
+                              m_ui->devBtnForceStop, m_ui->devBtnAdbWireless,
+                              m_ui->devBtnAdbRoot, m_ui->devBtnAdbUnroot,
+                              m_ui->devBtnRebootFastboot,
+                              m_ui->devBtnPowerKey,
+                              m_ui->devBtnConnectWifi,
+                              m_ui->devBtnFlash,
+                              m_ui->devBtnDeployConfig})
+        btn->setEnabled(!m_checkedDevices.isEmpty());
+
+    // Flash firmware: reboot bootloader + run download.sh with progress dialog
+    connect(m_ui->devBtnFlash, &QPushButton::clicked, this, [this, selectedSerials]() {
+        const QStringList serials = selectedSerials();
+        if (serials.isEmpty()) {
+            QMessageBox::warning(m_mainWindow, tr("No Device"),
+                                 tr("Please select a device first."));
+            return;
+        }
+
+        const QString firmwarePath = m_ui->devFirmwarePathEdit->text().trimmed();
+        if (firmwarePath.isEmpty()) {
+            QMessageBox::warning(m_mainWindow, tr("No Firmware Path"),
+                                 tr("Please select a firmware directory first."));
+            return;
+        }
+
+        const QFileInfo scriptInfo(firmwarePath + "/download.sh");
+        if (!scriptInfo.exists()) {
+            QMessageBox::warning(m_mainWindow, tr("Script Not Found"),
+                                 tr("download.sh not found in the firmware directory."));
+            return;
+        }
+
+        // Create progress dialog
+        QDialog *dlg = new QDialog(m_mainWindow);
+        dlg->setWindowTitle(tr("Flash Firmware"));
+        dlg->resize(700, 500);
+        dlg->setAttribute(Qt::WA_DeleteOnClose);
+
+        QVBoxLayout *layout = new QVBoxLayout(dlg);
+        layout->setContentsMargins(12, 12, 12, 12);
+        layout->setSpacing(8);
+
+        QLabel *statusLabel = new QLabel(tr("Flashing %1 device(s)...").arg(serials.size()));
+        statusLabel->setStyleSheet("color: #cccccc; font-weight: bold; font-size: 13px;");
+        layout->addWidget(statusLabel);
+
+        QTextEdit *outputView = new QTextEdit();
+        outputView->setReadOnly(true);
+        outputView->setStyleSheet(
+            "QTextEdit { background-color: #1e1e1e; color: #d4d4d4; border: 1px solid #3e3e42;"
+            " border-radius: 4px; font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; }");
+        layout->addWidget(outputView, 1);
+
+        QPushButton *closeBtn = new QPushButton(tr("Close"));
+        closeBtn->setEnabled(false);
+        closeBtn->setStyleSheet(
+            "QPushButton { background-color: #37373d; color: #cccccc; border: 1px solid #3e3e42;"
+            " border-radius: 4px; padding: 8px 24px; font-weight: bold; }"
+            "QPushButton:hover { background-color: #3e3e50; border-color: #007acc; }"
+            "QPushButton:disabled { color: #5a5a5a; }");
+        layout->addWidget(closeBtn, 0, Qt::AlignRight);
+
+        connect(closeBtn, &QPushButton::clicked, dlg, &QDialog::accept);
+
+        dlg->show();
+
+        // Track completion of all device processes
+        auto remaining = new int(serials.size());
+        auto hasErrors = new bool(false);
+
+        // Launch a separate process per device in parallel
+        for (const QString &serial : serials) {
+            const QString cmd = QString("export ANDROID_SERIAL=%1 ; adb -s %1 reboot bootloader && ./download.sh").arg(serial);
+            outputView->append(QStringLiteral("[%1] $ %2\n").arg(serial, cmd));
+
+            QProcess *proc = new QProcess(dlg);
+            proc->setWorkingDirectory(firmwarePath);
+            proc->setProcessChannelMode(QProcess::MergedChannels);
+
+            connect(proc, &QProcess::readyRead, dlg, [proc, outputView, serial]() {
+                const QString text = QString::fromUtf8(proc->readAll());
+                const QStringList lines = text.split('\n');
+                for (const QString &line : lines) {
+                    if (!line.isEmpty()) {
+                        outputView->moveCursor(QTextCursor::End);
+                        outputView->insertPlainText(QStringLiteral("[%1] %2\n").arg(serial, line));
+                    }
+                }
+                outputView->moveCursor(QTextCursor::End);
+            });
+
+            connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+                    dlg, [serial, statusLabel, outputView, closeBtn, remaining, hasErrors]
+                    (int exitCode, QProcess::ExitStatus status) {
+                const bool ok = (status == QProcess::NormalExit && exitCode == 0);
+                outputView->append(QStringLiteral("[%1] --- Finished (exit code: %2) ---\n")
+                                       .arg(serial).arg(exitCode));
+                if (!ok)
+                    *hasErrors = true;
+
+                --(*remaining);
+                if (*remaining <= 0) {
+                    const bool allOk = !(*hasErrors);
+                    statusLabel->setText(allOk ? QStringLiteral("All devices flashed successfully.")
+                                               : QStringLiteral("Flashing completed with errors on some devices."));
+                    statusLabel->setStyleSheet(
+                        allOk ? "color: #34d399; font-weight: bold; font-size: 13px;"
+                              : "color: #f44336; font-weight: bold; font-size: 13px;");
+                    closeBtn->setEnabled(true);
+                    delete remaining;
+                    delete hasErrors;
+                }
+            });
+
+            connect(proc, &QProcess::errorOccurred, dlg,
+                    [serial, statusLabel, outputView, closeBtn, remaining, hasErrors](QProcess::ProcessError error) {
+                Q_UNUSED(error);
+                outputView->append(QStringLiteral("[%1] --- Failed to start command ---\n").arg(serial));
+                *hasErrors = true;
+
+                --(*remaining);
+                if (*remaining <= 0) {
+                    statusLabel->setText(QStringLiteral("Flashing completed with errors on some devices."));
+                    statusLabel->setStyleSheet("color: #f44336; font-weight: bold; font-size: 13px;");
+                    closeBtn->setEnabled(true);
+                    delete remaining;
+                    delete hasErrors;
+                }
+            });
+
+            proc->start("/bin/bash", QStringList() << "-c" << cmd);
+        }
+    });
+
+    // ADB Wireless connect
+    connect(m_ui->devBtnAdbWireless, &QPushButton::clicked, this, [=]() {
+        for (const QString &s : selectedSerials())
+            DevicesManager::instance().enableAdbWireless(s);
+    });
+
+    // ADB root
+    connect(m_ui->devBtnAdbRoot, &QPushButton::clicked, this, [=]() {
+        for (const QString &s : selectedSerials())
+            DevicesManager::instance().runAdbCommand(AdbCommand::root(s));
+    });
+
+    // ADB unroot
+    connect(m_ui->devBtnAdbUnroot, &QPushButton::clicked, this, [=]() {
+        for (const QString &s : selectedSerials())
+            DevicesManager::instance().runAdbCommand(AdbCommand::unroot(s));
+    });
+
+    // Reboot fastboot
+    connect(m_ui->devBtnRebootFastboot, &QPushButton::clicked, this, [=]() {
+        for (const QString &s : selectedSerials())
+            DevicesManager::instance().runAdbCommand(AdbCommand::rebootFastboot(s));
+    });
+
+    // Power key input
+    connect(m_ui->devBtnPowerKey, &QPushButton::clicked, this, [=]() {
+        for (const QString &s : selectedSerials())
+            DevicesManager::instance().runAdbCommand(AdbCommand::powerKey(s));
+    });
+
+    // ── Configuration tab: toggle switches are defined in mainwindow.ui ─────
+    // devStayAwakeToggle and devAllowMockToggle are ToggleSwitch widgets.
+
+    // Helper: build configuration JSON from current toggle states
+    auto buildConfigJson = [this]() -> QJsonObject {
+        QJsonObject root;
+        QJsonObject deviceSettings;
+        deviceSettings["stay_awake"] = m_ui->devStayAwakeToggle->isChecked();
+        deviceSettings["allow_mock_modem"] = m_ui->devAllowMockToggle->isChecked();
+        deviceSettings["verifier_verify_adb_installs"] = m_ui->devVerifyAdbToggle->isChecked();
+        deviceSettings["system_locale"] = m_ui->devLocaleEdit->text().trimmed();
+        deviceSettings["time_12_24"] = m_ui->devTimeFormatToggle->isChecked(); // true = 24h
+        root["device_settings"] = deviceSettings;
+        QJsonObject displaySettings;
+        root["display"] = displaySettings;
+        return root;
+    };
+
+    // Helper: apply configuration JSON to toggle switches
+    auto applyConfigJson = [this](const QJsonObject &root) {
+        if (root.contains("device_settings")) {
+            QJsonObject ds = root["device_settings"].toObject();
+            if (ds.contains("stay_awake"))
+                m_ui->devStayAwakeToggle->setChecked(ds["stay_awake"].toBool());
+            if (ds.contains("allow_mock_modem"))
+                m_ui->devAllowMockToggle->setChecked(ds["allow_mock_modem"].toBool());
+            // Backward compat: old presets may have allow_mock_locations
+            if (ds.contains("allow_mock_locations") && !ds.contains("allow_mock_modem"))
+                m_ui->devAllowMockToggle->setChecked(ds["allow_mock_locations"].toBool());
+            if (ds.contains("verifier_verify_adb_installs"))
+                m_ui->devVerifyAdbToggle->setChecked(ds["verifier_verify_adb_installs"].toBool());
+            if (ds.contains("system_locale"))
+                m_ui->devLocaleEdit->setText(ds["system_locale"].toString());
+            if (ds.contains("time_12_24"))
+                m_ui->devTimeFormatToggle->setChecked(ds["time_12_24"].toBool());
+        }
+    };
+
+    // ── Auto-update JSON view when config changes ────────────────────────
+    auto updateJsonView = [this, buildConfigJson]() {
+        QJsonDocument doc(buildConfigJson());
+        m_ui->devJsonView->setPlainText(
+            QString::fromUtf8(doc.toJson(QJsonDocument::Indented)));
+    };
+
+    // Connect all toggles
+    connect(m_ui->devStayAwakeToggle, &ToggleSwitch::toggled, this, updateJsonView);
+    connect(m_ui->devAllowMockToggle, &ToggleSwitch::toggled, this, updateJsonView);
+    connect(m_ui->devVerifyAdbToggle, &ToggleSwitch::toggled, this, updateJsonView);
+    connect(m_ui->devTimeFormatToggle, &ToggleSwitch::toggled, this, updateJsonView);
+
+    // Connect locale input on Enter and on text change
+    connect(m_ui->devLocaleEdit, &QLineEdit::returnPressed, this, updateJsonView);
+    connect(m_ui->devLocaleEdit, &QLineEdit::textChanged, this, updateJsonView);
+
+    // Generate initial JSON view
+    updateJsonView();
+
+    // ── Export JSON button ──────────────────────────────────────────────────
+    connect(m_ui->devBtnExportJson, &QPushButton::clicked, this, [this, buildConfigJson]() {
+        const QString filePath = QFileDialog::getSaveFileName(
+            m_mainWindow, tr("Export Device Configuration"),
+            QDir::homePath() + "/device_config.json",
+            tr("JSON Files (*.json)"));
+        if (filePath.isEmpty()) return;
+
+        QJsonDocument doc(buildConfigJson());
+        QFile file(filePath);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QMessageBox::warning(m_mainWindow, tr("Export Failed"),
+                                 tr("Could not write to file:\n%1").arg(filePath));
+            return;
+        }
+        file.write(doc.toJson(QJsonDocument::Indented));
+        file.close();
+        QMessageBox::information(m_mainWindow, tr("Export Successful"),
+                                 tr("Configuration exported to:\n%1").arg(filePath));
+    });
+
+    // ── Import JSON button ──────────────────────────────────────────────────
+    connect(m_ui->devBtnImportJson, &QPushButton::clicked, this, [this, applyConfigJson]() {
+        const QString filePath = QFileDialog::getOpenFileName(
+            m_mainWindow, tr("Import Device Configuration"),
+            QDir::homePath(),
+            tr("JSON Files (*.json)"));
+        if (filePath.isEmpty()) return;
+
+        QFile file(filePath);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QMessageBox::warning(m_mainWindow, tr("Import Failed"),
+                                 tr("Could not open file:\n%1").arg(filePath));
+            return;
+        }
+        QByteArray data = file.readAll();
+        file.close();
+
+        QJsonParseError parseError;
+        QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+        if (doc.isNull()) {
+            QMessageBox::warning(m_mainWindow, tr("Import Failed"),
+                                 tr("Invalid JSON:\n%1").arg(parseError.errorString()));
+            return;
+        }
+
+        applyConfigJson(doc.object());
+
+        // Update the JSON preview
+        m_ui->devJsonView->setPlainText(
+            QString::fromUtf8(doc.toJson(QJsonDocument::Indented)));
+
+        QMessageBox::information(m_mainWindow, tr("Import Successful"),
+                                 tr("Configuration loaded from:\n%1").arg(filePath));
+    });
+
+    // ── Deploy to Device button ─────────────────────────────────────────────
+    connect(m_ui->devBtnDeployConfig, &QPushButton::clicked, this, [this, selectedSerials, buildConfigJson]() {
+        const QStringList serials = selectedSerials();
+        if (serials.isEmpty()) {
+            QMessageBox::warning(m_mainWindow, tr("No Device"),
+                                 tr("Please select a device or group first."));
+            return;
+        }
+
+        // Read config from JSON view if available, otherwise from toggles
+        QJsonObject config;
+        const QString jsonText = m_ui->devJsonView->toPlainText().trimmed();
+        if (!jsonText.isEmpty()) {
+            QJsonDocument doc = QJsonDocument::fromJson(jsonText.toUtf8());
+            if (!doc.isNull() && doc.isObject())
+                config = doc.object();
+        }
+        if (config.isEmpty())
+            config = buildConfigJson();
+
+        QJsonObject ds = config["device_settings"].toObject();
+
+        int deployed = 0;
+        auto &mgr = DevicesManager::instance();
+        for (const QString &serial : serials) {
+            if (ds.contains("stay_awake"))
+                mgr.runAdbCommand(AdbCommand::stayAwake(serial, ds["stay_awake"].toBool()));
+            if (ds.contains("allow_mock_modem"))
+                mgr.runAdbCommand(AdbCommand::setMockModem(serial, ds["allow_mock_modem"].toBool()));
+            if (ds.contains("verifier_verify_adb_installs"))
+                mgr.runAdbCommand(AdbCommand::setVerifyAdbInstalls(serial, ds["verifier_verify_adb_installs"].toBool()));
+            if (ds.contains("system_locale") && !ds["system_locale"].toString().isEmpty())
+                mgr.runAdbCommand(AdbCommand::setSystemLocale(serial, ds["system_locale"].toString()));
+            if (ds.contains("time_12_24"))
+                mgr.runAdbCommand(AdbCommand::setTimeFormat(serial, ds["time_12_24"].toBool()));
+            ++deployed;
+        }
+
+        QMessageBox::information(m_mainWindow, tr("Deploy Successful"),
+                                 tr("Configuration deployed to %1 device(s).").arg(deployed));
+    });
+
+    // ── Preset management ───────────────────────────────────────────────────
+
+    // Save preset — shows input dialog to type a name
+    connect(m_ui->devBtnSavePreset, &QPushButton::clicked, this,
+            [this, buildConfigJson]() {
+        bool ok = false;
+        const QString name = QInputDialog::getText(
+            m_mainWindow,
+            tr("Save Configuration Preset"),
+            tr("Enter a name for this preset:"),
+            QLineEdit::Normal,
+            QString(),
+            &ok).trimmed();
+        if (!ok || name.isEmpty()) return;
+
+        QJsonDocument doc(buildConfigJson());
+        DevicesManager::instance().saveConfigPreset(name, doc.toJson(QJsonDocument::Compact));
+        QMessageBox::information(m_mainWindow, tr("Save Preset"),
+                                 tr("Preset \"%1\" saved successfully.").arg(name));
+    });
+
+    // Load preset — shows a dialog with a list + delete option
+    connect(m_ui->devBtnLoadPreset, &QPushButton::clicked, this,
+            [this, applyConfigJson]() {
+        const QStringList names = DevicesManager::instance().listConfigPresets();
+        if (names.isEmpty()) {
+            QMessageBox::information(m_mainWindow, tr("Load Preset"),
+                                     tr("No saved presets found."));
+            return;
+        }
+
+        QDialog dialog(m_mainWindow);
+        dialog.setWindowTitle(tr("Load Configuration Preset"));
+        dialog.setMinimumSize(360, 300);
+
+        auto *layout     = new QVBoxLayout(&dialog);
+        auto *label      = new QLabel(tr("Select a preset to load:"), &dialog);
+        auto *listWidget = new QListWidget(&dialog);
+        listWidget->addItems(names);
+        listWidget->setCurrentRow(0);
+
+        auto *btnBox = new QDialogButtonBox(
+            QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+
+        auto *btnDelete = new QPushButton(tr("Delete"), &dialog);
+        btnBox->addButton(btnDelete, QDialogButtonBox::ResetRole);
+
+        layout->addWidget(label);
+        layout->addWidget(listWidget);
+        layout->addWidget(btnBox);
+
+        connect(btnBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+        connect(btnBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+        connect(btnDelete, &QPushButton::clicked, &dialog, [&]() {
+            QListWidgetItem *item = listWidget->currentItem();
+            if (!item) return;
+            const QString n = item->text();
+            const auto reply = QMessageBox::question(
+                &dialog, tr("Delete Preset"),
+                tr("Delete \"%1\"?").arg(n),
+                QMessageBox::Yes | QMessageBox::No);
+            if (reply != QMessageBox::Yes) return;
+            DevicesManager::instance().deleteConfigPreset(n);
+            delete listWidget->takeItem(listWidget->row(item));
+        });
+        connect(listWidget, &QListWidget::doubleClicked, &dialog, &QDialog::accept);
+
+        if (dialog.exec() != QDialog::Accepted) return;
+
+        QListWidgetItem *selected = listWidget->currentItem();
+        if (!selected) return;
+
+        const QByteArray data = DevicesManager::instance().loadConfigPreset(selected->text());
+        if (data.isEmpty()) return;
+
+        QJsonDocument doc = QJsonDocument::fromJson(data);
+        if (doc.isNull()) return;
+
+        applyConfigJson(doc.object());
+        m_ui->devJsonView->setPlainText(
+            QString::fromUtf8(doc.toJson(QJsonDocument::Indented)));
+    });
+
+    refreshDevicesTab();
+}
+
+void UiManager::refreshDevicesTab()
+{
+    const QString colText   = "#cccccc";
+    const QString colMuted  = "#8a8a8a";
+    const QString colAccent = "#007acc";
+    const QString colGreen  = "#34d399";
+    const QString colBorder = "#3e3e42";
+
+    // ── Device row factory (with checkbox) ────────────────────────────────────
+    auto makeDeviceRow = [&](const DeviceInfo &info, bool selected, bool checked) -> QWidget* {
+        const QString statusColor = info.online ? colGreen : colMuted;
+        const QString dotChar     = info.online ? QStringLiteral("●") : QStringLiteral("○");
+
+        QWidget *w = new QWidget();
+        w->setObjectName(QStringLiteral("devRow_") + info.serial);
+        const QString rowStyle = selected
+            ? QString("QWidget#devRow_%1 { background-color: #4a4a52; border-left: 2px solid %2; }")
+                  .arg(info.serial, colAccent)
+            : QString("QWidget#devRow_%1 { background-color: transparent; border-left: 2px solid transparent; }")
+                  .arg(info.serial);
+        w->setStyleSheet(rowStyle);
+        w->setCursor(Qt::PointingHandCursor);
+
+        QHBoxLayout *hl = new QHBoxLayout(w);
+        hl->setContentsMargins(selected ? 12 : 14, 8, 12, 8);
+        hl->setSpacing(10);
+
+        // Checkbox
+        QCheckBox *cb = new QCheckBox();
+        cb->setObjectName(QStringLiteral("devCheck_") + info.serial);
+        cb->setChecked(checked);
+        cb->setFixedSize(24, 24);
+        cb->setStyleSheet(
+            "QCheckBox { spacing: 0px; }"
+            "QCheckBox::indicator {"
+            "  width: 18px; height: 18px;"
+            "  border: 2px solid #5a5a5e;"
+            "  border-radius: 3px;"
+            "  background: transparent;"
+            "}"
+            "QCheckBox::indicator:checked {"
+            "  background-color: #007acc;"
+            "  border-color: #007acc;"
+            "}"
+            "QCheckBox::indicator:hover {"
+            "  border-color: #007acc;"
+            "}"
+        );
+        connect(cb, &QCheckBox::toggled, this, [this, serial = info.serial](bool on) {
+            if (on)
+                m_checkedDevices.insert(serial);
+            else
+                m_checkedDevices.remove(serial);
+            refreshCheckedDevicesList();
+        });
+        hl->addWidget(cb);
+
+        QLabel *dot = new QLabel(dotChar);
+        dot->setStyleSheet(QString("color: %1;").arg(statusColor));
+        dot->setFixedWidth(12);
+
+        QWidget *nameW = new QWidget();
+        nameW->setStyleSheet("background: transparent;");
+        QVBoxLayout *vl = new QVBoxLayout(nameW);
+        vl->setContentsMargins(0, 0, 0, 0);
+        vl->setSpacing(1);
+
+        QLabel *nameLbl = new QLabel(info.name);
+        nameLbl->setStyleSheet(
+            QString("color: %1; font-weight: %2;")
+            .arg(colText, selected ? "bold" : "normal"));
+
+        QLabel *serialLbl = new QLabel(info.serial);
+        serialLbl->setStyleSheet(
+            QString("color: %1;").arg(colMuted));
+
+        vl->addWidget(nameLbl);
+        vl->addWidget(serialLbl);
+
+        hl->addWidget(dot);
+        hl->addWidget(nameW, 1);
+
+        // Register row for click handling
+        m_deviceRowMap[w] = info;
+        w->installEventFilter(m_mainWindow);
+        return w;
+    };
+
+    // ── Clear current list ────────────────────────────────────────────────────
+    QVBoxLayout *devListVLayout = m_ui->devListVLayout;
+    while (devListVLayout->count() > 0) {
+        QLayoutItem *item = devListVLayout->takeAt(0);
+        if (QWidget *cw = item->widget()) cw->deleteLater();
+        delete item;
+    }
+
+    // Remember previously selected device serial so we can restore it.
+    const QString prevSerial = m_selectedDeviceRow
+        ? m_deviceRowMap.value(m_selectedDeviceRow).serial
+        : QString();
+    m_deviceRowMap.clear();
+    m_selectedDeviceRow = nullptr;
+
+    // ── Populate device list ──────────────────────────────────────────────────
+    DevicesManager &dm = DevicesManager::instance();
+    const QList<AdbDevice> connected = dm.connectedDevices();
+
+    QWidget *firstRow     = nullptr;
+    QWidget *restoredRow  = nullptr;
+
+    if (connected.isEmpty()) {
+        QLabel *placeholder = new QLabel(tr("No devices connected.\nConnect a device via USB or WiFi."));
+        placeholder->setAlignment(Qt::AlignCenter);
+        placeholder->setStyleSheet(QString("color: %1;").arg(colMuted));
+        devListVLayout->addWidget(placeholder);
+        devListVLayout->addStretch();
+        updateDeviceDetails({});
+        return;
+    }
+
+    // Remove checked serials that are no longer connected
+    QSet<QString> connectedIds;
+    for (const AdbDevice &d : connected)
+        connectedIds.insert(d.id);
+    m_checkedDevices.intersect(connectedIds);
+
+    for (const AdbDevice &d : connected) {
+        const DeviceInfo info = makeDeviceInfo(d, QString());
+        const bool selected = (!prevSerial.isEmpty() && d.id == prevSerial);
+        const bool checked  = m_checkedDevices.contains(d.id);
+        QWidget *row = makeDeviceRow(info, selected, checked);
+        devListVLayout->addWidget(row);
+        if (!firstRow)   firstRow   = row;
+        if (!prevSerial.isEmpty() && d.id == prevSerial)
+            restoredRow = row;
+    }
+
+    devListVLayout->addStretch();
+
+    // ── Restore / initial selection ───────────────────────────────────────────
+    if (restoredRow) {
+        m_selectedDeviceRow = restoredRow;
+        updateDeviceDetails(m_deviceRowMap[restoredRow]);
+    } else {
+        // No previously selected device — show default empty state
+        updateDeviceDetails({});
+    }
+
+    // ── Update the checked devices list in the right panel ───────────────────
+    refreshCheckedDevicesList();
+}
+
+void UiManager::onDevicesOrGroupsChanged()
+{
+    refreshDevicesTab();
+}
+
+void UiManager::selectDeviceRow(QWidget *row, const DeviceInfo &info)
+{
+    const QString colAccent = "#007acc";
+
+    // Deselect previous
+    if (m_selectedDeviceRow && m_selectedDeviceRow != row) {
+        const QString prevName = m_selectedDeviceRow->objectName();
+        m_selectedDeviceRow->setStyleSheet(
+            QString("QWidget#%1 { background-color: transparent; border-left: 2px solid transparent; }")
+            .arg(prevName));
+        if (auto *hl = qobject_cast<QHBoxLayout*>(m_selectedDeviceRow->layout())) {
+            for (int i = 0; i < hl->count(); ++i) {
+                if (auto *nameW = qobject_cast<QWidget*>(hl->itemAt(i)->widget())) {
+                    if (nameW->layout()) {
+                        if (auto *lbl = qobject_cast<QLabel*>(nameW->layout()->itemAt(0)->widget()))
+                            lbl->setStyleSheet("color: #cccccc; font-weight: normal;");
+                    }
+                }
+            }
+        }
+    }
+
+    // Select new row
+    m_selectedDeviceRow = row;
+    const QString rowName = row->objectName();
+    row->setStyleSheet(
+        QString("QWidget#%1 { background-color: #4a4a52; border-left: 2px solid %2; }")
+        .arg(rowName, colAccent));
+    row->layout()->setContentsMargins(12, 8, 12, 8);
+
+    updateDeviceDetails(info);
+}
+
+// ---------------------------------------------------------------------------
+// Refresh the checked devices list in the right panel (SYSTEM INFORMATION area)
+// ---------------------------------------------------------------------------
+void UiManager::refreshCheckedDevicesList()
+{
+    const QString colText   = "#cccccc";
+    const QString colMuted  = "#8a8a8a";
+    const QString colGreen  = "#34d399";
+    const QString colBorder = "#3e3e42";
+    const QString colAccent = "#007acc";
+
+    QVBoxLayout *listLayout = m_ui->devDeviceListVLayout;
+    while (listLayout->count() > 0) {
+        QLayoutItem *item = listLayout->takeAt(0);
+        if (QWidget *w = item->widget()) w->deleteLater();
+        delete item;
+    }
+
+    if (m_checkedDevices.isEmpty()) {
+        QLabel *empty = new QLabel(tr("No devices selected.\nTick checkboxes in the sidebar to select devices."));
+        empty->setAlignment(Qt::AlignCenter);
+        empty->setWordWrap(true);
+        empty->setStyleSheet(
+            QString("color: %1; font-style: italic;"
+                    " background: transparent; border: none;").arg(colMuted));
+        listLayout->addWidget(empty);
+
+        // Disable all action buttons when no devices are checked
+        for (QPushButton *btn : {m_ui->devBtnReboot,
+                                  m_ui->devBtnSyslog, m_ui->devBtnClearCache,
+                                  m_ui->devBtnUnlock,
+                                  m_ui->devBtnForceStop, m_ui->devBtnAdbWireless,
+                                  m_ui->devBtnAdbRoot, m_ui->devBtnAdbUnroot,
+                                  m_ui->devBtnRebootFastboot,
+                                  m_ui->devBtnPowerKey,
+                                  m_ui->devBtnConnectWifi,
+                                  m_ui->devBtnFlash,
+                                  m_ui->devBtnDeployConfig})
+            btn->setEnabled(false);
+        return;
+    }
+
+    DevicesManager &dm = DevicesManager::instance();
+    const QList<AdbDevice> connected = dm.connectedDevices();
+    QMap<QString, AdbDevice> deviceById;
+    for (const AdbDevice &d : connected)
+        deviceById.insert(d.id, d);
+
+    for (const QString &id : m_checkedDevices) {
+        const bool online = deviceById.contains(id) && deviceById[id].isOnline;
+        const QString name = deviceById.contains(id) ? deviceById[id].name : id;
+        const QString statusColor = online ? colGreen : colMuted;
+        const QString dotChar     = online ? QStringLiteral("●") : QStringLiteral("○");
+
+        QWidget *rowW = new QWidget();
+        rowW->setObjectName(QStringLiteral("devSelectedRow_") + id);
+        rowW->setStyleSheet(
+            QString("background: transparent; border-bottom: 1px solid %1;").arg(colBorder));
+        rowW->setCursor(Qt::PointingHandCursor);
+        QHBoxLayout *rl = new QHBoxLayout(rowW);
+        rl->setContentsMargins(0, 8, 0, 8);
+        rl->setSpacing(10);
+
+        QLabel *dot = new QLabel(dotChar);
+        dot->setStyleSheet(QString("color: %1; background: transparent; border: none;").arg(statusColor));
+        dot->setFixedWidth(14);
+
+        QLabel *nameLbl = new QLabel(name);
+        nameLbl->setStyleSheet(
+            QString("color: %1; background: transparent; border: none;").arg(colText));
+
+        QLabel *serialLbl = new QLabel(id);
+        serialLbl->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        serialLbl->setStyleSheet(
+            QString("color: %1; background: transparent; border: none;").arg(colMuted));
+
+        QLabel *statusLbl = new QLabel(online ? tr("Online") : tr("Offline"));
+        statusLbl->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        statusLbl->setStyleSheet(
+            QString("color: %1; background: transparent; border: none;").arg(statusColor));
+        statusLbl->setFixedWidth(50);
+
+        rl->addWidget(dot);
+        rl->addWidget(nameLbl, 1);
+        rl->addWidget(serialLbl, 1);
+        rl->addWidget(statusLbl);
+
+        // Click on this row to show device details
+        rowW->installEventFilter(m_mainWindow);
+        listLayout->addWidget(rowW);
+    }
+
+    // Enable/disable all action buttons based on checked devices
+    const bool hasChecked = !m_checkedDevices.isEmpty();
+    for (QPushButton *btn : {m_ui->devBtnReboot,
+                              m_ui->devBtnSyslog, m_ui->devBtnClearCache,
+                              m_ui->devBtnUnlock,
+                              m_ui->devBtnForceStop, m_ui->devBtnAdbWireless,
+                              m_ui->devBtnAdbRoot, m_ui->devBtnAdbUnroot,
+                              m_ui->devBtnRebootFastboot,
+                              m_ui->devBtnPowerKey,
+                              m_ui->devBtnConnectWifi,
+                              m_ui->devBtnFlash,
+                              m_ui->devBtnDeployConfig})
+        btn->setEnabled(hasChecked);
+}
+
+void UiManager::updateDeviceDetails(const DeviceInfo &info)
+{
+    const bool online = info.online;
+    const bool hasDevice = !info.serial.isEmpty();
+
+    // ── Header bar ──────────────────────────────────────────────────────────
+    m_ui->devNameLabel->setText(hasDevice ? info.name : tr("Select a device"));
+
+    // ── Dashboard info ────────────────────────────────────────────────────────
+    m_ui->devBatteryValue->setText(online ? tr("...") : tr("--"));
+    m_ui->devIpValue->setText(online ? tr("...") : tr("--"));
+    m_ui->devNetworkValue->setText(online ? tr("...") : tr("--"));
+
+    // Kick off async fetch for battery + IP
+    if (online && !info.serial.isEmpty())
+        DevicesManager::instance().fetchDeviceDetails(info.serial);
+
+    // ── Action buttons: disable when offline OR no checked devices ────────────
+    const bool canAct = online && !m_checkedDevices.isEmpty();
+    for (QPushButton *btn : {m_ui->devBtnReboot,
+                              m_ui->devBtnSyslog, m_ui->devBtnClearCache,
+                              m_ui->devBtnUnlock,
+                              m_ui->devBtnForceStop, m_ui->devBtnAdbWireless,
+                              m_ui->devBtnAdbRoot, m_ui->devBtnAdbUnroot,
+                              m_ui->devBtnRebootFastboot,
+                              m_ui->devBtnPowerKey,
+                              m_ui->devBtnConnectWifi,
+                              m_ui->devBtnFlash,
+                              m_ui->devBtnDeployConfig
+                            })
+        btn->setEnabled(canAct);
+
+    // ── System information: reset all values ────────────────────────────────
+    const QString placeholder = online ? tr("...") : tr("--");
+    m_ui->devSiManufacturerValue->setText(placeholder);
+    m_ui->devSiModelValue->setText(placeholder);
+    m_ui->devSiAndroidVersionValue->setText(placeholder);
+    m_ui->devSiSdkVersionValue->setText(placeholder);
+    m_ui->devSiBuildNumberValue->setText(placeholder);
+    m_ui->devSiBuildFingerprintValue->setText(placeholder);
+    m_ui->devSiSecurityPatchValue->setText(placeholder);
+    m_ui->devSiKernelVersionValue->setText(placeholder);
+    m_ui->devSiAbiValue->setText(placeholder);
+}
+
+void UiManager::onDeviceDetailsFetched(const DeviceDetails &details)
+{
+    // Only update if the currently selected device matches.
+    if (!m_selectedDeviceRow) return;
+    const DeviceInfo &sel = m_deviceRowMap.value(m_selectedDeviceRow);
+    if (sel.serial != details.serial) return;
+
+    m_ui->devBatteryValue->setText(details.batteryLevel);
+    m_ui->devIpValue->setText(details.ipAddress);
+    m_ui->devNetworkValue->setText(details.networkStatus);
+
+    // ── System information: update static labels ─────────────────────────────
+    m_ui->devSiManufacturerValue->setText(details.manufacturer);
+    m_ui->devSiModelValue->setText(details.model);
+    m_ui->devSiAndroidVersionValue->setText(details.androidVersion);
+    m_ui->devSiSdkVersionValue->setText(details.sdkVersion);
+    m_ui->devSiBuildNumberValue->setText(details.buildNumber);
+    m_ui->devSiBuildFingerprintValue->setText(details.buildFingerprint);
+    m_ui->devSiSecurityPatchValue->setText(details.securityPatch);
+    m_ui->devSiKernelVersionValue->setText(details.kernelVersion);
+    m_ui->devSiAbiValue->setText(details.abi);
+}
+
 
 void UiManager::setupTooltips()
 {
@@ -952,10 +1859,16 @@ void UiManager::onDeviceChanged(int index)
     if (!deviceId.isEmpty()) {
         m_ui->statusbar->showMessage(QString("Selected device: %1").arg(deviceName), 2000);
         m_dumpsysServices.clear();
+        const QString prevService = m_ui->txtDumpsysService->text().trimmed();
         m_ui->txtDumpsysService->setPlaceholderText(tr("Loading services..."));
-        m_ui->txtDumpsysService->clear();
         AdbManager::instance().setupReversePort(deviceId);
         AdbManager::instance().fetchDumpsysList(deviceId);
+
+        // Re-fetch the same dumpsys service on the new device
+        if (!prevService.isEmpty()) {
+            m_ui->txtDumpsysCmdResult->setPlainText(QStringLiteral("..."));
+            AdbManager::instance().fetchDumpsys(deviceId, prevService);
+        }
     }
     updateDumpsysCommandText();
 }
@@ -2539,6 +3452,54 @@ int UiManager::findNearestVisibleLog(int allLogsIndex) const
 
 bool UiManager::handleEvent(QObject *obj, QEvent *event)
 {
+    QWidget *w = qobject_cast<QWidget*>(obj);
+
+    // ── Device row: click to select ───────────────────────────────────────────
+    if (event->type() == QEvent::MouseButtonRelease) {
+        if (w && m_deviceRowMap.contains(w)) {
+            selectDeviceRow(w, m_deviceRowMap[w]);
+            return false;
+        }
+        // ── Selected device row in right panel: click to show details ─────────
+        if (w && w->objectName().startsWith(QStringLiteral("devSelectedRow_"))) {
+            const QString serial = w->objectName().mid(
+                static_cast<int>(QString("devSelectedRow_").length()));
+
+            // Highlight the clicked row, reset others
+            QVBoxLayout *listLayout = m_ui->devDeviceListVLayout;
+            for (int i = 0; i < listLayout->count(); ++i) {
+                if (QWidget *row = listLayout->itemAt(i)->widget()) {
+                    if (row == w)
+                        row->setStyleSheet("background-color: #2a2d32; border-bottom: 1px solid #3e3e42;");
+                    else
+                        row->setStyleSheet("background: transparent; border-bottom: 1px solid #3e3e42;");
+                }
+            }
+
+            // Find the device in connected list and show its details
+            DevicesManager &dm = DevicesManager::instance();
+            const QList<AdbDevice> connected = dm.connectedDevices();
+            for (const AdbDevice &d : connected) {
+                if (d.id == serial) {
+                    DeviceInfo info;
+                    info.serial = d.id;
+                    info.name   = d.name;
+                    info.online = d.isOnline;
+                    updateDeviceDetails(info);
+                    // Also highlight corresponding sidebar row
+                    for (auto it = m_deviceRowMap.constBegin(); it != m_deviceRowMap.constEnd(); ++it) {
+                        if (it.value().serial == serial) {
+                            selectDeviceRow(it.key(), it.value());
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            return false;
+        }
+    }
+
     if (handleTerminalKeyEvent(obj, event))     return true;
     if (event->type() == QEvent::Wheel)
         if (handleShiftScrollEvent(obj, static_cast<QWheelEvent*>(event))) return true;

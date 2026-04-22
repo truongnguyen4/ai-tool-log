@@ -11,8 +11,11 @@
 #include <QList>
 #include <QFutureWatcher>
 #include <QPushButton>
+#include <QMap>
+#include <QPoint>
 
 #include "adbmanager.h"
+#include "devicesmanager.h"
 #include "ilogconverter.h"
 #include "filemanager.h"
 #include "logmodel.h"
@@ -71,6 +74,15 @@ struct FileLoadResult {
 class UiManager : public QObject
 {
     Q_OBJECT
+
+public:
+    // Device display info derived from a real AdbDevice + group assignment.
+    struct DeviceInfo {
+        QString serial;        // adb device ID (unique key)
+        QString name;          // display name (model or serial)
+        QString group;         // group the device is assigned to
+        bool    online = false;
+    };
 
 public:
     explicit UiManager(Ui::MainWindow *ui, MainWindow *mainWindow);
@@ -230,6 +242,17 @@ private:
     void setupSocketListener();
 
     // =========================================================================
+    // SECTION: Devices Tab
+    // =========================================================================
+    void setupDevicesTab();
+    void refreshDevicesTab();
+    void updateDeviceDetails(const DeviceInfo &info);
+    void selectDeviceRow(QWidget *row, const DeviceInfo &info);
+    void onDevicesOrGroupsChanged();
+    void refreshCheckedDevicesList();
+    void onDeviceDetailsFetched(const DeviceDetails &details);
+
+    // =========================================================================
     // SECTION: Table Interaction
     // =========================================================================
     void onTableContextMenu(const QPoint &pos);
@@ -281,6 +304,11 @@ private:
     // =========================================================================
     Ui::MainWindow  *m_ui;
     MainWindow      *m_mainWindow;
+
+    // Devices tab: device row -> DeviceInfo map for click-to-select
+    QMap<QWidget*, DeviceInfo> m_deviceRowMap;
+    QWidget                   *m_selectedDeviceRow  = nullptr;
+    QSet<QString>              m_checkedDevices;      // serials of checked devices
 
     // Log data
     QVector<LogEntry>    allLogs;

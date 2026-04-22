@@ -396,7 +396,7 @@ QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color
       </property>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>2</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="tabAdbLogcat">
         <attribute name="title">
@@ -1690,46 +1690,6 @@ QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color
                 </spacer>
                </item>
                <item>
-                <widget class="QPushButton" name="btnSavePropertySet">
-                 <property name="maximumSize">
-                  <size>
-                   <width>30</width>
-                   <height>30</height>
-                  </size>
-                 </property>
-                 <property name="toolTip">
-                  <string>Save current properties to database</string>
-                 </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
-                   <normaloff>:/icons/document-save.svg</normaloff>:/icons/document-save.svg</iconset>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="btnLoadPropertySet">
-                 <property name="maximumSize">
-                  <size>
-                   <width>30</width>
-                   <height>30</height>
-                  </size>
-                 </property>
-                 <property name="toolTip">
-                  <string>Load saved properties from database</string>
-                 </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
-                   <normaloff>:/icons/folder-open.svg</normaloff>:/icons/folder-open.svg</iconset>
-                 </property>
-                </widget>
-               </item>
-               <item>
                 <widget class="QPushButton" name="btnExportPropertySet">
                  <property name="maximumSize">
                   <size>
@@ -1766,6 +1726,46 @@ QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color
                  <property name="icon">
                   <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
                    <normaloff>:/icons/upload.svg</normaloff>:/icons/upload.svg</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnSavePropertySet">
+                 <property name="maximumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="toolTip">
+                  <string>Save current properties to database</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                   <normaloff>:/icons/document-save.svg</normaloff>:/icons/document-save.svg</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnLoadPropertySet">
+                 <property name="maximumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="toolTip">
+                  <string>Load saved properties from database</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                   <normaloff>:/icons/folder-open.svg</normaloff>:/icons/folder-open.svg</iconset>
                  </property>
                 </widget>
                </item>
@@ -2312,8 +2312,1789 @@ QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="tabDevices">
+        <property name="styleSheet">
+         <string notr="true">
+#tabDevices { background-color: #1e1e1e; }
+#devSidebar { background-color: #252526; border-right: 1px solid #3e3e42; }
+#devRightPanel { background-color: #1e1e1e; }
+QSplitter#devSplitter::handle { background-color: #3e3e42; width: 1px; }
+#devLblAppName { color: #007acc; font-weight: bold; letter-spacing: 2px; }
+#devLblAppVersion { color: #8a8a8a; letter-spacing: 1px; }
+QPushButton#devBtnAddGroup { background-color: transparent; color: #007acc; border: 1px dashed #007acc; border-radius: 4px; padding: 4px 8px; }
+QPushButton#devBtnAddGroup:hover { background-color: #1a2a3a; }
+QScrollArea#devListScrollArea { background: transparent; border: none; }
+QScrollArea#devListScrollArea QScrollBar:vertical { width: 6px; background: transparent; }
+QScrollArea#devListScrollArea QScrollBar::handle:vertical { background: #3e3e42; border-radius: 3px; min-height: 20px; }
+QScrollArea#devListScrollArea QScrollBar::add-line:vertical,
+QScrollArea#devListScrollArea QScrollBar::sub-line:vertical { height: 0; }
+#devListContents { background: transparent; }
+#devNameLabel { color: #cccccc; font-weight: bold; }
+QTabWidget#devInnerTabWidget::pane { border: none; background: #1e1e1e; }
+QTabWidget#devInnerTabWidget QTabBar { background: #252526; }
+QTabWidget#devInnerTabWidget QTabBar::tab { background: #252526; color: #8a8a8a; border: none; border-bottom: 2px solid transparent; padding: 10px 20px; }
+QTabWidget#devInnerTabWidget QTabBar::tab:selected { color: #cccccc; border-bottom: 2px solid #007acc; }
+QTabWidget#devInnerTabWidget QTabBar::tab:hover:!selected { color: #cccccc; }
+QScrollArea#devDashScrollArea { background: #1e1e1e; border: none; }
+QScrollArea#devDashScrollArea QScrollBar:vertical { width: 8px; background: transparent; border: none; }
+QScrollArea#devDashScrollArea QScrollBar::handle:vertical { background: #3e3e42; border-radius: 4px; min-height: 24px; margin: 2px; }
+QScrollArea#devDashScrollArea QScrollBar::add-line:vertical,
+QScrollArea#devDashScrollArea QScrollBar::sub-line:vertical { height: 0; }
+#devDashContents { background-color: #1e1e1e; }
+#devInfoSep1, #devInfoSep2, #devInfoSep3 { color: #3e3e42; }
+#devBatteryTitle, #devIpTitle, #devNetworkTitle { color: #8a8a8a; letter-spacing: 1px; background: transparent; border: none; }
+#devBatteryValue, #devIpValue, #devNetworkValue { color: #cccccc; font-weight: bold; background: transparent; border: none; }
+#devBatteryIcon, #devIpIcon, #devNetworkIcon, #devWifiSsidIcon, #devWifiPassIcon { color: #8a8a8a; background: transparent; border: none; }
+#devQaTitle, #devSiTitle, #devConfigTitle, #devDeviceListTitle { color: #8a8a8a; font-weight: bold; letter-spacing: 1px; background: transparent; border: none; }
+#devWifiSsidTitle, #devWifiPassTitle { color: #8a8a8a; letter-spacing: 1px; background: transparent; border: none; }
+#devWifiSsidEdit, #devWifiPassEdit { background-color: #2d2d30; color: #cccccc; border: 1px solid #3e3e42; border-radius: 3px; padding: 4px 8px; }
+#devWifiSsidEdit:focus, #devWifiPassEdit:focus { border-color: #007acc; }
+#devSiManufacturerKey, #devSiModelKey, #devSiAndroidVersionKey, #devSiSdkVersionKey, #devSiBuildNumberKey, #devSiBuildFingerprintKey, #devSiSecurityPatchKey, #devSiKernelVersionKey, #devSiAbiKey { color: #8a8a8a; letter-spacing: 1px; background: transparent; border: none; border-bottom: 1px solid #3e3e42; padding: 4px 0; }
+#devSiManufacturerValue, #devSiModelValue, #devSiAndroidVersionValue, #devSiSdkVersionValue, #devSiBuildNumberValue, #devSiBuildFingerprintValue, #devSiSecurityPatchValue, #devSiKernelVersionValue, #devSiAbiValue { color: #cccccc; background: transparent; border: none; border-bottom: 1px solid #3e3e42; padding: 4px 0; }
+QTabWidget#devConfigTabWidget::pane { border: 1px solid #3e3e42; background: #252526; }
+QTabWidget#devConfigTabWidget QTabBar { background: #1e1e1e; }
+QTabWidget#devConfigTabWidget QTabBar::tab { background: #252526; color: #8a8a8a; border: none; border-bottom: 2px solid transparent; padding: 8px 16px; }
+QTabWidget#devConfigTabWidget QTabBar::tab:selected { color: #cccccc; border-bottom: 2px solid #007acc; }
+QTabWidget#devConfigTabWidget QTabBar::tab:hover:!selected { color: #cccccc; }
+QPushButton#devBtnDeployConfig { background-color: #007acc; color: #ffffff; border: none; border-radius: 4px; padding: 6px 16px; font-weight: bold; }
+QPushButton#devBtnDeployConfig:hover { background-color: #1a8ad4; }
+QPushButton#devBtnDeployConfig:pressed { background-color: #005a9e; }
+QPushButton#devBtnExportJson { background: transparent; border: none; padding: 4px; }
+QPushButton#devBtnExportJson:hover { background-color: #3e3e42; border-radius: 4px; }
+QPushButton#devBtnImportJson { background: transparent; border: none; padding: 4px; }
+QPushButton#devBtnImportJson:hover { background-color: #3e3e42; border-radius: 4px; }
+QPushButton#devBtnDeployConfig { background-color: #e67e22; color: #ffffff; border: none; border-radius: 4px; padding: 6px 16px; font-weight: bold; }
+QPushButton#devBtnDeployConfig:hover { background-color: #f0932b; }
+QPushButton#devBtnDeployConfig:pressed { background-color: #cc6d1a; }
+QPushButton#devBtnDeployConfig:disabled { background-color: #2d2d30; color: #5a5a5a; border: 1px solid #3e3e42; }
+QPushButton#devBtnSavePreset { background: transparent; border: none; padding: 4px; }
+QPushButton#devBtnSavePreset:hover { background-color: #3e3e42; border-radius: 4px; }
+QPushButton#devBtnLoadPreset { background: transparent; border: none; padding: 4px; }
+QPushButton#devBtnLoadPreset:hover { background-color: #3e3e42; border-radius: 4px; }
+QTextEdit#devJsonView { background-color: #1e1e1e; color: #d4d4d4; border: 1px solid #3e3e42; border-radius: 4px; font-family: monospace; }
+#devStayAwakeRow, #devAllowMockRow, #devVerifyAdbRow, #devLocaleRow, #devTimeFormatRow { background: #2d2d30; border: 1px solid #3e3e42; border-radius: 6px; }
+#devStayAwakeIcon, #devAllowMockIcon, #devVerifyAdbIcon, #devLocaleIcon, #devTimeFormatIcon { color: #cccccc; background: transparent; border: none; }
+#devStayAwakeLabel, #devAllowMockLabel, #devVerifyAdbLabel, #devLocaleLabel, #devTimeFormatLabel { color: #cccccc; font-weight: bold; background: transparent; border: none; }
+#devStayAwakeDesc, #devAllowMockDesc, #devVerifyAdbDesc, #devLocaleDesc, #devTimeFormatDesc { color: #8a8a8a; background: transparent; border: none; }
+#devLocaleEdit { background-color: #2d2d30; color: #cccccc; border: 1px solid #3e3e42; border-radius: 3px; padding: 4px 8px; }
+#devLocaleEdit:focus { border-color: #007acc; }
+#devFirmwareIcon, #devFirmwareTitle { color: #cccccc; background: transparent; border: none; font-weight: bold; }
+#devFirmwarePathEdit { background-color: #2d2d30; color: #cccccc; border: 1px solid #3e3e42; border-radius: 3px; padding: 4px 8px; }
+QPushButton#devBtnBrowseFirmware { background-color: #37373d; color: #cccccc; border: 1px solid #3e3e42; border-radius: 4px; padding: 4px 8px; }
+QPushButton#devBtnBrowseFirmware:hover { background-color: #3e3e50; border-color: #007acc; }
+QPushButton#devBtnFlash { background-color: #d4760a; color: #ffffff; border: none; border-radius: 4px; padding: 10px 8px; font-weight: bold; }
+QPushButton#devBtnFlash:hover { background-color: #e88a1e; }
+QPushButton#devBtnFlash:pressed { background-color: #b5650a; }
+QPushButton#devBtnFlash:disabled { background-color: #2d2d30; color: #5a5a5a; border: 1px solid #3e3e42; }
+QPushButton#devBtnConnectWifi { background-color: #d4760a; color: #ffffff; border: none; border-radius: 4px; padding: 10px 8px; font-weight: bold; }
+QPushButton#devBtnConnectWifi:hover { background-color: #e88a1e; }
+QPushButton#devBtnConnectWifi:pressed { background-color: #b5650a; }
+QPushButton#devBtnConnectWifi:disabled { background-color: #2d2d30; color: #5a5a5a; border: 1px solid #3e3e42; }
+QPushButton#devBtnReboot, QPushButton#devBtnSyslog, QPushButton#devBtnClearCache,
+QPushButton#devBtnUnlock, QPushButton#devBtnForceStop, QPushButton#devBtnAdbWireless,
+QPushButton#devBtnAdbRoot, QPushButton#devBtnAdbUnroot, QPushButton#devBtnRebootFastboot,
+QPushButton#devBtnPowerKey {
+  background-color: #1a6fb5; color: #ffffff; border: none;
+  border-radius: 4px; padding: 10px 8px; font-weight: bold;
+}
+QPushButton#devBtnReboot:hover, QPushButton#devBtnSyslog:hover,
+QPushButton#devBtnClearCache:hover, QPushButton#devBtnUnlock:hover,
+QPushButton#devBtnForceStop:hover, QPushButton#devBtnAdbWireless:hover,
+QPushButton#devBtnAdbRoot:hover, QPushButton#devBtnAdbUnroot:hover,
+QPushButton#devBtnRebootFastboot:hover,
+QPushButton#devBtnPowerKey:hover { background-color: #2080cc; }
+QPushButton#devBtnReboot:pressed, QPushButton#devBtnSyslog:pressed,
+QPushButton#devBtnClearCache:pressed, QPushButton#devBtnUnlock:pressed,
+QPushButton#devBtnForceStop:pressed, QPushButton#devBtnAdbWireless:pressed,
+QPushButton#devBtnAdbRoot:pressed, QPushButton#devBtnAdbUnroot:pressed,
+QPushButton#devBtnRebootFastboot:pressed,
+QPushButton#devBtnPowerKey:pressed { background-color: #145a96; }
+QPushButton#devBtnReboot:disabled, QPushButton#devBtnSyslog:disabled,
+QPushButton#devBtnClearCache:disabled, QPushButton#devBtnUnlock:disabled,
+QPushButton#devBtnForceStop:disabled, QPushButton#devBtnAdbWireless:disabled,
+QPushButton#devBtnAdbRoot:disabled, QPushButton#devBtnAdbUnroot:disabled,
+QPushButton#devBtnRebootFastboot:disabled,
+QPushButton#devBtnPowerKey:disabled { background-color: #2d2d30; color: #5a5a5a; border: 1px solid #3e3e42; }
+         </string>
+        </property>
+        <attribute name="title">
+         <string>Devices</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="devMainHLayout">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QSplitter" name="devSplitter">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="childrenCollapsible">
+            <bool>false</bool>
+           </property>
+           <widget class="QWidget" name="devSidebar">
+            <layout class="QVBoxLayout" name="devSidebarVLayout">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <layout class="QVBoxLayout" name="devAppTitleVLayout">
+               <property name="spacing">
+                <number>2</number>
+               </property>
+               <property name="leftMargin">
+                <number>16</number>
+               </property>
+               <property name="topMargin">
+                <number>14</number>
+               </property>
+               <property name="rightMargin">
+                <number>16</number>
+               </property>
+               <property name="bottomMargin">
+                <number>14</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="devLblAppVersion">
+                 <property name="text">
+                  <string>DEVICES MANAGER</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="devAddGroupHLayout">
+               <property name="spacing">
+                <number>6</number>
+               </property>
+               <property name="leftMargin">
+                <number>12</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>12</number>
+               </property>
+               <property name="bottomMargin">
+                <number>8</number>
+               </property>
+               <item>
+                <widget class="QPushButton" name="devBtnAddGroup">
+                 <property name="toolTip">
+                  <string>Create a new device group</string>
+                 </property>
+                 <property name="text">
+                  <string>+ New Group</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QScrollArea" name="devListScrollArea">
+               <property name="frameShape">
+                <enum>QFrame::Shape::NoFrame</enum>
+               </property>
+               <property name="horizontalScrollBarPolicy">
+                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+               </property>
+               <property name="widgetResizable">
+                <bool>true</bool>
+               </property>
+               <widget class="QWidget" name="devListContents">
+                <property name="geometry">
+                 <rect>
+                  <x>0</x>
+                  <y>0</y>
+                  <width>306</width>
+                  <height>727</height>
+                 </rect>
+                </property>
+                <layout class="QVBoxLayout" name="devListVLayout">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>8</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>8</number>
+                 </property>
+                 <item>
+                  <spacer>
+                   <property name="orientation">
+                    <enum>Qt::Orientation::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="devRightPanel">
+            <layout class="QVBoxLayout" name="devRightVLayout">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <layout class="QHBoxLayout" name="devHeaderHLayout">
+               <property name="spacing">
+                <number>14</number>
+               </property>
+               <property name="leftMargin">
+                <number>20</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>20</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <layout class="QVBoxLayout" name="devNameVLayout">
+                 <property name="spacing">
+                  <number>4</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <layout class="QHBoxLayout" name="devNameRowHLayout">
+                   <property name="spacing">
+                    <number>8</number>
+                   </property>
+                   <item>
+                    <widget class="QLabel" name="devNameLabel">
+                     <property name="text">
+                      <string>Pixel 7 Pro</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer>
+                     <property name="orientation">
+                      <enum>Qt::Orientation::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QTabWidget" name="devInnerTabWidget">
+               <property name="currentIndex">
+                <number>0</number>
+               </property>
+               <widget class="QWidget" name="devPageDashboard">
+                <attribute name="title">
+                 <string>Dashboard</string>
+                </attribute>
+                <layout class="QVBoxLayout" name="devPageDashLayout">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QScrollArea" name="devDashScrollArea">
+                   <property name="frameShape">
+                    <enum>QFrame::Shape::NoFrame</enum>
+                   </property>
+                   <property name="widgetResizable">
+                    <bool>true</bool>
+                   </property>
+                   <widget class="QWidget" name="devDashContents">
+                    <property name="geometry">
+                     <rect>
+                      <x>-140</x>
+                      <y>0</y>
+                      <width>1219</width>
+                      <height>1081</height>
+                     </rect>
+                    </property>
+                    <layout class="QVBoxLayout" name="devDashVLayout">
+                     <property name="spacing">
+                      <number>16</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>20</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>20</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>20</number>
+                     </property>
+                     <item>
+                      <layout class="QHBoxLayout" name="devInfoHLayout">
+                       <property name="spacing">
+                        <number>12</number>
+                       </property>
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item>
+                        <layout class="QVBoxLayout" name="devDeviceListContainerVLayout">
+                         <property name="spacing">
+                          <number>10</number>
+                         </property>
+                         <property name="leftMargin">
+                          <number>16</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>14</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>16</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>14</number>
+                         </property>
+                         <item>
+                          <widget class="QLabel" name="devDeviceListTitle">
+                           <property name="text">
+                            <string>SELECTED DEVICES</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <layout class="QVBoxLayout" name="devDeviceListVLayout">
+                           <property name="spacing">
+                            <number>0</number>
+                           </property>
+                           <property name="leftMargin">
+                            <number>0</number>
+                           </property>
+                           <property name="topMargin">
+                            <number>0</number>
+                           </property>
+                           <property name="rightMargin">
+                            <number>0</number>
+                           </property>
+                           <property name="bottomMargin">
+                            <number>0</number>
+                           </property>
+                          </layout>
+                         </item>
+                         <item>
+                          <spacer>
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Vertical</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>0</width>
+                             <height>0</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <spacer name="horizontalSpacer_8">
+                         <property name="orientation">
+                          <enum>Qt::Orientation::Horizontal</enum>
+                         </property>
+                         <property name="sizeHint" stdset="0">
+                          <size>
+                           <width>40</width>
+                           <height>20</height>
+                          </size>
+                         </property>
+                        </spacer>
+                       </item>
+                       <item>
+                        <layout class="QVBoxLayout" name="devSiVLayout">
+                         <property name="spacing">
+                          <number>10</number>
+                         </property>
+                         <property name="leftMargin">
+                          <number>16</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>14</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>16</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>14</number>
+                         </property>
+                         <item>
+                          <widget class="QLabel" name="devSiTitle">
+                           <property name="text">
+                            <string>SYSTEM INFORMATION</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <layout class="QGridLayout" name="devSysInfoGrid">
+                           <property name="horizontalSpacing">
+                            <number>8</number>
+                           </property>
+                           <property name="verticalSpacing">
+                            <number>6</number>
+                           </property>
+                           <item row="0" column="0">
+                            <widget class="QLabel" name="devSiManufacturerKey">
+                             <property name="text">
+                              <string>MANUFACTURER</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="1">
+                            <widget class="QLabel" name="devSiManufacturerValue">
+                             <property name="text">
+                              <string>--</string>
+                             </property>
+                             <property name="alignment">
+                              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                             </property>
+                             <property name="wordWrap">
+                              <bool>true</bool>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="1" column="0">
+                            <widget class="QLabel" name="devSiModelKey">
+                             <property name="text">
+                              <string>MODEL</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="1" column="1">
+                            <widget class="QLabel" name="devSiModelValue">
+                             <property name="text">
+                              <string>--</string>
+                             </property>
+                             <property name="alignment">
+                              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                             </property>
+                             <property name="wordWrap">
+                              <bool>true</bool>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="2" column="0">
+                            <widget class="QLabel" name="devSiAndroidVersionKey">
+                             <property name="text">
+                              <string>ANDROID VERSION</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="2" column="1">
+                            <widget class="QLabel" name="devSiAndroidVersionValue">
+                             <property name="text">
+                              <string>--</string>
+                             </property>
+                             <property name="alignment">
+                              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                             </property>
+                             <property name="wordWrap">
+                              <bool>true</bool>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="3" column="0">
+                            <widget class="QLabel" name="devSiSdkVersionKey">
+                             <property name="text">
+                              <string>SDK VERSION</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="3" column="1">
+                            <widget class="QLabel" name="devSiSdkVersionValue">
+                             <property name="text">
+                              <string>--</string>
+                             </property>
+                             <property name="alignment">
+                              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                             </property>
+                             <property name="wordWrap">
+                              <bool>true</bool>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="4" column="0">
+                            <widget class="QLabel" name="devSiBuildNumberKey">
+                             <property name="text">
+                              <string>BUILD NUMBER</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="4" column="1">
+                            <widget class="QLabel" name="devSiBuildNumberValue">
+                             <property name="text">
+                              <string>--</string>
+                             </property>
+                             <property name="alignment">
+                              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                             </property>
+                             <property name="wordWrap">
+                              <bool>true</bool>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="5" column="0">
+                            <widget class="QLabel" name="devSiBuildFingerprintKey">
+                             <property name="text">
+                              <string>BUILD FINGERPRINT</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="5" column="1">
+                            <widget class="QLabel" name="devSiBuildFingerprintValue">
+                             <property name="text">
+                              <string>--</string>
+                             </property>
+                             <property name="alignment">
+                              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                             </property>
+                             <property name="wordWrap">
+                              <bool>true</bool>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="6" column="0">
+                            <widget class="QLabel" name="devSiSecurityPatchKey">
+                             <property name="text">
+                              <string>SECURITY PATCH</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="6" column="1">
+                            <widget class="QLabel" name="devSiSecurityPatchValue">
+                             <property name="text">
+                              <string>--</string>
+                             </property>
+                             <property name="alignment">
+                              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                             </property>
+                             <property name="wordWrap">
+                              <bool>true</bool>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="7" column="0">
+                            <widget class="QLabel" name="devSiKernelVersionKey">
+                             <property name="text">
+                              <string>KERNEL VERSION</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="7" column="1">
+                            <widget class="QLabel" name="devSiKernelVersionValue">
+                             <property name="text">
+                              <string>--</string>
+                             </property>
+                             <property name="alignment">
+                              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                             </property>
+                             <property name="wordWrap">
+                              <bool>true</bool>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="8" column="0">
+                            <widget class="QLabel" name="devSiAbiKey">
+                             <property name="text">
+                              <string>ABI</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="8" column="1">
+                            <widget class="QLabel" name="devSiAbiValue">
+                             <property name="text">
+                              <string>--</string>
+                             </property>
+                             <property name="alignment">
+                              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                             </property>
+                             <property name="wordWrap">
+                              <bool>true</bool>
+                             </property>
+                            </widget>
+                           </item>
+                          </layout>
+                         </item>
+                         <item>
+                          <layout class="QVBoxLayout" name="verticalLayout_10">
+                           <item>
+                            <spacer name="verticalSpacer_2">
+                             <property name="orientation">
+                              <enum>Qt::Orientation::Vertical</enum>
+                             </property>
+                             <property name="sizeHint" stdset="0">
+                              <size>
+                               <width>20</width>
+                               <height>40</height>
+                              </size>
+                             </property>
+                            </spacer>
+                           </item>
+                          </layout>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <spacer name="horizontalSpacer_4">
+                         <property name="orientation">
+                          <enum>Qt::Orientation::Horizontal</enum>
+                         </property>
+                         <property name="sizeHint" stdset="0">
+                          <size>
+                           <width>40</width>
+                           <height>20</height>
+                          </size>
+                         </property>
+                        </spacer>
+                       </item>
+                       <item>
+                        <layout class="QGridLayout" name="devInfoGrid">
+                         <property name="horizontalSpacing">
+                          <number>12</number>
+                         </property>
+                         <property name="verticalSpacing">
+                          <number>8</number>
+                         </property>
+                         <item row="0" column="2">
+                          <widget class="QLabel" name="devBatteryValue">
+                           <property name="text">
+                            <string>85%</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="4" column="2">
+                          <widget class="QLineEdit" name="devWifiPassEdit">
+                           <property name="echoMode">
+                            <enum>QLineEdit::EchoMode::Password</enum>
+                           </property>
+                           <property name="placeholderText">
+                            <string>WiFi password</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="7" column="2">
+                          <layout class="QHBoxLayout" name="devFirmwarePathHLayout">
+                           <property name="spacing">
+                            <number>6</number>
+                           </property>
+                           <item>
+                            <widget class="QLineEdit" name="devFirmwarePathEdit">
+                             <property name="readOnly">
+                              <bool>true</bool>
+                             </property>
+                             <property name="placeholderText">
+                              <string>/path/to/firmware</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QPushButton" name="devBtnBrowseFirmware">
+                             <property name="toolTip">
+                              <string>Browse for firmware image</string>
+                             </property>
+                             <property name="text">
+                              <string/>
+                             </property>
+                             <property name="icon">
+                              <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                               <normaloff>:/icons/folder-open.svg</normaloff>:/icons/folder-open.svg</iconset>
+                             </property>
+                             <property name="iconSize">
+                              <size>
+                               <width>16</width>
+                               <height>16</height>
+                              </size>
+                             </property>
+                             <property name="fixedWidth" stdset="0">
+                              <number>36</number>
+                             </property>
+                            </widget>
+                           </item>
+                          </layout>
+                         </item>
+                         <item row="4" column="1">
+                          <widget class="QLabel" name="devWifiPassTitle">
+                           <property name="text">
+                            <string>PASSWORD</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="1">
+                          <widget class="QLabel" name="devBatteryTitle">
+                           <property name="text">
+                            <string>BATTERY</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="5" column="2">
+                          <widget class="QPushButton" name="devBtnConnectWifi">
+                           <property name="text">
+                            <string>CONNECT WIFI</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="7" column="1">
+                          <widget class="QLabel" name="devFirmwareTitle">
+                           <property name="text">
+                            <string>FIRMWARE</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="2">
+                          <widget class="QLabel" name="devIpValue">
+                           <property name="text">
+                            <string>192.168.1.15</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="2" column="1">
+                          <widget class="QLabel" name="devNetworkTitle">
+                           <property name="text">
+                            <string>Wifi</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="1">
+                          <widget class="QLabel" name="devIpTitle">
+                           <property name="text">
+                            <string>IP ADDRESS</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="0">
+                          <widget class="QLabel" name="devBatteryIcon">
+                           <property name="text">
+                            <string>🔋</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="8" column="2">
+                          <widget class="QPushButton" name="devBtnFlash">
+                           <property name="text">
+                            <string>FLASH FIRMWARE</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="0">
+                          <widget class="QLabel" name="devIpIcon">
+                           <property name="text">
+                            <string>📶</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="3" column="1">
+                          <widget class="QLabel" name="devWifiSsidTitle">
+                           <property name="text">
+                            <string>SSID</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="4" column="0">
+                          <widget class="QLabel" name="devWifiPassIcon">
+                           <property name="text">
+                            <string>🔑</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="3" column="0">
+                          <widget class="QLabel" name="devWifiSsidIcon">
+                           <property name="text">
+                            <string>📡</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="2" column="0">
+                          <widget class="QLabel" name="devNetworkIcon">
+                           <property name="text">
+                            <string>🌐</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="3" column="2">
+                          <widget class="QLineEdit" name="devWifiSsidEdit">
+                           <property name="placeholderText">
+                            <string>WiFi network name</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="7" column="0">
+                          <widget class="QLabel" name="devFirmwareIcon">
+                           <property name="text">
+                            <string>📦</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="2" column="2">
+                          <widget class="QLabel" name="devNetworkValue">
+                           <property name="text">
+                            <string>--</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="9" column="2">
+                          <spacer name="verticalSpacer_3">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Vertical</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>20</width>
+                             <height>40</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <spacer name="horizontalSpacer_11">
+                         <property name="orientation">
+                          <enum>Qt::Orientation::Horizontal</enum>
+                         </property>
+                         <property name="sizeHint" stdset="0">
+                          <size>
+                           <width>40</width>
+                           <height>20</height>
+                          </size>
+                         </property>
+                        </spacer>
+                       </item>
+                      </layout>
+                     </item>
+                     <item>
+                      <layout class="QHBoxLayout" name="devBottomHLayout">
+                       <property name="spacing">
+                        <number>12</number>
+                       </property>
+                       <item>
+                        <layout class="QVBoxLayout" name="devQaVLayout">
+                         <property name="spacing">
+                          <number>10</number>
+                         </property>
+                         <property name="leftMargin">
+                          <number>16</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>14</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>16</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>14</number>
+                         </property>
+                         <item>
+                          <widget class="QLabel" name="devQaTitle">
+                           <property name="text">
+                            <string>⚡  QUICK ACTIONS</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <layout class="QGridLayout" name="devQaGrid">
+                           <property name="spacing">
+                            <number>8</number>
+                           </property>
+                           <item row="1" column="0">
+                            <widget class="QPushButton" name="devBtnForceStop">
+                             <property name="text">
+                              <string>REBOOT SIDELOAD</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="1">
+                            <widget class="QPushButton" name="devBtnSyslog">
+                             <property name="text">
+                              <string>VOLUMN UP</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="1" column="1">
+                            <widget class="QPushButton" name="devBtnUnlock">
+                             <property name="text">
+                              <string>VOLUMN DOWN</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="3" column="0">
+                            <widget class="QPushButton" name="devBtnClearCache">
+                             <property name="text">
+                              <string>REBOOT BOOTLOADER</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="0">
+                            <widget class="QPushButton" name="devBtnReboot">
+                             <property name="text">
+                              <string>REBOOT DEVICE</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="4" column="0">
+                            <widget class="QPushButton" name="devBtnRebootFastboot">
+                             <property name="text">
+                              <string>REBOOT FASTBOOT</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="7" column="0">
+                            <widget class="QPushButton" name="devBtnAdbWireless">
+                             <property name="text">
+                              <string>ADB WIRELESS</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="7" column="1">
+                            <widget class="QPushButton" name="devBtnPowerKey">
+                             <property name="text">
+                              <string>POWER KEY</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="3" column="1">
+                            <widget class="QPushButton" name="devBtnAdbRoot">
+                             <property name="text">
+                              <string>ADB ROOT</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="4" column="1">
+                            <widget class="QPushButton" name="devBtnAdbUnroot">
+                             <property name="text">
+                              <string>ADB UNROOT</string>
+                             </property>
+                            </widget>
+                           </item>
+                          </layout>
+                         </item>
+                         <item>
+                          <spacer>
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Vertical</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>0</width>
+                             <height>0</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <spacer name="horizontalSpacer_10">
+                         <property name="orientation">
+                          <enum>Qt::Orientation::Horizontal</enum>
+                         </property>
+                         <property name="sizeHint" stdset="0">
+                          <size>
+                           <width>40</width>
+                           <height>20</height>
+                          </size>
+                         </property>
+                        </spacer>
+                       </item>
+                       <item>
+                        <spacer name="horizontalSpacer_13">
+                         <property name="orientation">
+                          <enum>Qt::Orientation::Horizontal</enum>
+                         </property>
+                         <property name="sizeHint" stdset="0">
+                          <size>
+                           <width>40</width>
+                           <height>20</height>
+                          </size>
+                         </property>
+                        </spacer>
+                       </item>
+                       <item>
+                        <spacer name="horizontalSpacer_9">
+                         <property name="orientation">
+                          <enum>Qt::Orientation::Horizontal</enum>
+                         </property>
+                         <property name="sizeHint" stdset="0">
+                          <size>
+                           <width>40</width>
+                           <height>20</height>
+                          </size>
+                         </property>
+                        </spacer>
+                       </item>
+                       <item>
+                        <layout class="QVBoxLayout" name="devConfigVLayout">
+                         <property name="spacing">
+                          <number>0</number>
+                         </property>
+                         <property name="leftMargin">
+                          <number>16</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>14</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>16</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>14</number>
+                         </property>
+                         <item>
+                          <widget class="QLabel" name="devConfigTitle">
+                           <property name="text">
+                            <string>CONFIGURATION</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <layout class="QHBoxLayout" name="devConfigContentHLayout">
+                           <property name="spacing">
+                            <number>12</number>
+                           </property>
+                           <item>
+                            <widget class="QTabWidget" name="devConfigTabWidget">
+                             <property name="currentIndex">
+                              <number>0</number>
+                             </property>
+                             <widget class="QWidget" name="devConfigTab1">
+                              <attribute name="title">
+                               <string>Device Settings</string>
+                              </attribute>
+                              <layout class="QVBoxLayout" name="devConfigTab1Layout">
+                               <property name="spacing">
+                                <number>8</number>
+                               </property>
+                               <property name="leftMargin">
+                                <number>12</number>
+                               </property>
+                               <property name="topMargin">
+                                <number>12</number>
+                               </property>
+                               <property name="rightMargin">
+                                <number>12</number>
+                               </property>
+                               <property name="bottomMargin">
+                                <number>12</number>
+                               </property>
+                               <item>
+                                <layout class="QHBoxLayout" name="devStayAwakeHLayout">
+                                 <property name="spacing">
+                                  <number>12</number>
+                                 </property>
+                                 <property name="leftMargin">
+                                  <number>14</number>
+                                 </property>
+                                 <property name="topMargin">
+                                  <number>12</number>
+                                 </property>
+                                 <property name="rightMargin">
+                                  <number>14</number>
+                                 </property>
+                                 <property name="bottomMargin">
+                                  <number>12</number>
+                                 </property>
+                                 <item>
+                                  <widget class="QLabel" name="devStayAwakeIcon">
+                                   <property name="text">
+                                    <string>🔆</string>
+                                   </property>
+                                   <property name="alignment">
+                                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                                   </property>
+                                   <property name="fixedWidth" stdset="0">
+                                    <number>24</number>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <layout class="QVBoxLayout" name="devStayAwakeTextVLayout">
+                                   <property name="spacing">
+                                    <number>2</number>
+                                   </property>
+                                   <item>
+                                    <widget class="QLabel" name="devStayAwakeLabel">
+                                     <property name="text">
+                                      <string>Stay Awake</string>
+                                     </property>
+                                    </widget>
+                                   </item>
+                                   <item>
+                                    <widget class="QLabel" name="devStayAwakeDesc">
+                                     <property name="text">
+                                      <string>Keep screen on while charging</string>
+                                     </property>
+                                     <property name="wordWrap">
+                                      <bool>true</bool>
+                                     </property>
+                                    </widget>
+                                   </item>
+                                  </layout>
+                                 </item>
+                                 <item>
+                                  <spacer name="horizontalSpacer_6">
+                                   <property name="orientation">
+                                    <enum>Qt::Orientation::Horizontal</enum>
+                                   </property>
+                                   <property name="sizeHint" stdset="0">
+                                    <size>
+                                     <width>40</width>
+                                     <height>20</height>
+                                    </size>
+                                   </property>
+                                  </spacer>
+                                 </item>
+                                 <item>
+                                  <widget class="ToggleSwitch" name="devStayAwakeToggle" native="true"/>
+                                 </item>
+                                </layout>
+                               </item>
+                               <item>
+                                <layout class="QHBoxLayout" name="devAllowMockHLayout">
+                                 <property name="spacing">
+                                  <number>12</number>
+                                 </property>
+                                 <property name="leftMargin">
+                                  <number>14</number>
+                                 </property>
+                                 <property name="topMargin">
+                                  <number>12</number>
+                                 </property>
+                                 <property name="rightMargin">
+                                  <number>14</number>
+                                 </property>
+                                 <property name="bottomMargin">
+                                  <number>12</number>
+                                 </property>
+                                 <item>
+                                  <widget class="QLabel" name="devAllowMockIcon">
+                                   <property name="text">
+                                    <string>�</string>
+                                   </property>
+                                   <property name="alignment">
+                                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                                   </property>
+                                   <property name="fixedWidth" stdset="0">
+                                    <number>24</number>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <layout class="QVBoxLayout" name="devAllowMockTextVLayout">
+                                   <property name="spacing">
+                                    <number>2</number>
+                                   </property>
+                                   <item>
+                                    <widget class="QLabel" name="devAllowMockLabel">
+                                     <property name="text">
+                                      <string>Allow Mock Modem</string>
+                                     </property>
+                                    </widget>
+                                   </item>
+                                   <item>
+                                    <widget class="QLabel" name="devAllowMockDesc">
+                                     <property name="text">
+                                      <string>Enable mock modem for radio testing</string>
+                                     </property>
+                                     <property name="wordWrap">
+                                      <bool>true</bool>
+                                     </property>
+                                    </widget>
+                                   </item>
+                                  </layout>
+                                 </item>
+                                 <item>
+                                  <spacer name="horizontalSpacer_7">
+                                   <property name="orientation">
+                                    <enum>Qt::Orientation::Horizontal</enum>
+                                   </property>
+                                   <property name="sizeHint" stdset="0">
+                                    <size>
+                                     <width>40</width>
+                                     <height>20</height>
+                                    </size>
+                                   </property>
+                                  </spacer>
+                                 </item>
+                                 <item>
+                                  <widget class="ToggleSwitch" name="devAllowMockToggle" native="true"/>
+                                 </item>
+                                </layout>
+                               </item>
+                               <item>
+                                <layout class="QHBoxLayout" name="devVerifyAdbHLayout">
+                                 <property name="spacing">
+                                  <number>12</number>
+                                 </property>
+                                 <property name="leftMargin">
+                                  <number>14</number>
+                                 </property>
+                                 <property name="topMargin">
+                                  <number>12</number>
+                                 </property>
+                                 <property name="rightMargin">
+                                  <number>14</number>
+                                 </property>
+                                 <property name="bottomMargin">
+                                  <number>12</number>
+                                 </property>
+                                 <item>
+                                  <widget class="QLabel" name="devVerifyAdbIcon">
+                                   <property name="text">
+                                    <string>🛡</string>
+                                   </property>
+                                   <property name="alignment">
+                                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                                   </property>
+                                   <property name="fixedWidth" stdset="0">
+                                    <number>24</number>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <layout class="QVBoxLayout" name="devVerifyAdbTextVLayout">
+                                   <property name="spacing">
+                                    <number>2</number>
+                                   </property>
+                                   <item>
+                                    <widget class="QLabel" name="devVerifyAdbLabel">
+                                     <property name="text">
+                                      <string>Verify ADB Installs</string>
+                                     </property>
+                                    </widget>
+                                   </item>
+                                   <item>
+                                    <widget class="QLabel" name="devVerifyAdbDesc">
+                                     <property name="text">
+                                      <string>Verify apps installed via ADB</string>
+                                     </property>
+                                     <property name="wordWrap">
+                                      <bool>true</bool>
+                                     </property>
+                                    </widget>
+                                   </item>
+                                  </layout>
+                                 </item>
+                                 <item>
+                                  <spacer name="horizontalSpacer_verifyAdb">
+                                   <property name="orientation">
+                                    <enum>Qt::Orientation::Horizontal</enum>
+                                   </property>
+                                   <property name="sizeHint" stdset="0">
+                                    <size>
+                                     <width>40</width>
+                                     <height>20</height>
+                                    </size>
+                                   </property>
+                                  </spacer>
+                                 </item>
+                                 <item>
+                                  <widget class="ToggleSwitch" name="devVerifyAdbToggle" native="true"/>
+                                 </item>
+                                </layout>
+                               </item>
+                               <item>
+                                <layout class="QHBoxLayout" name="devLocaleHLayout">
+                                 <property name="spacing">
+                                  <number>12</number>
+                                 </property>
+                                 <property name="leftMargin">
+                                  <number>14</number>
+                                 </property>
+                                 <property name="topMargin">
+                                  <number>12</number>
+                                 </property>
+                                 <property name="rightMargin">
+                                  <number>14</number>
+                                 </property>
+                                 <property name="bottomMargin">
+                                  <number>12</number>
+                                 </property>
+                                 <item>
+                                  <widget class="QLabel" name="devLocaleIcon">
+                                   <property name="text">
+                                    <string>🌐</string>
+                                   </property>
+                                   <property name="alignment">
+                                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                                   </property>
+                                   <property name="fixedWidth" stdset="0">
+                                    <number>24</number>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <layout class="QVBoxLayout" name="devLocaleTextVLayout">
+                                   <property name="spacing">
+                                    <number>2</number>
+                                   </property>
+                                   <item>
+                                    <widget class="QLabel" name="devLocaleLabel">
+                                     <property name="text">
+                                      <string>System Locale</string>
+                                     </property>
+                                    </widget>
+                                   </item>
+                                   <item>
+                                    <widget class="QLabel" name="devLocaleDesc">
+                                     <property name="text">
+                                      <string>Set device locale (e.g. en-US)</string>
+                                     </property>
+                                     <property name="wordWrap">
+                                      <bool>true</bool>
+                                     </property>
+                                    </widget>
+                                   </item>
+                                  </layout>
+                                 </item>
+                                 <item>
+                                  <spacer name="horizontalSpacer_locale">
+                                   <property name="orientation">
+                                    <enum>Qt::Orientation::Horizontal</enum>
+                                   </property>
+                                   <property name="sizeHint" stdset="0">
+                                    <size>
+                                     <width>40</width>
+                                     <height>20</height>
+                                    </size>
+                                   </property>
+                                  </spacer>
+                                 </item>
+                                 <item>
+                                  <widget class="QLineEdit" name="devLocaleEdit">
+                                   <property name="placeholderText">
+                                    <string>en-US</string>
+                                   </property>
+                                   <property name="fixedWidth" stdset="0">
+                                    <number>100</number>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                </layout>
+                               </item>
+                               <item>
+                                <layout class="QHBoxLayout" name="devTimeFormatHLayout">
+                                 <property name="spacing">
+                                  <number>12</number>
+                                 </property>
+                                 <property name="leftMargin">
+                                  <number>14</number>
+                                 </property>
+                                 <property name="topMargin">
+                                  <number>12</number>
+                                 </property>
+                                 <property name="rightMargin">
+                                  <number>14</number>
+                                 </property>
+                                 <property name="bottomMargin">
+                                  <number>12</number>
+                                 </property>
+                                 <item>
+                                  <widget class="QLabel" name="devTimeFormatIcon">
+                                   <property name="text">
+                                    <string>🕐</string>
+                                   </property>
+                                   <property name="alignment">
+                                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                                   </property>
+                                   <property name="fixedWidth" stdset="0">
+                                    <number>24</number>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <layout class="QVBoxLayout" name="devTimeFormatTextVLayout">
+                                   <property name="spacing">
+                                    <number>2</number>
+                                   </property>
+                                   <item>
+                                    <widget class="QLabel" name="devTimeFormatLabel">
+                                     <property name="text">
+                                      <string>24-Hour Time</string>
+                                     </property>
+                                    </widget>
+                                   </item>
+                                   <item>
+                                    <widget class="QLabel" name="devTimeFormatDesc">
+                                     <property name="text">
+                                      <string>Use 24-hour time format instead of 12-hour</string>
+                                     </property>
+                                     <property name="wordWrap">
+                                      <bool>true</bool>
+                                     </property>
+                                    </widget>
+                                   </item>
+                                  </layout>
+                                 </item>
+                                 <item>
+                                  <spacer name="horizontalSpacer_timeFormat">
+                                   <property name="orientation">
+                                    <enum>Qt::Orientation::Horizontal</enum>
+                                   </property>
+                                   <property name="sizeHint" stdset="0">
+                                    <size>
+                                     <width>40</width>
+                                     <height>20</height>
+                                    </size>
+                                   </property>
+                                  </spacer>
+                                 </item>
+                                 <item>
+                                  <widget class="ToggleSwitch" name="devTimeFormatToggle" native="true"/>
+                                 </item>
+                                </layout>
+                               </item>
+                              </layout>
+                             </widget>
+                             <widget class="QWidget" name="devConfigTab2">
+                              <attribute name="title">
+                               <string>Display</string>
+                              </attribute>
+                              <layout class="QVBoxLayout" name="devConfigTab2Layout">
+                               <property name="spacing">
+                                <number>8</number>
+                               </property>
+                               <property name="leftMargin">
+                                <number>12</number>
+                               </property>
+                               <property name="topMargin">
+                                <number>12</number>
+                               </property>
+                               <property name="rightMargin">
+                                <number>12</number>
+                               </property>
+                               <property name="bottomMargin">
+                                <number>12</number>
+                               </property>
+                               <item>
+                                <layout class="QVBoxLayout" name="devConfigSwitchList2"/>
+                               </item>
+                               <item>
+                                <spacer>
+                                 <property name="orientation">
+                                  <enum>Qt::Orientation::Vertical</enum>
+                                 </property>
+                                 <property name="sizeHint" stdset="0">
+                                  <size>
+                                   <width>0</width>
+                                   <height>0</height>
+                                  </size>
+                                 </property>
+                                </spacer>
+                               </item>
+                              </layout>
+                             </widget>
+                            </widget>
+                           </item>
+                           <item>
+                            <layout class="QVBoxLayout" name="devJsonPanelVLayout" stretch="0,1">
+                             <property name="spacing">
+                              <number>8</number>
+                             </property>
+                             <item>
+                              <layout class="QGridLayout" name="devBtnGridLayout">
+                               <property name="sizeConstraint">
+                                <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
+                               </property>
+                               <property name="spacing">
+                                <number>6</number>
+                               </property>
+                               <item row="1" column="3">
+                                <widget class="QPushButton" name="devBtnExportJson">
+                                 <property name="maximumSize">
+                                  <size>
+                                   <width>30</width>
+                                   <height>30</height>
+                                  </size>
+                                 </property>
+                                 <property name="toolTip">
+                                  <string>Export configuration to JSON file</string>
+                                 </property>
+                                 <property name="text">
+                                  <string/>
+                                 </property>
+                                 <property name="icon">
+                                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                                   <normaloff>:/icons/upload.svg</normaloff>:/icons/upload.svg</iconset>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="1" column="2">
+                                <widget class="QPushButton" name="devBtnImportJson">
+                                 <property name="maximumSize">
+                                  <size>
+                                   <width>30</width>
+                                   <height>30</height>
+                                  </size>
+                                 </property>
+                                 <property name="toolTip">
+                                  <string>Import configuration from JSON file</string>
+                                 </property>
+                                 <property name="text">
+                                  <string/>
+                                 </property>
+                                 <property name="icon">
+                                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                                   <normaloff>:/icons/download.svg</normaloff>:/icons/download.svg</iconset>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="1" column="0">
+                                <widget class="QPushButton" name="devBtnDeployConfig">
+                                 <property name="text">
+                                  <string>Deploy</string>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="1" column="6">
+                                <widget class="QPushButton" name="devBtnLoadPreset">
+                                 <property name="maximumSize">
+                                  <size>
+                                   <width>30</width>
+                                   <height>30</height>
+                                  </size>
+                                 </property>
+                                 <property name="toolTip">
+                                  <string>Load saved preset</string>
+                                 </property>
+                                 <property name="text">
+                                  <string/>
+                                 </property>
+                                 <property name="icon">
+                                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                                   <normaloff>:/icons/folder-open.svg</normaloff>:/icons/folder-open.svg</iconset>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="1" column="5">
+                                <widget class="QPushButton" name="devBtnSavePreset">
+                                 <property name="maximumSize">
+                                  <size>
+                                   <width>30</width>
+                                   <height>30</height>
+                                  </size>
+                                 </property>
+                                 <property name="toolTip">
+                                  <string>Save current configuration as preset</string>
+                                 </property>
+                                 <property name="text">
+                                  <string/>
+                                 </property>
+                                 <property name="icon">
+                                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                                   <normaloff>:/icons/document-save.svg</normaloff>:/icons/document-save.svg</iconset>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="1" column="1">
+                                <spacer name="horizontalSpacer_14">
+                                 <property name="orientation">
+                                  <enum>Qt::Orientation::Horizontal</enum>
+                                 </property>
+                                 <property name="sizeHint" stdset="0">
+                                  <size>
+                                   <width>40</width>
+                                   <height>20</height>
+                                  </size>
+                                 </property>
+                                </spacer>
+                               </item>
+                              </layout>
+                             </item>
+                             <item>
+                              <widget class="QTextEdit" name="devJsonView">
+                               <property name="sizePolicy">
+                                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                 <horstretch>0</horstretch>
+                                 <verstretch>1</verstretch>
+                                </sizepolicy>
+                               </property>
+                               <property name="minimumSize">
+                                <size>
+                                 <width>450</width>
+                                 <height>120</height>
+                                </size>
+                               </property>
+                               <property name="readOnly">
+                                <bool>true</bool>
+                               </property>
+                               <property name="placeholderText">
+                                <string>JSON output will appear here...</string>
+                               </property>
+                              </widget>
+                             </item>
+                            </layout>
+                           </item>
+                           <item>
+                            <spacer name="horizontalSpacer_5">
+                             <property name="orientation">
+                              <enum>Qt::Orientation::Horizontal</enum>
+                             </property>
+                             <property name="sizeHint" stdset="0">
+                              <size>
+                               <width>40</width>
+                               <height>20</height>
+                              </size>
+                             </property>
+                            </spacer>
+                           </item>
+                          </layout>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <spacer name="horizontalSpacer_12">
+                         <property name="orientation">
+                          <enum>Qt::Orientation::Horizontal</enum>
+                         </property>
+                         <property name="sizeHint" stdset="0">
+                          <size>
+                           <width>40</width>
+                           <height>20</height>
+                          </size>
+                         </property>
+                        </spacer>
+                       </item>
+                      </layout>
+                     </item>
+                     <item>
+                      <spacer>
+                       <property name="orientation">
+                        <enum>Qt::Orientation::Vertical</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                    </layout>
+                   </widget>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="devPageDevConfig">
+                <attribute name="title">
+                 <string>Device Config</string>
+                </attribute>
+               </widget>
+               <widget class="QWidget" name="devPageAppInstaller">
+                <attribute name="title">
+                 <string>App Installer</string>
+                </attribute>
+               </widget>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
-      <widget class="QWidget" name="terminalContainer" native="true">
+      <widget class="QWidget" name="terminalContainer">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -2348,6 +4129,13 @@ QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color
    </property>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ToggleSwitch</class>
+   <extends>QWidget</extends>
+   <header>toggleswitch.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc"/>
  </resources>
