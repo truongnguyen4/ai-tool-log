@@ -23,6 +23,8 @@ public:
     
 private:
     QRegularExpression m_regex;
+    mutable int m_cachedYear = 0;
+    mutable qint64 m_cachedYearStampMs = 0;
 };
 
 #endif // THREADTIMELOGCONVERTER_H

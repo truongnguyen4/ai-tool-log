@@ -10,6 +10,9 @@
 #include <QProcess>
 
 #include "adbmanager.h"
+#include "qsettingspresetstore.h"
+
+class PresetStore;
 
 // ---------------------------------------------------------------------------
 // DeviceGroup — a named group that holds device serial IDs.
@@ -98,11 +101,14 @@ public:
     QString savedWifiPassword() const;
     void saveWifiCredentials(const QString &ssid, const QString &password);
 
-    // Configuration preset storage.
+    // Configuration preset storage. Backed by QSettingsPresetStore.
     QStringList listConfigPresets();
     bool saveConfigPreset(const QString &name, const QByteArray &jsonData);
     QByteArray loadConfigPreset(const QString &name);
     bool deleteConfigPreset(const QString &name);
+
+    /** Underlying preset store (for use with shared PresetDialogs). */
+    PresetStore &configPresetStore();
 
 signals:
     // Emitted whenever the device list or any group assignment changes.
@@ -124,6 +130,7 @@ private:
     QList<AdbDevice>            m_connectedDevices;
     QMap<QString, QStringList>  m_groups;     // groupName -> list of deviceIds
     QSettings                   m_settings;
+    QSettingsPresetStore        m_configPresets;
 };
 
 #endif // DEVICESMANAGER_H

@@ -1,9 +1,22 @@
 #include "propertydefinitionmodel.h"
+#include "blinksweep.h"
 #include "tableconfig.h"
+#include <QBrush>
+#include <QColor>
+#include <QSet>
+#include <QTimer>
 
 PropertyDefinitionModel::PropertyDefinitionModel(QObject *parent)
     : QAbstractTableModel(parent)
 {
+    m_clock.start();
+    m_blinkSweep = new QTimer(this);
+    BlinkSweep::installForModel(m_blinkSweep, &m_blinkUntil, &m_clock, this);
+}
+
+void PropertyDefinitionModel::scheduleBlinkSweep()
+{
+    if (!m_blinkSweep->isActive()) m_blinkSweep->start();
 }
 
 int PropertyDefinitionModel::rowCount(const QModelIndex &parent) const
@@ -49,6 +62,11 @@ QVariant PropertyDefinitionModel::data(const QModelIndex &index, int role) const
             index.column() == TableConfig::PropertyDefColumns::READ_ONLY) {
             return Qt::AlignCenter;
         }
+    }
+    else if (role == Qt::BackgroundRole) {
+        const auto it = m_blinkUntil.constFind(prop.id);
+        if (it != m_blinkUntil.constEnd() && it.value() > m_clock.elapsed())
+            return QBrush(QColor("#1f4d7a"));
     }
     
     return QVariant();
@@ -104,16 +122,20 @@ void PropertyDefinitionModel::addPropertyDefinition(const PropertyDefinition &pr
 void PropertyDefinitionModel::updatePropertyDefinitions(const QVector<PropertyDefinition> &properties, bool allowInsert)
 {
     bool changed = false;
+    QSet<QString> blinkKeys;
 
     for (const PropertyDefinition &newEntry : properties) {
         bool found = false;
         for (int i = 0; i < m_properties.size(); ++i) {
             if (m_properties[i].id == newEntry.id) {
+                const QString prevValue = m_properties[i].value;
                 if (allowInsert) {
                     m_properties[i] = newEntry;
                 } else {
                     m_properties[i].value = newEntry.value;
                 }
+                if (prevValue != newEntry.value)
+                    blinkKeys.insert(newEntry.id);
                 found   = true;
                 changed = true;
                 break;
@@ -128,13 +150,19 @@ void PropertyDefinitionModel::updatePropertyDefinitions(const QVector<PropertyDe
     if (!changed)
         return;
 
+    if (!blinkKeys.isEmpty()) {
+        const qint64 deadline = m_clock.elapsed() + 1000;
+        for (const QString &k : blinkKeys) m_blinkUntil.insert(k, deadline);
+        scheduleBlinkSweep();
+    }
+
     if (allowInsert) {
         beginResetModel();
         endResetModel();
     } else {
         m_updatingFromSocket = true;
-        emit dataChanged(index(0, TableConfig::PropertyDefColumns::VALUE),
-                         index(rowCount() - 1, TableConfig::PropertyDefColumns::VALUE));
+        emit dataChanged(index(0, 0),
+                         index(rowCount() - 1, columnCount() - 1));
         m_updatingFromSocket = false;
     }
 }
@@ -143,14 +171,22 @@ void PropertyDefinitionModel::updatePropertyDefinition(int row, const PropertyDe
 {
     if (row < 0 || row >= m_properties.size())
         return;
-    
+
+    const QString prevValue = m_properties[row].value;
+
     // Update the property definition at the specified row
     m_properties[row] = property;
-    
+
+    // Trigger blink highlight if the value actually changed.
+    if (prevValue != property.value && !property.id.isEmpty()) {
+        m_blinkUntil.insert(property.id, m_clock.elapsed() + 1000);
+        scheduleBlinkSweep();
+    }
+
     // Emit dataChanged for the entire row
     QModelIndex topLeft = index(row, 0);
     QModelIndex bottomRight = index(row, TableConfig::PropertyDefColumns::TOTAL_COLUMNS - 1);
-    emit dataChanged(topLeft, bottomRight, {Qt::DisplayRole, Qt::EditRole});
+    emit dataChanged(topLeft, bottomRight, {Qt::DisplayRole, Qt::EditRole, Qt::BackgroundRole});
 }
 
 void PropertyDefinitionModel::removePropertyDefinition(int row)

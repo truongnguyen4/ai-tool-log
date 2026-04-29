@@ -2,19 +2,17 @@
 #define LOGFILTER_H
 
 #include "ilogfilter.h"
-#include <QRegularExpression>
 
 class LogFilter : public ILogFilter
 {
 public:
     LogFilter() = default;
     ~LogFilter() override = default;
-    
+
     bool passesFilter(const LogEntry &entry, const FilterCriteria &criteria) const override;
-    
-private:
-    bool matchesParsedFilter(const QString &value, const ParsedFilter &pf,
-                             bool exactMatch = false) const;
+
+    // Maps a log-level letter ("V"/"D"/"I"/"W"/"E"/"A") to a 0..5 ordinal,
+    // or -1 if unrecognized. Public so LogFilterController can reuse it.
     static int levelIndex(const QString &level);
 };
 

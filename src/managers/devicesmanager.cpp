@@ -1,8 +1,10 @@
 #include "devicesmanager.h"
 #include "adbmanager.h"
 #include "adbcommand.h"
+#include "adbexecutor.h"
+#include "devicedetailsconverter.h"
+#include "presetstore.h"
 #include <QDebug>
-#include <QRegularExpression>
 #include <QThread>
 #include <QtConcurrent/QtConcurrent>
 
@@ -12,6 +14,7 @@ const QString DevicesManager::kUnknownGroup = QStringLiteral("Unknown");
 DevicesManager::DevicesManager(QObject *parent)
     : QObject(parent)
     , m_settings(QStringLiteral("ToolLogPro"), QStringLiteral("DeviceGroups"))
+    , m_configPresets(QStringLiteral("ConfigPresets"), &m_settings)
 {
     loadGroupsFromSettings();
 
@@ -150,35 +153,25 @@ void DevicesManager::fetchDeviceDetails(const QString &deviceId)
 {
     const QString adbPath = AdbManager::instance().getAdbPath();
 
-    QtConcurrent::run([this, deviceId, adbPath]() {
+    (void)QtConcurrent::run([this, deviceId, adbPath]() {
         DeviceDetails details;
         details.serial = deviceId;
 
         // Helper: run a single adb command and return trimmed stdout.
         auto runAdb = [&](const QStringList &args) -> QString {
-            QProcess proc;
-            proc.start(adbPath, args);
-            if (!proc.waitForFinished(3000)) return {};
-            return QString::fromUtf8(proc.readAllStandardOutput()).trimmed();
+            const AdbProcessResult result = AdbExecutor::run(adbPath, args, 3000);
+            return result.started && !result.timedOut
+                       ? result.standardOutput.trimmed()
+                       : QString();
         };
 
         // --- Battery level ---
-        {
-            const QString out = runAdb(AdbCommand::getBatteryInfo(deviceId));
-            QRegularExpression re(QStringLiteral("level:\\s*(\\d+)"));
-            auto m = re.match(out);
-            if (m.hasMatch())
-                details.batteryLevel = m.captured(1) + QStringLiteral("%");
-        }
+        details.batteryLevel = DeviceDetailsConverter::convertBatteryLevel(
+            runAdb(AdbCommand::getBatteryInfo(deviceId)));
 
         // --- IP address ---
-        {
-            const QString out = runAdb(AdbCommand::getIpRoute(deviceId));
-            QRegularExpression re(QStringLiteral("src\\s+(\\d+\\.\\d+\\.\\d+\\.\\d+)"));
-            auto m = re.match(out);
-            if (m.hasMatch())
-                details.ipAddress = m.captured(1);
-        }
+        details.ipAddress = DeviceDetailsConverter::convertIpFromRoute(
+            runAdb(AdbCommand::getIpRoute(deviceId)));
 
         // --- System properties via getprop ---
         auto getProp = [&](const QString &prop) -> QString {
@@ -195,24 +188,12 @@ void DevicesManager::fetchDeviceDetails(const QString &deviceId)
         details.buildNumber     = getProp(QStringLiteral("ro.build.display.id"));
 
         // --- Kernel version ---
-        {
-            const QString out = runAdb(AdbCommand::getKernelVersion(deviceId));
-            if (!out.isEmpty()) {
-                // "Linux version 5.10.157-..." -- take first two words after "Linux version"
-                QRegularExpression re(QStringLiteral("Linux version\\s+(\\S+)"));
-                auto m = re.match(out);
-                details.kernelVersion = m.hasMatch() ? m.captured(1) : out.left(60);
-            }
-        }
+        details.kernelVersion = DeviceDetailsConverter::convertKernelVersion(
+            runAdb(AdbCommand::getKernelVersion(deviceId)));
 
         // --- Network status (WiFi) ---
-        {
-            const QString out = runAdb(AdbCommand::getWifiStatus(deviceId));
-            if (out.trimmed() == QStringLiteral("1"))
-                details.networkStatus = QStringLiteral("Connected");
-            else
-                details.networkStatus = QStringLiteral("Disconnected");
-        }
+        details.networkStatus = DeviceDetailsConverter::convertWifiStatus(
+            runAdb(AdbCommand::getWifiStatus(deviceId)));
 
         // Fill empty fields with N/A
         auto fallback = [](QString &s) { if (s.isEmpty()) s = QStringLiteral("N/A"); };
@@ -265,10 +246,8 @@ void DevicesManager::saveGroupsToSettings()
 void DevicesManager::runAdbCommand(const QStringList &args)
 {
     const QString adbPath = AdbManager::instance().getAdbPath();
-    QtConcurrent::run([adbPath, args]() {
-        QProcess proc;
-        proc.start(adbPath, args);
-        proc.waitForFinished(10000);
+    (void)QtConcurrent::run([adbPath, args]() {
+        (void)AdbExecutor::run(adbPath, args, 10000);
     });
 }
 
@@ -277,23 +256,21 @@ void DevicesManager::enableAdbWireless(const QString &deviceId)
 {
     const QString adbPath = AdbManager::instance().getAdbPath();
 
-    QtConcurrent::run([this, adbPath, deviceId]() {
+    (void)QtConcurrent::run([this, adbPath, deviceId]() {
         auto runAdb = [&](const QStringList &args) -> QString {
-            QProcess proc;
-            proc.start(adbPath, args);
-            if (!proc.waitForFinished(5000)) return {};
-            return QString::fromUtf8(proc.readAllStandardOutput()).trimmed();
+            const AdbProcessResult result = AdbExecutor::run(adbPath, args, 5000);
+            return result.started && !result.timedOut
+                       ? result.standardOutput.trimmed()
+                       : QString();
         };
 
         // 1) Get device IP address first
-        const QString ipOut = runAdb(AdbCommand::getIpRoute(deviceId));
-        QRegularExpression re(QStringLiteral("src\\s+(\\d+\\.\\d+\\.\\d+\\.\\d+)"));
-        auto m = re.match(ipOut);
-        if (!m.hasMatch()) {
+        const QString ip = DeviceDetailsConverter::convertIpFromRoute(
+            runAdb(AdbCommand::getIpRoute(deviceId)));
+        if (ip.isEmpty()) {
             qWarning() << "enableAdbWireless: could not determine device IP";
             return;
         }
-        const QString ip = m.captured(1);
 
         // 2) Switch device to TCP/IP mode
         runAdb(AdbCommand::tcpip(deviceId));
@@ -330,83 +307,31 @@ void DevicesManager::saveWifiCredentials(const QString &ssid, const QString &pas
 // ---------------------------------------------------------------------------
 QStringList DevicesManager::listConfigPresets()
 {
-    QStringList names;
-    const int count = m_settings.beginReadArray(QStringLiteral("ConfigPresets"));
-    for (int i = 0; i < count; ++i) {
-        m_settings.setArrayIndex(i);
-        names << m_settings.value(QStringLiteral("name")).toString();
-    }
-    m_settings.endArray();
-    return names;
+    return m_configPresets.listPresets();
 }
 
 // ---------------------------------------------------------------------------
 bool DevicesManager::saveConfigPreset(const QString &name, const QByteArray &jsonData)
 {
-    // Load existing presets
-    QList<QPair<QString, QByteArray>> presets;
-    const int count = m_settings.beginReadArray(QStringLiteral("ConfigPresets"));
-    for (int i = 0; i < count; ++i) {
-        m_settings.setArrayIndex(i);
-        const QString n = m_settings.value(QStringLiteral("name")).toString();
-        const QByteArray d = m_settings.value(QStringLiteral("data")).toByteArray();
-        if (n != name) // skip if overwriting
-            presets.append({n, d});
-    }
-    m_settings.endArray();
-
-    // Append new/updated preset
-    presets.append({name, jsonData});
-
-    // Write back
-    m_settings.beginWriteArray(QStringLiteral("ConfigPresets"), presets.size());
-    for (int i = 0; i < presets.size(); ++i) {
-        m_settings.setArrayIndex(i);
-        m_settings.setValue(QStringLiteral("name"), presets[i].first);
-        m_settings.setValue(QStringLiteral("data"), presets[i].second);
-    }
-    m_settings.endArray();
-    m_settings.sync();
-    return true;
+    QString err;
+    return m_configPresets.savePreset(name, jsonData, err);
 }
 
 // ---------------------------------------------------------------------------
 QByteArray DevicesManager::loadConfigPreset(const QString &name)
 {
-    const int count = m_settings.beginReadArray(QStringLiteral("ConfigPresets"));
-    QByteArray result;
-    for (int i = 0; i < count; ++i) {
-        m_settings.setArrayIndex(i);
-        if (m_settings.value(QStringLiteral("name")).toString() == name) {
-            result = m_settings.value(QStringLiteral("data")).toByteArray();
-            break;
-        }
-    }
-    m_settings.endArray();
-    return result;
+    return m_configPresets.loadPreset(name);
 }
 
 // ---------------------------------------------------------------------------
 bool DevicesManager::deleteConfigPreset(const QString &name)
 {
-    QList<QPair<QString, QByteArray>> presets;
-    const int count = m_settings.beginReadArray(QStringLiteral("ConfigPresets"));
-    for (int i = 0; i < count; ++i) {
-        m_settings.setArrayIndex(i);
-        const QString n = m_settings.value(QStringLiteral("name")).toString();
-        const QByteArray d = m_settings.value(QStringLiteral("data")).toByteArray();
-        if (n != name)
-            presets.append({n, d});
-    }
-    m_settings.endArray();
+    QString err;
+    return m_configPresets.deletePreset(name, err);
+}
 
-    m_settings.beginWriteArray(QStringLiteral("ConfigPresets"), presets.size());
-    for (int i = 0; i < presets.size(); ++i) {
-        m_settings.setArrayIndex(i);
-        m_settings.setValue(QStringLiteral("name"), presets[i].first);
-        m_settings.setValue(QStringLiteral("data"), presets[i].second);
-    }
-    m_settings.endArray();
-    m_settings.sync();
-    return true;
+// ---------------------------------------------------------------------------
+PresetStore &DevicesManager::configPresetStore()
+{
+    return m_configPresets;
 }

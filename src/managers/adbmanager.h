@@ -6,10 +6,10 @@
 #include <QStringList>
 #include <QProcess>
 #include <QTimer>
-#include <QMap>
 #include "settingsmodel.h"
 #include "propertiesmodel.h"
 #include "propertydefinition.h"
+#include <QMap>
 
 struct AdbDevice {
     QString id;
@@ -57,11 +57,6 @@ public:
     // Run `adb shell cmd cradle_manager <args>` asynchronously
     void runCradleCommand(const QString &deviceId, const QStringList &args);
 
-    // Run `adb reverse tcp:<devicePort> tcp:<hostPort>` so the Android device
-    // can reach our SocketServer.  Fire-and-forget: errors are logged only.
-    void setupReversePort(const QString &deviceId, quint16 devicePort = 8080, quint16 hostPort = 5555);
-    void removeReversePort(const QString &deviceId, quint16 devicePort = 8080);
-
     // --- Async save operations (Issue #7) ---
     void saveSettingAsync(int row, const QString &deviceId,
                           const QString &group, const QString &setting,
@@ -74,6 +69,12 @@ public:
                                     QString &value, QString &error);
     bool setPropertyDefinitionValue(const QString &deviceId, const QString &propertyId,
                                     const QString &value, QString &error);
+
+    // --- Single-item synchronous fetchers (used by filtered monitoring) ---
+    bool getSettingValue(const QString &deviceId, const QString &group, const QString &setting,
+                         QString &value, QString &error);
+    bool getPropertyValue(const QString &deviceId, const QString &property,
+                          QString &value, QString &error);
 
 signals:
     // Device
@@ -116,6 +117,7 @@ private:
 
     void detectDevices();
     void parseDeviceList(const QString &output);
+    void runPendingDumpsysRequest();
 
     QString      m_adbPath;
     QProcess    *m_logcatProcess     = nullptr;
@@ -126,6 +128,10 @@ private:
     bool         m_logcatRunning     = false;
     bool         m_dmesgRunning      = false;
     bool         m_dmesgUserStopped  = false;
+    bool         m_detectInFlight    = false;
+    bool         m_dumpsysInFlight   = false;
+    QString      m_pendingDumpsysDeviceId;
+    QString      m_pendingDumpsysArgs;
 };
 
 #endif // ADBMANAGER_H

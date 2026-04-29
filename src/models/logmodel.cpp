@@ -1,11 +1,21 @@
 #include "logmodel.h"
 #include "tableconfig.h"
+#include "colorscheme.h"
 #include <QFont>
 
 LogModel::LogModel(QObject *parent)
     : QAbstractTableModel(parent)
     , m_markedRows(nullptr)
-{}
+{
+    // Repaint when the user switches theme.
+    connect(&ColorScheme::instance(), &ColorScheme::modeChanged,
+            this, [this]() {
+                if (m_logs.isEmpty()) return;
+                emit dataChanged(index(0, 0),
+                                 index(m_logs.size() - 1, columnCount() - 1),
+                                 { Qt::ForegroundRole, Qt::BackgroundRole });
+            });
+}
 
 int LogModel::rowCount(const QModelIndex &parent) const
 {
@@ -59,7 +69,7 @@ QVariant LogModel::data(const QModelIndex &index, int role) const
     else if (role == Qt::BackgroundRole) {
         // Highlight marked rows
         if (m_markedRows && m_markedRows->contains(index.row())) {
-            return QColor("#1a3a80"); // Navy — matches the table selection palette
+            return ColorScheme::instance().markedRowBackground();
         }
     }
 
@@ -114,8 +124,7 @@ void LogModel::addLogs(const QVector<LogEntry> &entries)
     const int last  = first + entries.size() - 1;
     beginInsertRows(QModelIndex(), first, last);
     m_logs.reserve(m_logs.size() + entries.size());
-    for (const LogEntry &e : entries)
-        m_logs.append(e);
+    m_logs.append(entries);
     endInsertRows();
 }
 
@@ -147,11 +156,5 @@ void LogModel::setMarkedRows(const QSet<int> *markedRows)
 
 QColor LogModel::getLevelColor(const QString &level) const
 {
-    if (level == "V") return QColor("#9ca3af"); // Verbose - Gray
-    if (level == "D") return QColor("#60a5fa"); // Debug - Blue
-    if (level == "I") return QColor("#34d399"); // Info - Green
-    if (level == "W") return QColor("#fbbf24"); // Warn - Yellow
-    if (level == "E") return QColor("#f87171"); // Error - Red
-    if (level == "A") return QColor("#c084fc"); // Assert - Purple
-    return QColor("#CCCCCC");
+    return ColorScheme::instance().levelColor(level);
 }

@@ -1,11 +1,19 @@
 #include "marklogmodel.h"
 #include "tableconfig.h"
+#include "colorscheme.h"
 #include <QFont>
 #include <QDateTime>
 
 MarkLogModel::MarkLogModel(QObject *parent)
     : QAbstractTableModel(parent)
 {
+    connect(&ColorScheme::instance(), &ColorScheme::modeChanged,
+            this, [this]() {
+                if (m_markedLogs.isEmpty()) return;
+                emit dataChanged(index(0, 0),
+                                 index(m_markedLogs.size() - 1, columnCount() - 1),
+                                 { Qt::ForegroundRole, Qt::BackgroundRole });
+            });
 }
 
 int MarkLogModel::rowCount(const QModelIndex &parent) const
@@ -65,7 +73,7 @@ QVariant MarkLogModel::data(const QModelIndex &index, int role) const
     else if (role == Qt::BackgroundRole) {
         // Highlight the anchor row with a subtle teal tint
         if (index.row() == m_anchorRow)
-            return QColor("#1a3a4a"); // dark teal — marks the T=0 anchor
+            return ColorScheme::instance().anchorRowBackground();
     }
     else if (role == Qt::ForegroundRole) {
         return getLevelColor(entry.level);
@@ -199,11 +207,5 @@ void MarkLogModel::setAnchorRow(int row)
 
 QColor MarkLogModel::getLevelColor(const QString &level) const
 {
-    if (level == "V") return QColor("#9ca3af");      // Gray
-    else if (level == "D") return QColor("#60a5fa"); // Blue
-    else if (level == "I") return QColor("#34d399"); // Green
-    else if (level == "W") return QColor("#fbbf24"); // Yellow
-    else if (level == "E") return QColor("#f87171"); // Red
-    else if (level == "A") return QColor("#c084fc"); // Purple
-    return QColor("#cccccc");
+    return ColorScheme::instance().levelColor(level);
 }

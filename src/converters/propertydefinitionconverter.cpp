@@ -1,7 +1,7 @@
 #include "propertydefinitionconverter.h"
 #include <QRegularExpression>
 
-PropertyDefinition PropertyDefinitionConverter::parseLine(const QString &line)
+PropertyDefinition PropertyDefinitionConverter::convertLine(const QString &line)
 {
     PropertyDefinition prop;
     const QString trimmed = line.trimmed();
@@ -43,13 +43,13 @@ PropertyDefinition PropertyDefinitionConverter::parseLine(const QString &line)
     return prop;
 }
 
-QVector<PropertyDefinition> PropertyDefinitionConverter::parseOutput(const QString &output)
+QVector<PropertyDefinition> PropertyDefinitionConverter::convertOutput(const QString &output)
 {
     QVector<PropertyDefinition> propertyDefinitions;
     QStringList lines = output.split('\n', Qt::SkipEmptyParts);
     
     for (const QString &line : lines) {
-        PropertyDefinition prop = parseLine(line);
+        PropertyDefinition prop = convertLine(line);
         
         // Add property if it has at minimum a name
         if (prop.isValid()) {

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Activity / live-monitor icon: stylized signal waveform (heartbeat).
+     Modern, minimal, instantly readable as "live readings". White stroke
+     so it works on both idle and active button backgrounds. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+     fill="none" stroke="#ffffff" stroke-width="2.2"
+     stroke-linecap="round" stroke-linejoin="round">
+  <polyline points="3,12 7,12 9,7 12,17 15,9 17,12 21,12"/>
+</svg>

@@ -1,9 +1,22 @@
 #include "propertiesmodel.h"
+#include "blinksweep.h"
 #include "tableconfig.h"
+#include <QBrush>
+#include <QColor>
+#include <QSet>
+#include <QTimer>
 
 PropertiesModel::PropertiesModel(QObject *parent)
     : QAbstractTableModel(parent), m_isFiltered(false)
 {
+    m_clock.start();
+    m_blinkSweep = new QTimer(this);
+    BlinkSweep::installForModel(m_blinkSweep, &m_blinkUntil, &m_clock, this);
+}
+
+void PropertiesModel::scheduleBlinkSweep()
+{
+    if (!m_blinkSweep->isActive()) m_blinkSweep->start();
 }
 
 int PropertiesModel::rowCount(const QModelIndex &parent) const
@@ -39,6 +52,12 @@ QVariant PropertiesModel::data(const QModelIndex &index, int role) const
         case ACTION: return QString(); // Action column (for button)
         default: return QVariant();
         }
+    }
+
+    if (role == Qt::BackgroundRole) {
+        const auto it = m_blinkUntil.constFind(entry.property);
+        if (it != m_blinkUntil.constEnd() && it.value() > m_clock.elapsed())
+            return QBrush(QColor("#1f4d7a"));
     }
 
     return QVariant();
@@ -115,16 +134,20 @@ void PropertiesModel::setProperties(const QVector<PropertyEntry> &properties)
 void PropertiesModel::updateProperties(const QVector<PropertyEntry> &properties, bool allowInsert)
 {
     bool changed = false;
+    QSet<QString> blinkKeys;
 
     for (const PropertyEntry &newEntry : properties) {
         bool found = false;
         for (int i = 0; i < m_allProperties.size(); ++i) {
             if (m_allProperties[i].property == newEntry.property) {
-                m_allProperties[i].value = newEntry.value;
+                if (m_allProperties[i].value != newEntry.value) {
+                    blinkKeys.insert(m_allProperties[i].property);
+                    m_allProperties[i].value = newEntry.value;
+                    changed = true;
+                }
                 if (allowInsert)
                     m_allProperties[i].line = newEntry.line;
-                found   = true;
-                changed = true;
+                found = true;
                 break;
             }
         }
@@ -136,6 +159,12 @@ void PropertiesModel::updateProperties(const QVector<PropertyEntry> &properties,
 
     if (!changed)
         return;
+
+    if (!blinkKeys.isEmpty()) {
+        const qint64 deadline = m_clock.elapsed() + 1000;
+        for (const QString &k : blinkKeys) m_blinkUntil.insert(k, deadline);
+        scheduleBlinkSweep();
+    }
 
     if (allowInsert) {
         if (m_isFiltered)
@@ -157,8 +186,8 @@ void PropertiesModel::updateProperties(const QVector<PropertyEntry> &properties,
         }
         const int rows = rowCount();
         if (rows > 0) {
-            emit dataChanged(index(0, TableConfig::PropertiesColumns::VALUE),
-                             index(rows - 1, TableConfig::PropertiesColumns::VALUE));
+            emit dataChanged(index(0, 0),
+                             index(rows - 1, columnCount() - 1));
         }
     }
 }
@@ -166,6 +195,11 @@ void PropertiesModel::updateProperties(const QVector<PropertyEntry> &properties,
 const QVector<PropertyEntry>& PropertiesModel::getProperties() const
 {
     return m_allProperties;
+}
+
+const QVector<PropertyEntry>& PropertiesModel::visibleProperties() const
+{
+    return m_isFiltered ? m_filteredProperties : m_allProperties;
 }
 
 void PropertiesModel::applyFilter(const QString &nameFilter, const QString &valueFilter)
@@ -182,10 +216,12 @@ void PropertiesModel::applyFilter(const QString &nameFilter, const QString &valu
         m_isFiltered = true;
         m_filteredProperties.clear();
         
-        ConfigFilterCriteria criteria;
-        criteria.nameFilter = nameFilter;
+        ValueFilterCriteria criteria;
+        criteria.nameFilter  = nameFilter;
+        criteria.parsedName  = ParsedFilter::build(nameFilter);
         criteria.valueFilter = valueFilter;
-        
+        criteria.parsedValue = ParsedFilter::build(valueFilter);
+
         for (const PropertyEntry &entry : m_allProperties) {
             // Filter by PROPERTY name and by VALUE
             if (m_filter.passesFilter(entry.property, entry.value, criteria)) {

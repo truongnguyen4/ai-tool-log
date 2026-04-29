@@ -10,5 +10,11 @@
         <file>icons/plus.svg</file>
         <file>icons/download.svg</file>
         <file>icons/upload.svg</file>
+        <file>icons/auto-scroll.svg</file>
+        <file>icons/activity.svg</file>
+        <file>icons/tab-logcat.svg</file>
+        <file>icons/tab-android.svg</file>
+        <file>icons/tab-sdk.svg</file>
+        <file>icons/tab-devices.svg</file>
     </qresource>
 </RCC>

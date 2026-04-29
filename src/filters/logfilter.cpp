@@ -1,72 +1,33 @@
 #include "logfilter.h"
+#include "filterengine.h"
 
 bool LogFilter::passesFilter(const LogEntry &entry, const FilterCriteria &criteria) const
 {
-    // Keyword regex: matched against tag, message, or package
-    if (!criteria.keywordFilter.isEmpty() && criteria.keywordRegex.isValid()) {
-        if (!criteria.keywordRegex.match(entry.tag).hasMatch()
-         && !criteria.keywordRegex.match(entry.message).hasMatch()
-         && !criteria.keywordRegex.match(entry.package).hasMatch())
-            return false;
-    }
-
-    // String filters – use pre-parsed form (zero allocations per entry)
-    if (criteria.parsedMessage.active
-            && !matchesParsedFilter(entry.message, criteria.parsedMessage))
+    // Keyword regex: matched against tag, message, or package.
+    if (!criteria.keywordFilter.isEmpty()
+        && !FilterEngine::matchesRegex({entry.tag, entry.message, entry.package},
+                                       criteria.keywordRegex))
         return false;
 
-    if (criteria.parsedTag.active
-            && !matchesParsedFilter(entry.tag, criteria.parsedTag))
-        return false;
-
-    if (criteria.parsedPackage.active
-            && !matchesParsedFilter(entry.package, criteria.parsedPackage))
-        return false;
-
-    if (criteria.parsedPid.active
-            && !matchesParsedFilter(entry.pid, criteria.parsedPid, /*exactMatch=*/true))
-        return false;
-
-    if (criteria.parsedTid.active
-            && !matchesParsedFilter(entry.tid, criteria.parsedTid, /*exactMatch=*/true))
-        return false;
+    // String filters – use pre-parsed form (zero allocations per entry).
+    if (!FilterEngine::matchesLogic(entry.message, criteria.parsedMessage)) return false;
+    if (!FilterEngine::matchesLogic(entry.tag,     criteria.parsedTag))     return false;
+    if (!FilterEngine::matchesLogic(entry.package, criteria.parsedPackage)) return false;
+    if (!FilterEngine::matchesLogic(entry.pid,     criteria.parsedPid, /*exact=*/true)) return false;
+    if (!FilterEngine::matchesLogic(entry.tid,     criteria.parsedTid, /*exact=*/true)) return false;
 
     // Time range
     if (!criteria.startTime.isEmpty() && entry.time < criteria.startTime)
         return false;
-    if (!criteria.endTime.isEmpty() && entry.time > criteria.endTime)
+    if (!criteria.endTime.isEmpty()   && entry.time > criteria.endTime)
         return false;
 
     // Level filter – O(1) switch, no QStringList allocation
-    if (criteria.minLevelIndex >= 0) {
-        if (levelIndex(entry.level) < criteria.minLevelIndex)
-            return false;
-    }
+    if (criteria.minLevelIndex >= 0
+        && levelIndex(entry.level) < criteria.minLevelIndex)
+        return false;
 
     return true;
-}
-
-// ---------------------------------------------------------------------------
-// Fast path: pre-parsed filter tokens, no splitting or trimming
-// ---------------------------------------------------------------------------
-bool LogFilter::matchesParsedFilter(const QString &value, const ParsedFilter &pf,
-                                    bool exactMatch) const
-{
-    if (pf.op == FilterOperator::OR) {
-        for (const QString &part : pf.parts) {
-            if (exactMatch ? (value == part)
-                           : value.contains(part, Qt::CaseInsensitive))
-                return true;
-        }
-        return false;
-    } else {
-        for (const QString &part : pf.parts) {
-            if (exactMatch ? (value != part)
-                           : !value.contains(part, Qt::CaseInsensitive))
-                return false;
-        }
-        return true;
-    }
 }
 
 // ---------------------------------------------------------------------------

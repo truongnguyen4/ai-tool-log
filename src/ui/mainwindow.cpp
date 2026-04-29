@@ -26,7 +26,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    m_uiManager->teardownSocket();
     m_uiManager->persistFilterHistory();
     QMainWindow::closeEvent(event);
 }

@@ -3,7 +3,12 @@
 
 #include <QAbstractTableModel>
 #include <QVector>
+#include <QHash>
+#include <QString>
+#include <QElapsedTimer>
 #include "propertydefinition.h"
+
+class QTimer;
 
 class PropertyDefinitionModel : public QAbstractTableModel
 {
@@ -37,6 +42,11 @@ public:
 private:
     QVector<PropertyDefinition> m_properties;
     bool m_updatingFromSocket = false;
+
+    QHash<QString, qint64> m_blinkUntil;   // property id -> deadline ms
+    QElapsedTimer          m_clock;
+    QTimer                *m_blinkSweep = nullptr;
+    void scheduleBlinkSweep();
 };
 
 #endif // PROPERTYDEFINITIONMODEL_H

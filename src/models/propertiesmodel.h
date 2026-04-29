@@ -3,10 +3,13 @@
 
 #include <QAbstractTableModel>
 #include <QVector>
+#include <QHash>
 #include <QString>
-#include "iconfigfilter.h"
-#include "configfilter.h"
+#include <QElapsedTimer>
+#include "valuefilter.h"
 #include "propertyentry.h"
+
+class QTimer;
 
 class PropertiesModel : public QAbstractTableModel
 {
@@ -28,6 +31,9 @@ public:
     // allowInsert=false: update value-only for existing entries, no insertion (socket path).
     void updateProperties(const QVector<PropertyEntry> &properties, bool allowInsert = true);
     const QVector<PropertyEntry>& getProperties() const;
+    // Returns the rows currently visible in the table (filtered if a filter
+    // is active, otherwise all rows).
+    const QVector<PropertyEntry>& visibleProperties() const;
     
     void applyFilter(const QString &nameFilter, const QString &valueFilter = QString());
     void reapplyFilter();
@@ -36,10 +42,15 @@ public:
 private:
     QVector<PropertyEntry> m_allProperties;
     QVector<PropertyEntry> m_filteredProperties;
-    ConfigFilter m_filter;
+    ValueFilter m_filter;
     bool m_isFiltered;
     QString m_currentNameFilter;   // Store current name filter to reapply after update
     QString m_currentValueFilter;  // Store current value filter to reapply after update
+
+    QHash<QString, qint64> m_blinkUntil;
+    QElapsedTimer          m_clock;
+    QTimer                *m_blinkSweep = nullptr;
+    void scheduleBlinkSweep();
 };
 
 #endif // PROPERTIESMODEL_H

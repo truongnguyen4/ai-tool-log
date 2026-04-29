@@ -13,263 +13,6 @@
   <property name="windowTitle">
    <string>ToolLogPro</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">/* ── Dark theme — modern developer focus ─────────── */
-
-/* Base */
-QMainWindow, QDialog { background-color: #1e1e1e; color: #cccccc; }
-QWidget { background-color: #1e1e1e; color: #cccccc; }
-
-/* Line Edit */
-QLineEdit {
-    background-color: #3c3c3c;
-    border: 1px solid #3c3c3c;
-    border-radius: 4px;
-    padding: 4px 8px;
-    color: #cccccc;
-    selection-background-color: #1a3a80;
-}
-QLineEdit:hover    { border-color: #5a5a5f; }
-QLineEdit:focus    { border-color: #007acc; background-color: #3c3c3c; }
-QLineEdit:disabled { color: #6b6b6b; background-color: #2d2d30; border-color: #3e3e42; }
-
-/* Push Button */
-QPushButton {
-    background-color: #3a3a3a;
-    border: 1px solid #4a4a4a;
-    border-radius: 4px;
-    padding: 5px 12px;
-    color: #cccccc;
-}
-QPushButton:hover    { background-color: #454545; border-color: #5a5a5f; }
-QPushButton:pressed  { background-color: #2a2a2a; border-color: #007acc; }
-QPushButton:disabled { color: #6b6b6b; background-color: #2d2d30; border-color: #3e3e42; }
-
-QPushButton:checked       { background-color: #0e639c; border-color: #0e639c; color: white; }
-QPushButton:checked:hover { background-color: #1177bb; border-color: #1177bb; }
-
-QPushButton#btnResume       { background-color: #0e639c; border-color: #0e639c; color: white; }
-QPushButton#btnResume:hover { background-color: #1177bb; border-color: #1177bb; }
-QPushButton#btnAutoScroll:checked { background-color: #0e639c; border-color: #0e639c; }
-
-/* ComboBox */
-QComboBox {
-    background-color: #3c3c3c;
-    border: 1px solid #3c3c3c;
-    border-radius: 4px;
-    padding: 4px 8px;
-    color: #cccccc;
-}
-QComboBox:hover { border-color: #5a5a5f; }
-QComboBox:focus { border-color: #007acc; }
-QComboBox::drop-down { border: none; width: 18px; }
-QComboBox::down-arrow {
-    image: none;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 5px solid #9d9d9d;
-    width: 0;
-    height: 0;
-}
-QComboBox QAbstractItemView {
-    background-color: #252526;
-    color: #cccccc;
-    selection-background-color: #094771;
-    selection-color: white;
-    border: 1px solid #454545;
-    outline: none;
-}
-QComboBox QAbstractItemView::item {
-    background-color: #252526;
-    color: #cccccc;
-    padding: 5px 8px;
-    min-height: 22px;
-}
-QComboBox QAbstractItemView::item:hover    { background-color: #2a2d2e; }
-QComboBox QAbstractItemView::item:selected { background-color: #094771; color: white; }
-
-/* Table View */
-QTableView {
-    background-color: #1e1e1e;
-    alternate-background-color: #252526;
-    gridline-color: #2a2a2a;
-    color: #cccccc;
-    border: none;
-    selection-background-color: #1a3a80;
-}
-QTableView::item              { padding: 3px 6px; border: none; }
-QTableView::item:selected     { background-color: #1a3a80; color: #ffffff; }
-QTableView::item:focus        { background-color: #1a3a80; outline: none; }
-QTableView::item:hover:!selected { background-color: #2a2d2e; }
-
-QHeaderView { background-color: #252526; }
-QHeaderView::section {
-    background-color: #252526;
-    color: #8a8a8a;
-    padding: 5px 8px;
-    border: none;
-    border-right: 1px solid #3e3e42;
-    border-bottom: 1px solid #3e3e42;
-}
-
-/* RadioButton */
-QRadioButton { color: #cccccc; spacing: 6px; }
-QRadioButton::indicator { width: 14px; height: 14px; }
-QRadioButton::indicator:unchecked {
-    border: 1px solid #5a5a5f;
-    border-radius: 7px;
-    background-color: transparent;
-}
-QRadioButton::indicator:unchecked:hover { border-color: #007acc; }
-QRadioButton::indicator:checked {
-    border: 1px solid #007acc;
-    border-radius: 7px;
-    background-color: #007acc;
-}
-
-/* CheckBox */
-QCheckBox { color: #cccccc; spacing: 6px; }
-QCheckBox::indicator {
-    width: 14px;
-    height: 14px;
-    border: 1px solid #5a5a5f;
-    border-radius: 3px;
-    background-color: transparent;
-}
-QCheckBox::indicator:hover           { border-color: #007acc; }
-QCheckBox::indicator:checked         { background-color: #007acc; border-color: #007acc; }
-QCheckBox::indicator:checked:hover   { background-color: #1177bb; border-color: #1177bb; }
-
-/* Label */
-QLabel { color: #cccccc; background: transparent; }
-
-/* Group Box */
-QGroupBox {
-    border: 1px solid #2d2d30;
-    border-radius: 4px;
-    margin-top: 12px;
-    padding: 8px 8px 6px 8px;
-    color: #cccccc;
-}
-QGroupBox::title {
-    subcontrol-origin: margin;
-    subcontrol-position: top left;
-    left: 8px;
-    padding: 0 5px;
-    color: #8a8a8a;
-}
-
-/* Splitter */
-QSplitter::handle            { background-color: #2d2d30; }
-QSplitter::handle:horizontal { width: 3px; }
-QSplitter::handle:vertical   { height: 3px; }
-QSplitter::handle:hover      { background-color: #007acc; }
-
-/* Scroll Bars */
-QScrollBar:vertical {
-    border: none;
-    background-color: transparent;
-    width: 10px;
-}
-QScrollBar::handle:vertical {
-    background-color: #424242;
-    border-radius: 5px;
-    min-height: 24px;
-    margin: 2px;
-}
-QScrollBar::handle:vertical:hover   { background-color: #686868; }
-QScrollBar::handle:vertical:pressed { background-color: #9d9d9d; }
-
-QScrollBar:horizontal {
-    border: none;
-    background-color: transparent;
-    height: 10px;
-}
-QScrollBar::handle:horizontal {
-    background-color: #424242;
-    border-radius: 5px;
-    min-width: 24px;
-    margin: 2px;
-}
-QScrollBar::handle:horizontal:hover { background-color: #686868; }
-
-QScrollBar::add-line, QScrollBar::sub-line { border: none; background: none; }
-QScrollBar::add-page, QScrollBar::sub-page { background: none; }
-
-/* Tab Widget */
-QTabWidget::pane {
-    border: none;
-    border-top: 1px solid #3e3e42;
-    background-color: #1e1e1e;
-}
-QTabWidget::tab-bar { left: 0; }
-
-QTabBar { background-color: #252526; }
-QTabBar::tab {
-    background-color: transparent;
-    color: #9d9d9d;
-    border: none;
-    border-bottom: 2px solid transparent;
-    padding: 8px 16px;
-}
-QTabBar::tab:hover:!selected { color: #cccccc; background-color: #2a2d2e; }
-QTabBar::tab:selected        { color: #cccccc; border-bottom: 2px solid #007acc; }
-
-QTabBar::tab:left {
-    min-width: 110px;
-    min-height: 38px;
-    border-bottom: none;
-    border-right: 2px solid transparent;
-    padding: 10px 14px;
-}
-QTabBar::tab:left:selected        { border-right: 2px solid #007acc; border-bottom: none; }
-QTabBar::tab:left:hover:!selected { background-color: #2a2d2e; }
-
-/* Plain / Text Edit (output panels, cell content) */
-QPlainTextEdit, QTextEdit {
-    background-color: #1e1e1e;
-    border: 1px solid #3e3e42;
-    border-radius: 4px;
-    color: #d4d4d4;
-    selection-background-color: #1a3a80;
-    padding: 2px;
-}
-QPlainTextEdit:focus, QTextEdit:focus { border-color: #007acc; }
-
-/* Status Bar */
-QStatusBar {
-    background-color: #007acc;
-    color: white;
-    border-top: 1px solid #005a9e;
-}
-QStatusBar::item { border: none; }
-
-/* Tooltips */
-QToolTip {
-    background-color: #252526;
-    color: #cccccc;
-    border: 1px solid #454545;
-    border-radius: 4px;
-    padding: 4px 8px;
-}
-
-/* Log level radio colors — VS Code syntax palette */
-QRadioButton#radioVerbosePlus, QRadioButton#radioV { color: #9d9d9d; }
-QRadioButton#radioD { color: #569cd6; }
-QRadioButton#radioI { color: #4ec9b0; }
-QRadioButton#radioW { color: #ce9178; }
-QRadioButton#radioE { color: #f14c4c; }
-QRadioButton#radioA { color: #c586c0; }
-
-QRadioButton#radioVerbosePlus::indicator:checked,
-QRadioButton#radioV::indicator:checked { background-color: #9d9d9d; border-color: #9d9d9d; }
-QRadioButton#radioD::indicator:checked { background-color: #569cd6; border-color: #569cd6; }
-QRadioButton#radioI::indicator:checked { background-color: #4ec9b0; border-color: #4ec9b0; }
-QRadioButton#radioW::indicator:checked { background-color: #ce9178; border-color: #ce9178; }
-QRadioButton#radioE::indicator:checked { background-color: #f14c4c; border-color: #f14c4c; }
-QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color: #c586c0; }
-            </string>
-  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
@@ -343,29 +86,6 @@ QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color
          </size>
         </property>
        </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnToggleTerminal">
-        <property name="maximumSize">
-         <size>
-          <width>35</width>
-          <height>35</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
-          <normaloff>:/icons/terminal.svg</normaloff>:/icons/terminal.svg</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="btnAppSettings">
@@ -812,12 +532,19 @@ QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color
                 <widget class="QPushButton" name="btnAutoScroll">
                  <property name="maximumSize">
                   <size>
-                   <width>16777215</width>
+                   <width>35</width>
                    <height>35</height>
                   </size>
                  </property>
                  <property name="text">
-                  <string>Auto-Scroll</string>
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                   <normaloff>:/icons/auto-scroll.svg</normaloff>:/icons/auto-scroll.svg</iconset>
+                 </property>
+                 <property name="toolTip">
+                  <string>Auto-scroll: stick the log table to the newest line</string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -841,7 +568,7 @@ QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="btnToggleCellContent">
+                <widget class="QPushButton" name="btnFitRows">
                  <property name="maximumSize">
                   <size>
                    <width>16777215</width>
@@ -849,12 +576,50 @@ QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color
                   </size>
                  </property>
                  <property name="text">
-                  <string>Cell Content</string>
+                  <string>↕ Fit Rows</string>
+                 </property>
+                 <property name="toolTip">
+                  <string>Resize all rows to fit cell content (only available when capture is stopped)</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnSplitLog">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>35</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>⊟ Split</string>
+                 </property>
+                 <property name="toolTip">
+                  <string>Show a second log pane (Pane B) below the main one</string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
                  </property>
-                 <property name="checked">
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnSyncPanes">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>35</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>⇄ Sync</string>
+                 </property>
+                 <property name="toolTip">
+                  <string>When ON, filter/highlight/level changes apply to BOTH panes; when OFF, they apply only to the active pane</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                 <property name="visible">
                   <bool>false</bool>
                  </property>
                 </widget>
@@ -956,34 +721,6 @@ QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color
               </layout>
              </item>
              <item>
-              <widget class="QTextEdit" name="txtCellContent">
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>90</height>
-                </size>
-               </property>
-               <property name="visible">
-                <bool>false</bool>
-               </property>
-               <property name="lineWrapMode">
-                <enum>QTextEdit::LineWrapMode::WidgetWidth</enum>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-               <property name="placeholderText">
-                <string>Click on a cell to view its content...</string>
-               </property>
-              </widget>
-             </item>
-             <item>
               <widget class="QSplitter" name="splitterLogTables">
                <property name="orientation">
                 <enum>Qt::Orientation::Vertical</enum>
@@ -1018,9 +755,6 @@ QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color
                  </property>
                  <item>
                   <widget class="QWidget" name="markLogHeader" native="true">
-                   <property name="styleSheet">
-                    <string notr="true">background-color: #252526; border-bottom: 1px solid #3e3e42;</string>
-                   </property>
                    <layout class="QHBoxLayout" name="horizontalLayout_markLogHeader">
                     <property name="spacing">
                      <number>2</number>
@@ -1039,9 +773,6 @@ QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color
                     </property>
                     <item>
                      <widget class="QLabel" name="lblMarkLog">
-                      <property name="styleSheet">
-                       <string notr="true">color: #9d9d9d; font-weight: 600; padding: 3px 6px;</string>
-                      </property>
                       <property name="text">
                        <string>Marked</string>
                       </property>
@@ -1062,9 +793,6 @@ QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color
                     </item>
                     <item>
                      <widget class="QPushButton" name="btnClearAllMarked">
-                      <property name="styleSheet">
-                       <string notr="true">QPushButton { background: transparent; border: none; border-radius: 4px; } QPushButton:hover { background-color: rgba(255,255,255,35); }</string>
-                      </property>
                       <property name="text">
                        <string/>
                       </property>
@@ -2313,110 +2041,6 @@ QRadioButton#radioA::indicator:checked { background-color: #c586c0; border-color
         </layout>
        </widget>
        <widget class="QWidget" name="tabDevices">
-        <property name="styleSheet">
-         <string notr="true">
-#tabDevices { background-color: #1e1e1e; }
-#devSidebar { background-color: #252526; border-right: 1px solid #3e3e42; }
-#devRightPanel { background-color: #1e1e1e; }
-QSplitter#devSplitter::handle { background-color: #3e3e42; width: 1px; }
-#devLblAppName { color: #007acc; font-weight: bold; letter-spacing: 2px; }
-#devLblAppVersion { color: #8a8a8a; letter-spacing: 1px; }
-QPushButton#devBtnAddGroup { background-color: transparent; color: #007acc; border: 1px dashed #007acc; border-radius: 4px; padding: 4px 8px; }
-QPushButton#devBtnAddGroup:hover { background-color: #1a2a3a; }
-QScrollArea#devListScrollArea { background: transparent; border: none; }
-QScrollArea#devListScrollArea QScrollBar:vertical { width: 6px; background: transparent; }
-QScrollArea#devListScrollArea QScrollBar::handle:vertical { background: #3e3e42; border-radius: 3px; min-height: 20px; }
-QScrollArea#devListScrollArea QScrollBar::add-line:vertical,
-QScrollArea#devListScrollArea QScrollBar::sub-line:vertical { height: 0; }
-#devListContents { background: transparent; }
-#devNameLabel { color: #cccccc; font-weight: bold; }
-QTabWidget#devInnerTabWidget::pane { border: none; background: #1e1e1e; }
-QTabWidget#devInnerTabWidget QTabBar { background: #252526; }
-QTabWidget#devInnerTabWidget QTabBar::tab { background: #252526; color: #8a8a8a; border: none; border-bottom: 2px solid transparent; padding: 10px 20px; }
-QTabWidget#devInnerTabWidget QTabBar::tab:selected { color: #cccccc; border-bottom: 2px solid #007acc; }
-QTabWidget#devInnerTabWidget QTabBar::tab:hover:!selected { color: #cccccc; }
-QScrollArea#devDashScrollArea { background: #1e1e1e; border: none; }
-QScrollArea#devDashScrollArea QScrollBar:vertical { width: 8px; background: transparent; border: none; }
-QScrollArea#devDashScrollArea QScrollBar::handle:vertical { background: #3e3e42; border-radius: 4px; min-height: 24px; margin: 2px; }
-QScrollArea#devDashScrollArea QScrollBar::add-line:vertical,
-QScrollArea#devDashScrollArea QScrollBar::sub-line:vertical { height: 0; }
-#devDashContents { background-color: #1e1e1e; }
-#devInfoSep1, #devInfoSep2, #devInfoSep3 { color: #3e3e42; }
-#devBatteryTitle, #devIpTitle, #devNetworkTitle { color: #8a8a8a; letter-spacing: 1px; background: transparent; border: none; }
-#devBatteryValue, #devIpValue, #devNetworkValue { color: #cccccc; font-weight: bold; background: transparent; border: none; }
-#devBatteryIcon, #devIpIcon, #devNetworkIcon, #devWifiSsidIcon, #devWifiPassIcon { color: #8a8a8a; background: transparent; border: none; }
-#devQaTitle, #devSiTitle, #devConfigTitle, #devDeviceListTitle { color: #8a8a8a; font-weight: bold; letter-spacing: 1px; background: transparent; border: none; }
-#devWifiSsidTitle, #devWifiPassTitle { color: #8a8a8a; letter-spacing: 1px; background: transparent; border: none; }
-#devWifiSsidEdit, #devWifiPassEdit { background-color: #2d2d30; color: #cccccc; border: 1px solid #3e3e42; border-radius: 3px; padding: 4px 8px; }
-#devWifiSsidEdit:focus, #devWifiPassEdit:focus { border-color: #007acc; }
-#devSiManufacturerKey, #devSiModelKey, #devSiAndroidVersionKey, #devSiSdkVersionKey, #devSiBuildNumberKey, #devSiBuildFingerprintKey, #devSiSecurityPatchKey, #devSiKernelVersionKey, #devSiAbiKey { color: #8a8a8a; letter-spacing: 1px; background: transparent; border: none; border-bottom: 1px solid #3e3e42; padding: 4px 0; }
-#devSiManufacturerValue, #devSiModelValue, #devSiAndroidVersionValue, #devSiSdkVersionValue, #devSiBuildNumberValue, #devSiBuildFingerprintValue, #devSiSecurityPatchValue, #devSiKernelVersionValue, #devSiAbiValue { color: #cccccc; background: transparent; border: none; border-bottom: 1px solid #3e3e42; padding: 4px 0; }
-QTabWidget#devConfigTabWidget::pane { border: 1px solid #3e3e42; background: #252526; }
-QTabWidget#devConfigTabWidget QTabBar { background: #1e1e1e; }
-QTabWidget#devConfigTabWidget QTabBar::tab { background: #252526; color: #8a8a8a; border: none; border-bottom: 2px solid transparent; padding: 8px 16px; }
-QTabWidget#devConfigTabWidget QTabBar::tab:selected { color: #cccccc; border-bottom: 2px solid #007acc; }
-QTabWidget#devConfigTabWidget QTabBar::tab:hover:!selected { color: #cccccc; }
-QPushButton#devBtnDeployConfig { background-color: #007acc; color: #ffffff; border: none; border-radius: 4px; padding: 6px 16px; font-weight: bold; }
-QPushButton#devBtnDeployConfig:hover { background-color: #1a8ad4; }
-QPushButton#devBtnDeployConfig:pressed { background-color: #005a9e; }
-QPushButton#devBtnExportJson { background: transparent; border: none; padding: 4px; }
-QPushButton#devBtnExportJson:hover { background-color: #3e3e42; border-radius: 4px; }
-QPushButton#devBtnImportJson { background: transparent; border: none; padding: 4px; }
-QPushButton#devBtnImportJson:hover { background-color: #3e3e42; border-radius: 4px; }
-QPushButton#devBtnDeployConfig { background-color: #e67e22; color: #ffffff; border: none; border-radius: 4px; padding: 6px 16px; font-weight: bold; }
-QPushButton#devBtnDeployConfig:hover { background-color: #f0932b; }
-QPushButton#devBtnDeployConfig:pressed { background-color: #cc6d1a; }
-QPushButton#devBtnDeployConfig:disabled { background-color: #2d2d30; color: #5a5a5a; border: 1px solid #3e3e42; }
-QPushButton#devBtnSavePreset { background: transparent; border: none; padding: 4px; }
-QPushButton#devBtnSavePreset:hover { background-color: #3e3e42; border-radius: 4px; }
-QPushButton#devBtnLoadPreset { background: transparent; border: none; padding: 4px; }
-QPushButton#devBtnLoadPreset:hover { background-color: #3e3e42; border-radius: 4px; }
-QTextEdit#devJsonView { background-color: #1e1e1e; color: #d4d4d4; border: 1px solid #3e3e42; border-radius: 4px; font-family: monospace; }
-#devStayAwakeRow, #devAllowMockRow, #devVerifyAdbRow, #devLocaleRow, #devTimeFormatRow { background: #2d2d30; border: 1px solid #3e3e42; border-radius: 6px; }
-#devStayAwakeIcon, #devAllowMockIcon, #devVerifyAdbIcon, #devLocaleIcon, #devTimeFormatIcon { color: #cccccc; background: transparent; border: none; }
-#devStayAwakeLabel, #devAllowMockLabel, #devVerifyAdbLabel, #devLocaleLabel, #devTimeFormatLabel { color: #cccccc; font-weight: bold; background: transparent; border: none; }
-#devStayAwakeDesc, #devAllowMockDesc, #devVerifyAdbDesc, #devLocaleDesc, #devTimeFormatDesc { color: #8a8a8a; background: transparent; border: none; }
-#devLocaleEdit { background-color: #2d2d30; color: #cccccc; border: 1px solid #3e3e42; border-radius: 3px; padding: 4px 8px; }
-#devLocaleEdit:focus { border-color: #007acc; }
-#devFirmwareIcon, #devFirmwareTitle { color: #cccccc; background: transparent; border: none; font-weight: bold; }
-#devFirmwarePathEdit { background-color: #2d2d30; color: #cccccc; border: 1px solid #3e3e42; border-radius: 3px; padding: 4px 8px; }
-QPushButton#devBtnBrowseFirmware { background-color: #37373d; color: #cccccc; border: 1px solid #3e3e42; border-radius: 4px; padding: 4px 8px; }
-QPushButton#devBtnBrowseFirmware:hover { background-color: #3e3e50; border-color: #007acc; }
-QPushButton#devBtnFlash { background-color: #d4760a; color: #ffffff; border: none; border-radius: 4px; padding: 10px 8px; font-weight: bold; }
-QPushButton#devBtnFlash:hover { background-color: #e88a1e; }
-QPushButton#devBtnFlash:pressed { background-color: #b5650a; }
-QPushButton#devBtnFlash:disabled { background-color: #2d2d30; color: #5a5a5a; border: 1px solid #3e3e42; }
-QPushButton#devBtnConnectWifi { background-color: #d4760a; color: #ffffff; border: none; border-radius: 4px; padding: 10px 8px; font-weight: bold; }
-QPushButton#devBtnConnectWifi:hover { background-color: #e88a1e; }
-QPushButton#devBtnConnectWifi:pressed { background-color: #b5650a; }
-QPushButton#devBtnConnectWifi:disabled { background-color: #2d2d30; color: #5a5a5a; border: 1px solid #3e3e42; }
-QPushButton#devBtnReboot, QPushButton#devBtnSyslog, QPushButton#devBtnClearCache,
-QPushButton#devBtnUnlock, QPushButton#devBtnForceStop, QPushButton#devBtnAdbWireless,
-QPushButton#devBtnAdbRoot, QPushButton#devBtnAdbUnroot, QPushButton#devBtnRebootFastboot,
-QPushButton#devBtnPowerKey {
-  background-color: #1a6fb5; color: #ffffff; border: none;
-  border-radius: 4px; padding: 10px 8px; font-weight: bold;
-}
-QPushButton#devBtnReboot:hover, QPushButton#devBtnSyslog:hover,
-QPushButton#devBtnClearCache:hover, QPushButton#devBtnUnlock:hover,
-QPushButton#devBtnForceStop:hover, QPushButton#devBtnAdbWireless:hover,
-QPushButton#devBtnAdbRoot:hover, QPushButton#devBtnAdbUnroot:hover,
-QPushButton#devBtnRebootFastboot:hover,
-QPushButton#devBtnPowerKey:hover { background-color: #2080cc; }
-QPushButton#devBtnReboot:pressed, QPushButton#devBtnSyslog:pressed,
-QPushButton#devBtnClearCache:pressed, QPushButton#devBtnUnlock:pressed,
-QPushButton#devBtnForceStop:pressed, QPushButton#devBtnAdbWireless:pressed,
-QPushButton#devBtnAdbRoot:pressed, QPushButton#devBtnAdbUnroot:pressed,
-QPushButton#devBtnRebootFastboot:pressed,
-QPushButton#devBtnPowerKey:pressed { background-color: #145a96; }
-QPushButton#devBtnReboot:disabled, QPushButton#devBtnSyslog:disabled,
-QPushButton#devBtnClearCache:disabled, QPushButton#devBtnUnlock:disabled,
-QPushButton#devBtnForceStop:disabled, QPushButton#devBtnAdbWireless:disabled,
-QPushButton#devBtnAdbRoot:disabled, QPushButton#devBtnAdbUnroot:disabled,
-QPushButton#devBtnRebootFastboot:disabled,
-QPushButton#devBtnPowerKey:disabled { background-color: #2d2d30; color: #5a5a5a; border: 1px solid #3e3e42; }
-         </string>
-        </property>
         <attribute name="title">
          <string>Devices</string>
         </attribute>
@@ -3297,28 +2921,28 @@ QPushButton#devBtnPowerKey:disabled { background-color: #2d2d30; color: #5a5a5a;
                             <number>8</number>
                            </property>
                            <item row="1" column="0">
-                            <widget class="QPushButton" name="devBtnForceStop">
+                            <widget class="QPushButton" name="devBtnRebootSideload">
                              <property name="text">
                               <string>REBOOT SIDELOAD</string>
                              </property>
                             </widget>
                            </item>
                            <item row="0" column="1">
-                            <widget class="QPushButton" name="devBtnSyslog">
+                            <widget class="QPushButton" name="devBtnVolumeUp">
                              <property name="text">
                               <string>VOLUMN UP</string>
                              </property>
                             </widget>
                            </item>
                            <item row="1" column="1">
-                            <widget class="QPushButton" name="devBtnUnlock">
+                            <widget class="QPushButton" name="devBtnVolumeDown">
                              <property name="text">
                               <string>VOLUMN DOWN</string>
                              </property>
                             </widget>
                            </item>
                            <item row="3" column="0">
-                            <widget class="QPushButton" name="devBtnClearCache">
+                            <widget class="QPushButton" name="devBtnRebootBootloader">
                              <property name="text">
                               <string>REBOOT BOOTLOADER</string>
                              </property>
@@ -3447,12 +3071,18 @@ QPushButton#devBtnPowerKey:disabled { background-color: #2d2d30; color: #5a5a5a;
                           </widget>
                          </item>
                          <item>
-                          <layout class="QHBoxLayout" name="devConfigContentHLayout">
+                          <layout class="QHBoxLayout" name="devConfigContentHLayout" stretch="3,2">
                            <property name="spacing">
                             <number>12</number>
                            </property>
                            <item>
                             <widget class="QTabWidget" name="devConfigTabWidget">
+                             <property name="minimumSize">
+                              <size>
+                               <width>460</width>
+                               <height>0</height>
+                              </size>
+                             </property>
                              <property name="currentIndex">
                               <number>0</number>
                              </property>
@@ -3461,6 +3091,34 @@ QPushButton#devBtnPowerKey:disabled { background-color: #2d2d30; color: #5a5a5a;
                                <string>Device Settings</string>
                               </attribute>
                               <layout class="QVBoxLayout" name="devConfigTab1Layout">
+                               <property name="spacing">
+                                <number>0</number>
+                               </property>
+                               <property name="leftMargin">
+                                <number>0</number>
+                               </property>
+                               <property name="topMargin">
+                                <number>0</number>
+                               </property>
+                               <property name="rightMargin">
+                                <number>0</number>
+                               </property>
+                               <property name="bottomMargin">
+                                <number>0</number>
+                               </property>
+                               <item>
+                                <widget class="QScrollArea" name="devConfigTab1Scroll">
+                                 <property name="widgetResizable">
+                                  <bool>true</bool>
+                                 </property>
+                                 <property name="frameShape">
+                                  <enum>QFrame::Shape::NoFrame</enum>
+                                 </property>
+                                 <property name="horizontalScrollBarPolicy">
+                                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                                 </property>
+                                 <widget class="QWidget" name="devConfigTab1Contents">
+                                  <layout class="QVBoxLayout" name="devConfigTab1ContentLayout">
                                <property name="spacing">
                                 <number>8</number>
                                </property>
@@ -3843,6 +3501,235 @@ QPushButton#devBtnPowerKey:disabled { background-color: #2d2d30; color: #5a5a5a;
                                  </item>
                                 </layout>
                                </item>
+                               <item>
+                                <layout class="QHBoxLayout" name="devWifiHLayout">
+                                 <property name="spacing"><number>12</number></property>
+                                 <property name="leftMargin"><number>14</number></property>
+                                 <property name="topMargin"><number>12</number></property>
+                                 <property name="rightMargin"><number>14</number></property>
+                                 <property name="bottomMargin"><number>12</number></property>
+                                 <item>
+                                  <widget class="QLabel" name="devWifiIcon">
+                                   <property name="text"><string>📶</string></property>
+                                   <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                   <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <layout class="QVBoxLayout" name="devWifiTextVLayout">
+                                   <property name="spacing"><number>2</number></property>
+                                   <item><widget class="QLabel" name="devWifiLabel"><property name="text"><string>Wi-Fi</string></property></widget></item>
+                                   <item><widget class="QLabel" name="devWifiDesc"><property name="text"><string>Enable or disable Wi-Fi radio</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                  </layout>
+                                 </item>
+                                 <item><spacer name="hs_wifi"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                 <item><widget class="ToggleSwitch" name="devWifiToggle" native="true"/></item>
+                                </layout>
+                               </item>
+                               <item>
+                                <layout class="QHBoxLayout" name="devBluetoothHLayout">
+                                 <property name="spacing"><number>12</number></property>
+                                 <property name="leftMargin"><number>14</number></property>
+                                 <property name="topMargin"><number>12</number></property>
+                                 <property name="rightMargin"><number>14</number></property>
+                                 <property name="bottomMargin"><number>12</number></property>
+                                 <item>
+                                  <widget class="QLabel" name="devBluetoothIcon">
+                                   <property name="text"><string>ᛒ</string></property>
+                                   <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                   <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <layout class="QVBoxLayout" name="devBluetoothTextVLayout">
+                                   <property name="spacing"><number>2</number></property>
+                                   <item><widget class="QLabel" name="devBluetoothLabel"><property name="text"><string>Bluetooth</string></property></widget></item>
+                                   <item><widget class="QLabel" name="devBluetoothDesc"><property name="text"><string>Enable or disable Bluetooth radio</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                  </layout>
+                                 </item>
+                                 <item><spacer name="hs_bluetooth"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                 <item><widget class="ToggleSwitch" name="devBluetoothToggle" native="true"/></item>
+                                </layout>
+                               </item>
+                               <item>
+                                <layout class="QHBoxLayout" name="devAirplaneHLayout">
+                                 <property name="spacing"><number>12</number></property>
+                                 <property name="leftMargin"><number>14</number></property>
+                                 <property name="topMargin"><number>12</number></property>
+                                 <property name="rightMargin"><number>14</number></property>
+                                 <property name="bottomMargin"><number>12</number></property>
+                                 <item>
+                                  <widget class="QLabel" name="devAirplaneIcon">
+                                   <property name="text"><string>✈</string></property>
+                                   <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                   <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <layout class="QVBoxLayout" name="devAirplaneTextVLayout">
+                                   <property name="spacing"><number>2</number></property>
+                                   <item><widget class="QLabel" name="devAirplaneLabel"><property name="text"><string>Airplane Mode</string></property></widget></item>
+                                   <item><widget class="QLabel" name="devAirplaneDesc"><property name="text"><string>Disable all wireless radios</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                  </layout>
+                                 </item>
+                                 <item><spacer name="hs_airplane"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                 <item><widget class="ToggleSwitch" name="devAirplaneToggle" native="true"/></item>
+                                </layout>
+                               </item>
+                               <item>
+                                <layout class="QHBoxLayout" name="devAutoTimeHLayout">
+                                 <property name="spacing"><number>12</number></property>
+                                 <property name="leftMargin"><number>14</number></property>
+                                 <property name="topMargin"><number>12</number></property>
+                                 <property name="rightMargin"><number>14</number></property>
+                                 <property name="bottomMargin"><number>12</number></property>
+                                 <item>
+                                  <widget class="QLabel" name="devAutoTimeIcon">
+                                   <property name="text"><string>⌚</string></property>
+                                   <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                   <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <layout class="QVBoxLayout" name="devAutoTimeTextVLayout">
+                                   <property name="spacing"><number>2</number></property>
+                                   <item><widget class="QLabel" name="devAutoTimeLabel"><property name="text"><string>Automatic Time (NTP)</string></property></widget></item>
+                                   <item><widget class="QLabel" name="devAutoTimeDesc"><property name="text"><string>Sync system time from network</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                  </layout>
+                                 </item>
+                                 <item><spacer name="hs_autoTime"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                 <item><widget class="ToggleSwitch" name="devAutoTimeToggle" native="true"/></item>
+                                </layout>
+                               </item>
+                               <item>
+                                <layout class="QHBoxLayout" name="devNfcHLayout">
+                                 <property name="spacing"><number>12</number></property>
+                                 <property name="leftMargin"><number>14</number></property>
+                                 <property name="topMargin"><number>12</number></property>
+                                 <property name="rightMargin"><number>14</number></property>
+                                 <property name="bottomMargin"><number>12</number></property>
+                                 <item>
+                                  <widget class="QLabel" name="devNfcIcon">
+                                   <property name="text"><string>📡</string></property>
+                                   <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                   <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <layout class="QVBoxLayout" name="devNfcTextVLayout">
+                                   <property name="spacing"><number>2</number></property>
+                                   <item><widget class="QLabel" name="devNfcLabel"><property name="text"><string>NFC</string></property></widget></item>
+                                   <item><widget class="QLabel" name="devNfcDesc"><property name="text"><string>Enable or disable NFC radio</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                  </layout>
+                                 </item>
+                                 <item><spacer name="hs_nfc"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                 <item><widget class="ToggleSwitch" name="devNfcToggle" native="true"/></item>
+                                </layout>
+                               </item>
+                               <item>
+                                <layout class="QHBoxLayout" name="devBatterySaverHLayout">
+                                 <property name="spacing"><number>12</number></property>
+                                 <property name="leftMargin"><number>14</number></property>
+                                 <property name="topMargin"><number>12</number></property>
+                                 <property name="rightMargin"><number>14</number></property>
+                                 <property name="bottomMargin"><number>12</number></property>
+                                 <item>
+                                  <widget class="QLabel" name="devBatterySaverIcon">
+                                   <property name="text"><string>🔋</string></property>
+                                   <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                   <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <layout class="QVBoxLayout" name="devBatterySaverTextVLayout">
+                                   <property name="spacing"><number>2</number></property>
+                                   <item><widget class="QLabel" name="devBatterySaverLabel"><property name="text"><string>Battery Saver</string></property></widget></item>
+                                   <item><widget class="QLabel" name="devBatterySaverDesc"><property name="text"><string>Reduce background activity to save power</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                  </layout>
+                                 </item>
+                                 <item><spacer name="hs_batterySaver"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                 <item><widget class="ToggleSwitch" name="devBatterySaverToggle" native="true"/></item>
+                                </layout>
+                               </item>
+                               <item>
+                                <layout class="QHBoxLayout" name="devDevOptsHLayout">
+                                 <property name="spacing"><number>12</number></property>
+                                 <property name="leftMargin"><number>14</number></property>
+                                 <property name="topMargin"><number>12</number></property>
+                                 <property name="rightMargin"><number>14</number></property>
+                                 <property name="bottomMargin"><number>12</number></property>
+                                 <item>
+                                  <widget class="QLabel" name="devDevOptsIcon">
+                                   <property name="text"><string>⚙</string></property>
+                                   <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                   <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <layout class="QVBoxLayout" name="devDevOptsTextVLayout">
+                                   <property name="spacing"><number>2</number></property>
+                                   <item><widget class="QLabel" name="devDevOptsLabel"><property name="text"><string>Developer Options</string></property></widget></item>
+                                   <item><widget class="QLabel" name="devDevOptsDesc"><property name="text"><string>Show Developer Options in Settings app</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                  </layout>
+                                 </item>
+                                 <item><spacer name="hs_devOpts"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                 <item><widget class="ToggleSwitch" name="devDevOptsToggle" native="true"/></item>
+                                </layout>
+                               </item>
+                               <item>
+                                <layout class="QHBoxLayout" name="devAdbWifiHLayout">
+                                 <property name="spacing"><number>12</number></property>
+                                 <property name="leftMargin"><number>14</number></property>
+                                 <property name="topMargin"><number>12</number></property>
+                                 <property name="rightMargin"><number>14</number></property>
+                                 <property name="bottomMargin"><number>12</number></property>
+                                 <item>
+                                  <widget class="QLabel" name="devAdbWifiIcon">
+                                   <property name="text"><string>🔌</string></property>
+                                   <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                   <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <layout class="QVBoxLayout" name="devAdbWifiTextVLayout">
+                                   <property name="spacing"><number>2</number></property>
+                                   <item><widget class="QLabel" name="devAdbWifiLabel"><property name="text"><string>ADB over Wi-Fi</string></property></widget></item>
+                                   <item><widget class="QLabel" name="devAdbWifiDesc"><property name="text"><string>Allow ADB connections over wireless</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                  </layout>
+                                 </item>
+                                 <item><spacer name="hs_adbWifi"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                 <item><widget class="ToggleSwitch" name="devAdbWifiToggle" native="true"/></item>
+                                </layout>
+                               </item>
+                               <item>
+                                <layout class="QHBoxLayout" name="devHiddenApiHLayout">
+                                 <property name="spacing"><number>12</number></property>
+                                 <property name="leftMargin"><number>14</number></property>
+                                 <property name="topMargin"><number>12</number></property>
+                                 <property name="rightMargin"><number>14</number></property>
+                                 <property name="bottomMargin"><number>12</number></property>
+                                 <item>
+                                  <widget class="QLabel" name="devHiddenApiIcon">
+                                   <property name="text"><string>🔓</string></property>
+                                   <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                   <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <layout class="QVBoxLayout" name="devHiddenApiTextVLayout">
+                                   <property name="spacing"><number>2</number></property>
+                                   <item><widget class="QLabel" name="devHiddenApiLabel"><property name="text"><string>Allow Hidden APIs</string></property></widget></item>
+                                   <item><widget class="QLabel" name="devHiddenApiDesc"><property name="text"><string>Permit apps to use @hide platform APIs</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                  </layout>
+                                 </item>
+                                 <item><spacer name="hs_hiddenApi"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                 <item><widget class="ToggleSwitch" name="devHiddenApiToggle" native="true"/></item>
+                                </layout>
+                               </item>
+                                  </layout>
+                                 </widget>
+                                </widget>
+                               </item>
                               </layout>
                              </widget>
                              <widget class="QWidget" name="devConfigTab2">
@@ -3851,22 +3738,204 @@ QPushButton#devBtnPowerKey:disabled { background-color: #2d2d30; color: #5a5a5a;
                               </attribute>
                               <layout class="QVBoxLayout" name="devConfigTab2Layout">
                                <property name="spacing">
-                                <number>8</number>
+                                <number>0</number>
                                </property>
                                <property name="leftMargin">
-                                <number>12</number>
+                                <number>0</number>
                                </property>
                                <property name="topMargin">
-                                <number>12</number>
+                                <number>0</number>
                                </property>
                                <property name="rightMargin">
-                                <number>12</number>
+                                <number>0</number>
                                </property>
                                <property name="bottomMargin">
-                                <number>12</number>
+                                <number>0</number>
                                </property>
                                <item>
-                                <layout class="QVBoxLayout" name="devConfigSwitchList2"/>
+                                <widget class="QScrollArea" name="devConfigTab2Scroll">
+                                 <property name="widgetResizable">
+                                  <bool>true</bool>
+                                 </property>
+                                 <property name="frameShape">
+                                  <enum>QFrame::Shape::NoFrame</enum>
+                                 </property>
+                                 <property name="horizontalScrollBarPolicy">
+                                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                                 </property>
+                                 <widget class="QWidget" name="devConfigTab2Contents">
+                                  <layout class="QVBoxLayout" name="devConfigTab2ContentLayout">
+                                   <property name="spacing">
+                                    <number>8</number>
+                                   </property>
+                                   <property name="leftMargin">
+                                    <number>12</number>
+                                   </property>
+                                   <property name="topMargin">
+                                    <number>12</number>
+                                   </property>
+                                   <property name="rightMargin">
+                                    <number>12</number>
+                                   </property>
+                                   <property name="bottomMargin">
+                                    <number>12</number>
+                                   </property>
+                               <item>
+                                <layout class="QVBoxLayout" name="devConfigSwitchList2">
+                                 <property name="spacing">
+                                  <number>8</number>
+                                 </property>
+                                 <item>
+                                  <layout class="QHBoxLayout" name="devAutoRotateHLayout">
+                                   <property name="spacing"><number>12</number></property>
+                                   <property name="leftMargin"><number>14</number></property>
+                                   <property name="topMargin"><number>12</number></property>
+                                   <property name="rightMargin"><number>14</number></property>
+                                   <property name="bottomMargin"><number>12</number></property>
+                                   <item>
+                                    <widget class="QLabel" name="devAutoRotateIcon">
+                                     <property name="text"><string>↻</string></property>
+                                     <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                     <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                    </widget>
+                                   </item>
+                                   <item>
+                                    <layout class="QVBoxLayout" name="devAutoRotateTextVLayout">
+                                     <property name="spacing"><number>2</number></property>
+                                     <item><widget class="QLabel" name="devAutoRotateLabel"><property name="text"><string>Auto-Rotate Screen</string></property></widget></item>
+                                     <item><widget class="QLabel" name="devAutoRotateDesc"><property name="text"><string>Rotate screen based on device orientation</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                    </layout>
+                                   </item>
+                                   <item><spacer name="hs_autoRotate"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                   <item><widget class="ToggleSwitch" name="devAutoRotateToggle" native="true"/></item>
+                                  </layout>
+                                 </item>
+                                 <item>
+                                  <layout class="QHBoxLayout" name="devShowTouchesHLayout">
+                                   <property name="spacing"><number>12</number></property>
+                                   <property name="leftMargin"><number>14</number></property>
+                                   <property name="topMargin"><number>12</number></property>
+                                   <property name="rightMargin"><number>14</number></property>
+                                   <property name="bottomMargin"><number>12</number></property>
+                                   <item>
+                                    <widget class="QLabel" name="devShowTouchesIcon">
+                                     <property name="text"><string>◉</string></property>
+                                     <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                     <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                    </widget>
+                                   </item>
+                                   <item>
+                                    <layout class="QVBoxLayout" name="devShowTouchesTextVLayout">
+                                     <property name="spacing"><number>2</number></property>
+                                     <item><widget class="QLabel" name="devShowTouchesLabel"><property name="text"><string>Show Touches</string></property></widget></item>
+                                     <item><widget class="QLabel" name="devShowTouchesDesc"><property name="text"><string>Visualize tap points on screen</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                    </layout>
+                                   </item>
+                                   <item><spacer name="hs_showTouches"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                   <item><widget class="ToggleSwitch" name="devShowTouchesToggle" native="true"/></item>
+                                  </layout>
+                                 </item>
+                                 <item>
+                                  <layout class="QHBoxLayout" name="devPointerLocationHLayout">
+                                   <property name="spacing"><number>12</number></property>
+                                   <property name="leftMargin"><number>14</number></property>
+                                   <property name="topMargin"><number>12</number></property>
+                                   <property name="rightMargin"><number>14</number></property>
+                                   <property name="bottomMargin"><number>12</number></property>
+                                   <item>
+                                    <widget class="QLabel" name="devPointerLocationIcon">
+                                     <property name="text"><string>+</string></property>
+                                     <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                     <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                    </widget>
+                                   </item>
+                                   <item>
+                                    <layout class="QVBoxLayout" name="devPointerLocationTextVLayout">
+                                     <property name="spacing"><number>2</number></property>
+                                     <item><widget class="QLabel" name="devPointerLocationLabel"><property name="text"><string>Pointer Location</string></property></widget></item>
+                                     <item><widget class="QLabel" name="devPointerLocationDesc"><property name="text"><string>Show pointer coordinates overlay</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                    </layout>
+                                   </item>
+                                   <item><spacer name="hs_pointerLocation"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                   <item><widget class="ToggleSwitch" name="devPointerLocationToggle" native="true"/></item>
+                                  </layout>
+                                 </item>
+                                 <item>
+                                  <layout class="QHBoxLayout" name="devDarkModeHLayout">
+                                   <property name="spacing"><number>12</number></property>
+                                   <property name="leftMargin"><number>14</number></property>
+                                   <property name="topMargin"><number>12</number></property>
+                                   <property name="rightMargin"><number>14</number></property>
+                                   <property name="bottomMargin"><number>12</number></property>
+                                   <item>
+                                    <widget class="QLabel" name="devDarkModeIcon">
+                                     <property name="text"><string>☾</string></property>
+                                     <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                     <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                    </widget>
+                                   </item>
+                                   <item>
+                                    <layout class="QVBoxLayout" name="devDarkModeTextVLayout">
+                                     <property name="spacing"><number>2</number></property>
+                                     <item><widget class="QLabel" name="devDarkModeLabel"><property name="text"><string>Dark Mode</string></property></widget></item>
+                                     <item><widget class="QLabel" name="devDarkModeDesc"><property name="text"><string>Force system-wide dark theme</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                    </layout>
+                                   </item>
+                                   <item><spacer name="hs_darkMode"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                   <item><widget class="ToggleSwitch" name="devDarkModeToggle" native="true"/></item>
+                                  </layout>
+                                 </item>
+                                 <item>
+                                  <layout class="QHBoxLayout" name="devForceRtlHLayout">
+                                   <property name="spacing"><number>12</number></property>
+                                   <property name="leftMargin"><number>14</number></property>
+                                   <property name="topMargin"><number>12</number></property>
+                                   <property name="rightMargin"><number>14</number></property>
+                                   <property name="bottomMargin"><number>12</number></property>
+                                   <item>
+                                    <widget class="QLabel" name="devForceRtlIcon">
+                                     <property name="text"><string>⇄</string></property>
+                                     <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                     <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                    </widget>
+                                   </item>
+                                   <item>
+                                    <layout class="QVBoxLayout" name="devForceRtlTextVLayout">
+                                     <property name="spacing"><number>2</number></property>
+                                     <item><widget class="QLabel" name="devForceRtlLabel"><property name="text"><string>Force RTL Layout</string></property></widget></item>
+                                     <item><widget class="QLabel" name="devForceRtlDesc"><property name="text"><string>Force right-to-left UI layout for testing</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                    </layout>
+                                   </item>
+                                   <item><spacer name="hs_forceRtl"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                   <item><widget class="ToggleSwitch" name="devForceRtlToggle" native="true"/></item>
+                                  </layout>
+                                 </item>
+                                 <item>
+                                  <layout class="QHBoxLayout" name="devAnimationsHLayout">
+                                   <property name="spacing"><number>12</number></property>
+                                   <property name="leftMargin"><number>14</number></property>
+                                   <property name="topMargin"><number>12</number></property>
+                                   <property name="rightMargin"><number>14</number></property>
+                                   <property name="bottomMargin"><number>12</number></property>
+                                   <item>
+                                    <widget class="QLabel" name="devAnimationsIcon">
+                                     <property name="text"><string>✨</string></property>
+                                     <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+                                     <property name="fixedWidth" stdset="0"><number>24</number></property>
+                                    </widget>
+                                   </item>
+                                   <item>
+                                    <layout class="QVBoxLayout" name="devAnimationsTextVLayout">
+                                     <property name="spacing"><number>2</number></property>
+                                     <item><widget class="QLabel" name="devAnimationsLabel"><property name="text"><string>Animations Enabled</string></property></widget></item>
+                                     <item><widget class="QLabel" name="devAnimationsDesc"><property name="text"><string>Window/transition/animator scales (off = all zero)</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                                    </layout>
+                                   </item>
+                                   <item><spacer name="hs_animations"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                                   <item><widget class="ToggleSwitch" name="devAnimationsToggle" native="true"/></item>
+                                  </layout>
+                                 </item>
+                                </layout>
                                </item>
                                <item>
                                 <spacer>
@@ -3880,6 +3949,10 @@ QPushButton#devBtnPowerKey:disabled { background-color: #2d2d30; color: #5a5a5a;
                                   </size>
                                  </property>
                                 </spacer>
+                               </item>
+                                  </layout>
+                                 </widget>
+                                </widget>
                                </item>
                               </layout>
                              </widget>
@@ -4094,38 +4167,13 @@ QPushButton#devBtnPowerKey:disabled { background-color: #2d2d30; color: #5a5a5a;
         </layout>
        </widget>
       </widget>
-      <widget class="QWidget" name="terminalContainer">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <layout class="QVBoxLayout" name="terminalLayout">
-        <property name="spacing">
-         <number>0</number>
-        </property>
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-       </layout>
-      </widget>
      </widget>
     </item>
    </layout>
   </widget>
   <widget class="QStatusBar" name="statusbar">
    <property name="styleSheet">
-    <string notr="true">background-color: #007acc; color: white;</string>
+    <string notr="true">background-color: #6366f1; color: white;</string>
    </property>
   </widget>
  </widget>

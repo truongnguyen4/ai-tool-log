@@ -3,6 +3,8 @@
 #include <QApplication>
 #include <QTextDocument>
 #include <QAbstractTextDocumentLayout>
+#include <QTableView>
+#include <QHeaderView>
 
 // Define predefined highlight colors - vibrant but readable
 const QColor HighlightDelegate::HIGHLIGHT_COLORS[] = {
@@ -277,14 +279,22 @@ QSize HighlightDelegate::sizeHint(const QStyleOptionViewItem &option,
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
 
-    // Use available column width; fall back to a reasonable default before
-    // the view has been laid out (rect.width() == 0).
-    const int availWidth = opt.rect.width() > 10 ? opt.rect.width() - 10 : 400;
+    // When called from resizeRowToContents() / sizeHintForRow(), Qt sets
+    // opt.rect to the full view rect (via initViewItemOption), NOT the cell
+    // rect. Always read the actual column width from the view so the
+    // word-wrap height is computed against the real available space.
+    int availWidth = 400;
+    if (auto *tv = qobject_cast<const QTableView *>(opt.widget)) {
+        int cw = tv->columnWidth(index.column());
+        if (cw > 10) availWidth = cw;
+    }
+    availWidth -= 10;      // cell padding
+
     const QFontMetrics fm(opt.font);
     const QRect br = fm.boundingRect(QRect(0, 0, availWidth, 0),
                                       Qt::TextWordWrap | Qt::AlignLeft,
                                       opt.text);
-    return QSize(opt.rect.width(), qMax(br.height() + 6, fm.height() + 6));
+    return QSize(availWidth + 10, qMax(br.height() + 6, fm.height() + 6));
 }
 
 void HighlightDelegate::setWordWrap(bool enabled)

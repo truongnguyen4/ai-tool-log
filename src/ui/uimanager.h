@@ -7,10 +7,8 @@
 #include <QHash>
 #include <QSet>
 #include <QString>
-#include <QStringList>
 #include <QList>
 #include <QFutureWatcher>
-#include <QPushButton>
 #include <QMap>
 #include <QPoint>
 
@@ -23,17 +21,15 @@
 #include "settingsmodel.h"
 #include "propertiesmodel.h"
 #include "propertydefinitionmodel.h"
-#include "filterhistorymanager.h"
+#include "historymanager.h"
 #include "highlightdelegate.h"
 #include "ilogfilter.h"
 #include "logfilter.h"
-#include "propertydefinitionbackend.h"
-#include "socketserver.h"
-#include "settingssockethandler.h"
-#include "systempropertysockethandler.h"
-#include "propertydefinitionsockethandler.h"
+#include "logfiltercontroller.h"
+#include "logsplitcontroller.h"
+#include <QStringList>
+#include <QPushButton>
 
-class QTermWidget;
 class QTableView;
 class QWheelEvent;
 class MainWindow;
@@ -75,6 +71,8 @@ class UiManager : public QObject
 {
     Q_OBJECT
 
+    friend class DevicesTabController;
+
 public:
     // Device display info derived from a real AdbDevice + group assignment.
     struct DeviceInfo {
@@ -95,22 +93,27 @@ public:
 
     // Called from MainWindow::closeEvent() to flush filter history to QSettings.
     void persistFilterHistory();
-    // Called from MainWindow::closeEvent() to disconnect socket and remove adb port forwarding.
-    void teardownSocket();
+
+private slots:
+    void applyCurrentTheme();
 
 private:
     // =========================================================================
     // SECTION: Setup — initialise visual components
     // =========================================================================
+    void setupMainNavigationTabs();
     void setupLogTable();
     void setupConfigurationTables();
-    void setupSDKTab();
-    void setupTerminal();
-    void setupDumpsys();
-    void setupCradleTab();
+    void convertSdkTabsToSidebar();
+    void setupTabAutoFetch();
     void setupTooltips();
-    void setupFilterHistory();
+    void setupToolbarDividers();
+    void setupStatusBarIndicators();
     void setupSplittersAndMisc();
+
+    // U6: persist column widths + splitter sizes between sessions.
+    void saveLayoutPreferences();
+    void restoreLayoutPreferences();
 
     // =========================================================================
     // SECTION: Signal connections — group by feature area
@@ -125,8 +128,8 @@ private:
     // =========================================================================
     void onFilterChanged();
     void onHighlightChanged();
-    void onHighlightNext();
-    void onHighlightPrev();
+    void onHighlightNextClicked();
+    void onHighlightPrevClicked();
     void updateFilterHighlighting();
     void onSettingsFilterChanged();
     void onPropertiesFilterChanged();
@@ -134,6 +137,7 @@ private:
     void applyFilters();
     void updateFilterCount();
     bool passesFilter(const LogEntry &entry);
+    void setupFilterCompleters();
 
     // =========================================================================
     // SECTION: Device / Logcat
@@ -144,6 +148,18 @@ private:
     void onStartClicked();
     void onClearClicked();
     void flushPendingLines();
+
+    // Status-bar feedback helpers — single source of truth for transient
+    // toolbar messages. Kept side-by-side with the logcat slots so all
+    // message-emitting code reads the same way (UiManager::flashStatus(...)).
+    void flashStatus(const QString &message);
+
+    // Toolbar visuals for the logcat / kernel toggle pair. Encapsulates the
+    // active-button stylesheet + cross-button enable/disable used by both
+    // click slots and AdbManager state callbacks (logcatStarted/Stopped,
+    // dmesgStopped/Failed).
+    void setLogcatRunningVisuals(bool running);
+    void setKernelRunningVisuals(bool running);
 
     // =========================================================================
     // SECTION: Kernel (dmesg)
@@ -161,110 +177,16 @@ private:
     void onFileLoadFinished();
 
     // =========================================================================
-    // SECTION: Configuration Tab (Settings & Properties)
-    // =========================================================================
-    void onRefreshSettingsClicked();
-    void onRefreshPropertiesClicked();
-    void onSettingsFetched(const QVector<SettingEntry> &settings);
-    void onPropertiesFetched(const QVector<PropertyEntry> &properties);
-    void onSaveSettingClicked(int row);
-    void onSavePropertyClicked(int row);
-    void onSettingSaveResult(int row, bool success,
-                             const QString &group, const QString &setting,
-                             const QString &newValue, const QString &verifiedValue,
-                             const QString &error);
-    void onPropertySaveResult(int row, bool success,
-                              const QString &property,
-                              const QString &newValue, const QString &verifiedValue,
-                              const QString &error);
-    void recreateSettingsButtons();
-    void recreatePropertiesButtons();
-    static QPushButton *createActionButton(const QString &label,
-                                           const QString &tooltip,
-                                           int maxWidth,
-                                           QWidget *parent);
-
-    // =========================================================================
-    // SECTION: SDK Tab (Property Definitions)
-    // =========================================================================
-    void onSearchPropertyDefinition();
-    void onAddPropertyDefinition();
-    void onClearAllPropertyDefinitions();
-    void onFetchPropertyDefinitions();
-    void onRefreshPropertyDefinitionValues();
-    void onPropertyDefinitionsFetched(const QVector<PropertyDefinition> &defs);
-    void onGetPropertyDefinitionClicked(int row);
-    void onSetPropertyDefinitionClicked(int row);
-    void onRemovePropertyDefinitionClicked(int row);
-    void updatePropertyNamesCompleter();
-
-    // Property set persistence / exchange
-    void onSavePropertySet();
-    void onLoadPropertySet();
-    void onExportPropertySet();
-    void onImportPropertySet();
-
-    // Recreate Set/Get/Remove button widgets for all rows in the property definition table.
-    // Must be called after any bulk model reset (load from DB, import from file).
-    void recreatePropertyDefinitionButtons();
-
-    // =========================================================================
-    // SECTION: Dumpsys Tab
-    // =========================================================================
-    void onRunDumpsysClicked();
-    void onDumpsysFetched(const QString &output);
-    void onDumpsysListFetched(const QStringList &services);
-    void onDumpsysSearchChanged();
-    void onDumpsysSearchNext();
-    void onDumpsysSearchPrev();
-    void applyDumpsysHighlights(const QString &needle);
-    void updateDumpsysCommandText();
-    void onRunDumpsysCmdClicked();
-    void onRawAdbCommandFinished(const QString &output);
-
-    // =========================================================================
-    // SECTION: Cradle Manager Tab
-    // =========================================================================
-    void onCradleGetInfo();
-    void onCradleQueryFirmware();
-    void onCradleUpdateFirmware();
-    void onCradleQuerySchedule();
-    void onCradleCommandFinished(const QString &output, const QString &error);
-
-    // =========================================================================
-    // SECTION: Terminal
-    // =========================================================================
-    void onToggleTerminal(bool checked);
-
-    // =========================================================================
-    // SECTION: Socket Listener
-    // =========================================================================
-    void setupSocketListener();
-
-    // =========================================================================
-    // SECTION: Devices Tab
-    // =========================================================================
-    void setupDevicesTab();
-    void refreshDevicesTab();
-    void updateDeviceDetails(const DeviceInfo &info);
-    void selectDeviceRow(QWidget *row, const DeviceInfo &info);
-    void onDevicesOrGroupsChanged();
-    void refreshCheckedDevicesList();
-    void onDeviceDetailsFetched(const DeviceDetails &details);
-
-    // =========================================================================
     // SECTION: Table Interaction
     // =========================================================================
     void onTableContextMenu(const QPoint &pos);
     void addToFilter(const QString &filterType, const QString &value, FilterOperator op);
+    void showCellContentDialog(const QString &content, QWidget *parent = nullptr);
     void onLogTableDoubleClicked(const QModelIndex &index);
     void onLogTableClicked(const QModelIndex &index);
     void onMarkLogTableClicked(const QModelIndex &index);
     void onMarkLogContextMenu(const QPoint &pos);
-    void onClearAllMarkedLog();
-    void showCellContent(QTableView *tableView,
-                         const QAbstractItemModel *model,
-                         const QModelIndex &index);
+    void onClearAllMarkedClicked();
     void copyTableRows(QTableView *tableView);
     void enableTableCopyAction(QTableView *tableView);
 
@@ -273,9 +195,9 @@ private:
     // =========================================================================
     void onColumnsClicked();
     void onAutoScrollToggled(bool checked);
+    void onFitRowsClicked();
     void onAppSettingsClicked();
     void applyColumnVisibility(const QVector<bool> &vis);
-    void applyPropDefColumnVisibility(const QVector<bool> &vis);
     void applyAppFont(const QFont &font);
 
     // =========================================================================
@@ -295,7 +217,6 @@ private:
     // =========================================================================
     // SECTION: Event Filter Helpers
     // =========================================================================
-    bool handleTerminalKeyEvent(QObject *obj, QEvent *event);
     bool handleShiftScrollEvent(QObject *obj, QWheelEvent *wheelEvent);
     bool handleCompleterFocusEvent(QObject *obj, QEvent *event);
 
@@ -318,6 +239,32 @@ private:
     QHash<quint64, int>  m_filteredLogsIndex;
     QSet<int>            m_markedRows;
 
+    // Per-pane runtime UI state. Snapshotted on active-pane change so each
+    // pane keeps its own filter / highlight / level radio values. Memory
+    // only — discarded on app exit.
+    struct PaneInputs {
+        QString message;
+        QString tag;
+        QString package;
+        QString pid;
+        QString startTime;
+        QString endTime;
+        QString keyword;
+        QString highlight;
+        // 0=Verbose+, 1=V, 2=D, 3=I, 4=W, 5=E, 6=A, -1=none
+        int     levelRadio = 0;
+    };
+    PaneInputs m_paneAInputs;
+    PaneInputs m_paneBInputs;
+    bool       m_lastActiveIsB = false;
+    // When >= 0, forces useB() to that value (0 = pane A, 1 = pane B).
+    // Used by sync-mode applyFilters to drive the inactive pane.
+    int        m_paneOverride  = -1;
+    // When true, filter / highlight / level changes apply to BOTH panes.
+    bool       m_syncPanes     = false;
+    void snapshotInputsTo(PaneInputs &out) const;
+    void loadInputsFrom(const PaneInputs &in);
+
     // Models
     LogModel                *m_logModel               = nullptr;
     MarkLogModel            *m_markLogModel            = nullptr;
@@ -327,7 +274,6 @@ private:
 
     // Misc data
     QVector<PropertyDefinition> m_availablePropertyDefinitions;
-    QStringList                 m_dumpsysServices;
     QString                     m_currentDeviceId;
 
     // Input pipeline
@@ -349,29 +295,69 @@ private:
     // Converters / filters
     LogConverterPtr  m_logConverter;
     FileManager      m_fileManager;
-    LogFilter        m_logFilter;
+    LogFilterController *m_logFilterController = nullptr;
+    class ConfigurationController *m_configurationController = nullptr;
 
-    // Highlight delegates
+    // Status bar permanent indicators (live monitor + device count).
+    class QLabel *m_lblStatusMonitor = nullptr;
+    class QLabel *m_lblStatusDevices = nullptr;
+    class QTimer *m_monitorPulseTimer = nullptr;
+    bool m_monitorPulseBright = true;
+    int m_monitorActiveCount = 0;
+
+    // Theme: dark sheet captured from mainwindow.ui at startup.
+    QString m_darkStylesheet;
+
+    // Highlight delegates (pane A)
     HighlightDelegate *m_pidHighlightDelegate     = nullptr;
     HighlightDelegate *m_packageHighlightDelegate = nullptr;
     HighlightDelegate *m_tagHighlightDelegate     = nullptr;
     HighlightDelegate *m_messageHighlightDelegate = nullptr;
+    // Highlight delegates (pane B) — created lazily when pane B is built so
+    // that filter/highlight keywords only affect the active pane when sync
+    // is off.
+    HighlightDelegate *m_pidHighlightDelegateB     = nullptr;
+    HighlightDelegate *m_packageHighlightDelegateB = nullptr;
+    HighlightDelegate *m_tagHighlightDelegateB     = nullptr;
+    HighlightDelegate *m_messageHighlightDelegateB = nullptr;
 
     // Filter history
-    FilterHistoryManager *m_filterHistoryManager = nullptr;
+    HistoryManager *m_historyManager = nullptr;
 
-    // Property definition persistence / export backend
-    PropertyDefinitionBackend *m_propDefBackend = nullptr;
+    // Cradle Manager tab controller (forward-declared to keep header light)
+    class CradleController *m_cradleController = nullptr;
+    class DumpsysController *m_dumpsysController = nullptr;
+    class DevicesTabController *m_devicesTabController = nullptr;
+    LogSplitController         *m_logSplitController   = nullptr;
 
-    // Embedded terminal
-    QTermWidget *m_terminal          = nullptr;
-    QList<int>   m_savedSplitterSizes;
-
-    // Socket listener for live settings/property updates from device
-    SocketServer                        *m_socketServer                        = nullptr;
-    SettingsSocketHandler               *m_settingsSocketHandler               = nullptr;
-    SystemPropertySocketHandler         *m_systemPropertySocketHandler         = nullptr;
-    PropertyDefinitionSocketHandler     *m_propertyDefinitionSocketHandler     = nullptr;
+    // ------------------------------------------------------------------------
+    // Active-pane accessors. When the log split is active AND pane B is the
+    // active pane, return references into LogSplitController::PaneState.
+    // Otherwise return references to UiManager's pane-A members.
+    // ------------------------------------------------------------------------
+    inline bool useB() const {
+        if (!m_logSplitController) return false;
+        if (m_paneOverride >= 0)
+            return m_paneOverride == 1
+                   && m_logSplitController->paneB()
+                   && m_logSplitController->paneB()->model;
+        return m_logSplitController->activeIsB()
+               && m_logSplitController->paneB() && m_logSplitController->paneB()->model;
+    }
+    inline QVector<LogEntry>&    activeAllLogs()      { return useB() ? m_logSplitController->paneB()->allLogs      : allLogs; }
+    inline const QVector<LogEntry>& activeAllLogs() const { return useB() ? m_logSplitController->paneB()->allLogs : allLogs; }
+    inline QVector<LogEntry>&    activeFilteredLogs() { return useB() ? m_logSplitController->paneB()->filteredLogs : filteredLogs; }
+    inline const QVector<LogEntry>& activeFilteredLogs() const { return useB() ? m_logSplitController->paneB()->filteredLogs : filteredLogs; }
+    inline QHash<quint64,int>&   activeAllLogsIndex() { return useB() ? m_logSplitController->paneB()->allLogsIndex : m_allLogsIndex; }
+    inline const QHash<quint64,int>& activeAllLogsIndex() const { return useB() ? m_logSplitController->paneB()->allLogsIndex : m_allLogsIndex; }
+    inline QHash<quint64,int>&   activeFilteredLogsIndex() { return useB() ? m_logSplitController->paneB()->filteredLogsIndex : m_filteredLogsIndex; }
+    inline const QHash<quint64,int>& activeFilteredLogsIndex() const { return useB() ? m_logSplitController->paneB()->filteredLogsIndex : m_filteredLogsIndex; }
+    inline QSet<int>&            activeMarkedRows()   { return useB() ? m_logSplitController->paneB()->markedRows   : m_markedRows; }
+    inline quint64&              activeNextLogId()    { return useB() ? m_logSplitController->paneB()->nextLogId    : m_nextLogId; }
+    inline LogModel*             activeLogModel()     { return useB() ? m_logSplitController->paneB()->model        : m_logModel; }
+    inline MarkLogModel*         activeMarkLogModel() { return useB() ? m_logSplitController->paneB()->markModel    : m_markLogModel; }
+    QTableView*                  activeTableLog();
+    QTableView*                  activeTableMarkLog();
 };
 
 #endif // UIMANAGER_H

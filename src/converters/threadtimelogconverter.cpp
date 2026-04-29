@@ -43,9 +43,13 @@ LogEntry ThreadtimeLogConverter::convert(const QString &line) const
             entry.tid = "";
         }
         
-        // Add current year to the date
-        int currentYear = QDateTime::currentDateTime().date().year();
-        entry.date = QString("%1-%2").arg(currentYear).arg(dateStr);
+        // Add current year to the date (cached for ~5 minutes to avoid per-line QDateTime cost)
+        const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+        if (m_cachedYear == 0 || nowMs - m_cachedYearStampMs > 5LL * 60 * 1000) {
+            m_cachedYear = QDateTime::currentDateTime().date().year();
+            m_cachedYearStampMs = nowMs;
+        }
+        entry.date = QString::number(m_cachedYear) + QLatin1Char('-') + dateStr;
     }
     
     return entry;

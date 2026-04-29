@@ -92,15 +92,6 @@ inline QStringList cradleCommand(const QString &deviceId, const QStringList &arg
     return QStringList() << "-s" << deviceId << "shell" << "cmd" << "cradle_manager" << args;
 }
 
-// Reverse port: `adb reverse tcp:<devicePort> tcp:<hostPort>`
-// Routes connections from device:devicePort → host:hostPort
-inline QStringList reversePort(const QString &deviceId, quint16 devicePort, quint16 hostPort)
-{
-    return QStringList() << "-s" << deviceId << "reverse"
-                         << QString("tcp:%1").arg(devicePort)
-                         << QString("tcp:%1").arg(hostPort);
-}
-
 // Battery level: `adb shell dumpsys battery`
 inline QStringList getBatteryInfo(const QString &deviceId)
 {
@@ -232,6 +223,118 @@ inline QStringList rebootFastboot(const QString &deviceId)
 inline QStringList powerKey(const QString &deviceId)
 {
     return QStringList() << "-s" << deviceId << "shell" << "input" << "keyevent" << "KEYCODE_POWER";
+}
+
+// ── Display tab ─────────────────────────────────────────────────────────────
+
+// Auto-rotate screen: settings put system accelerometer_rotation 0|1
+inline QStringList setAutoRotate(const QString &deviceId, bool enabled)
+{
+    return QStringList() << "-s" << deviceId << "shell" << "settings" << "put" << "system"
+                         << "accelerometer_rotation" << (enabled ? "1" : "0");
+}
+
+// Show touches: settings put system show_touches 0|1
+inline QStringList setShowTouches(const QString &deviceId, bool enabled)
+{
+    return QStringList() << "-s" << deviceId << "shell" << "settings" << "put" << "system"
+                         << "show_touches" << (enabled ? "1" : "0");
+}
+
+// Pointer location overlay: settings put system pointer_location 0|1
+inline QStringList setPointerLocation(const QString &deviceId, bool enabled)
+{
+    return QStringList() << "-s" << deviceId << "shell" << "settings" << "put" << "system"
+                         << "pointer_location" << (enabled ? "1" : "0");
+}
+
+// Dark mode: cmd uimode night yes|no
+inline QStringList setDarkMode(const QString &deviceId, bool enabled)
+{
+    return QStringList() << "-s" << deviceId << "shell" << "cmd" << "uimode"
+                         << "night" << (enabled ? "yes" : "no");
+}
+
+// Force RTL layout: setprop debug.force_rtl <true|false> (and settings global setting)
+inline QStringList setForceRtl(const QString &deviceId, bool enabled)
+{
+    return QStringList() << "-s" << deviceId << "shell" << "settings" << "put" << "global"
+                         << "debug.force_rtl" << (enabled ? "1" : "0");
+}
+
+// Skip / restore animations (sets all 3 scales). 0 = off, 1 = normal
+inline QStringList setAnimationsEnabled(const QString &deviceId, bool enabled)
+{
+    const QString v = enabled ? "1" : "0";
+    return QStringList() << "-s" << deviceId << "shell"
+                         << QString("settings put global window_animation_scale %1 ; "
+                                    "settings put global transition_animation_scale %1 ; "
+                                    "settings put global animator_duration_scale %1").arg(v);
+}
+
+// ── Device Settings tab additions ───────────────────────────────────────────
+
+// Wi-Fi enable/disable: svc wifi enable|disable
+inline QStringList setWifiEnabled(const QString &deviceId, bool enabled)
+{
+    return QStringList() << "-s" << deviceId << "shell" << "svc" << "wifi"
+                         << (enabled ? "enable" : "disable");
+}
+
+// Bluetooth enable/disable: svc bluetooth enable|disable (Android 12+)
+inline QStringList setBluetoothEnabled(const QString &deviceId, bool enabled)
+{
+    return QStringList() << "-s" << deviceId << "shell" << "svc" << "bluetooth"
+                         << (enabled ? "enable" : "disable");
+}
+
+// Airplane mode: cmd connectivity airplane-mode enable|disable
+inline QStringList setAirplaneMode(const QString &deviceId, bool enabled)
+{
+    return QStringList() << "-s" << deviceId << "shell" << "cmd" << "connectivity"
+                         << "airplane-mode" << (enabled ? "enable" : "disable");
+}
+
+// Auto NTP time: settings put global auto_time 0|1
+inline QStringList setAutoTime(const QString &deviceId, bool enabled)
+{
+    return QStringList() << "-s" << deviceId << "shell" << "settings" << "put" << "global"
+                         << "auto_time" << (enabled ? "1" : "0");
+}
+
+// NFC enable/disable: svc nfc enable|disable
+inline QStringList setNfcEnabled(const QString &deviceId, bool enabled)
+{
+    return QStringList() << "-s" << deviceId << "shell" << "svc" << "nfc"
+                         << (enabled ? "enable" : "disable");
+}
+
+// Battery saver: settings put global low_power 0|1
+inline QStringList setBatterySaver(const QString &deviceId, bool enabled)
+{
+    return QStringList() << "-s" << deviceId << "shell" << "settings" << "put" << "global"
+                         << "low_power" << (enabled ? "1" : "0");
+}
+
+// Developer Options on: settings put global development_settings_enabled 0|1
+inline QStringList setDeveloperOptions(const QString &deviceId, bool enabled)
+{
+    return QStringList() << "-s" << deviceId << "shell" << "settings" << "put" << "global"
+                         << "development_settings_enabled" << (enabled ? "1" : "0");
+}
+
+// ADB over Wi-Fi: settings put global adb_wifi_enabled 0|1
+inline QStringList setAdbWifi(const QString &deviceId, bool enabled)
+{
+    return QStringList() << "-s" << deviceId << "shell" << "settings" << "put" << "global"
+                         << "adb_wifi_enabled" << (enabled ? "1" : "0");
+}
+
+// Allow hidden APIs: settings put global hidden_api_policy 1 (allow) | 0 (default)
+inline QStringList setHiddenApiAllow(const QString &deviceId, bool allow)
+{
+    return QStringList() << "-s" << deviceId << "shell" << "settings" << "put" << "global"
+                         << "hidden_api_policy" << (allow ? "1" : "0");
 }
 
 } // namespace AdbCommand
