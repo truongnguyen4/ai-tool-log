@@ -15,10 +15,10 @@ qt_add_executable(ToolLogPro
     src/ui/mainwindow.h
     src/ui/mainwindow.ui
     src/ui/uimanager.cpp
+    src/ui/uimanager_devices.cpp
     src/ui/uimanager_events.cpp
     src/ui/uimanager_fileio.cpp
     src/ui/uimanager_files.cpp
-    src/ui/uimanager_kernel.cpp
     src/ui/uimanager_filter.cpp
     src/ui/uimanager_misc.cpp
     src/ui/uimanager_theme.cpp
@@ -27,11 +27,14 @@ qt_add_executable(ToolLogPro
     src/ui/uimanager_table.cpp
     src/ui/uimanager_table_copy.cpp
     src/ui/uimanager.h
+    src/ui/widgets/searchablelistpopup.cpp
+    src/ui/widgets/searchablelistpopup.h
     src/ui/widgets/toggleswitch.cpp
     src/ui/widgets/toggleswitch.h
     src/ui/dialogs/settingsdialog.cpp
     src/ui/dialogs/settingsdialog.h
     src/ui/tooltips.h
+    src/ui/tablestyler.h
     src/delegates/blinkdelegate.cpp
     src/delegates/blinkdelegate.h
     src/ui/controllers/cradlecontroller.cpp
@@ -78,6 +81,10 @@ qt_add_executable(ToolLogPro
     # Delegates
     src/delegates/highlightdelegate.cpp
     src/delegates/highlightdelegate.h
+    src/delegates/propertyvaluedelegate.cpp
+    src/delegates/propertyvaluedelegate.h
+    src/delegates/rowactiondelegate.cpp
+    src/delegates/rowactiondelegate.h
     
     # Managers
     src/managers/adbmanager.cpp
@@ -93,6 +100,8 @@ qt_add_executable(ToolLogPro
     src/managers/historymanager.h
     src/managers/jsonfileio.cpp
     src/managers/jsonfileio.h
+    src/managers/packageresolver.cpp
+    src/managers/packageresolver.h
     src/managers/presetstore.h
     src/managers/sqlitepresetstore.cpp
     src/managers/sqlitepresetstore.h
@@ -100,6 +109,9 @@ qt_add_executable(ToolLogPro
     src/managers/qsettingspresetstore.h
     
     # Models
+    src/models/logtablemodelbase.cpp
+    src/models/logtablemodelbase.h
+    src/models/valuetablesync.h
     src/models/logmodel.cpp
     src/models/logmodel.h
     src/models/marklogmodel.cpp
@@ -110,6 +122,8 @@ qt_add_executable(ToolLogPro
     src/models/propertiesmodel.h
     src/models/propertydefinitionmodel.cpp
     src/models/propertydefinitionmodel.h
+    src/models/textsearchmodel.cpp
+    src/models/textsearchmodel.h
     src/models/blinksweep.h
     
     # Converters
@@ -117,10 +131,12 @@ qt_add_executable(ToolLogPro
     src/converters/threadtimelogconverter.h
     src/converters/brieflogconverter.cpp
     src/converters/brieflogconverter.h
-    src/converters/propertydefinitionconverter.cpp
-    src/converters/propertydefinitionconverter.h
-    src/converters/propertydefinitionjson.cpp
-    src/converters/propertydefinitionjson.h
+    src/converters/dmesglogconverter.cpp
+    src/converters/dmesglogconverter.h
+    src/converters/configurationmanageroutput.cpp
+    src/converters/configurationmanageroutput.h
+    src/converters/propertysetjson.cpp
+    src/converters/propertysetjson.h
     src/converters/devicelistconverter.cpp
     src/converters/devicelistconverter.h
     src/converters/settingslistconverter.cpp
@@ -133,18 +149,24 @@ qt_add_executable(ToolLogPro
     src/converters/devicedetailsconverter.h
     
     # Filters
+    src/filters/crashdetector.h
+    src/filters/filterquery.cpp
+    src/filters/filterquery.h
     src/filters/logfilter.cpp
     src/filters/logfilter.h
-    src/filters/valuefilter.cpp
-    src/filters/valuefilter.h
-    src/filters/filterengine.cpp
-    src/filters/filterengine.h
+    src/filters/logquery.cpp
+    src/filters/logquery.h
+    src/filters/propertydefinitionquery.cpp
+    src/filters/propertydefinitionquery.h
+    src/filters/tablequery.cpp
+    src/filters/tablequery.h
     
     # Interfaces
     src/interfaces/ilogconverter.h
     src/interfaces/ilogfilter.h
 
     # Data
+    src/data/propertydefinition.cpp
     src/data/propertydefinition.h
     src/data/logentry.h
     src/data/settingentry.h
@@ -208,6 +230,11 @@ target_link_libraries(ToolLogPro
         Qt::Concurrent
         Qt::Sql
 )
+
+# Resident-set sampling for the status bar uses the platform's own API.
+if(WIN32)
+    target_link_libraries(ToolLogPro PRIVATE psapi)
+endif()
 
 include(GNUInstallDirs)
 

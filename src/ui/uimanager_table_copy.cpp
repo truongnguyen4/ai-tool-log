@@ -8,10 +8,19 @@
 
 void UiManager::copyTableRows(QTableView *tableView)
 {
+    if (!tableView)
+        return;
     QAbstractItemModel *model = tableView->model();
-    if (!model) return;
-
     QItemSelectionModel *selModel = tableView->selectionModel();
+    if (!model || !selModel)
+        return;   // a view with no model has no selection model either
+
+    // A cell shown only as a checkbox has no display text; its edit value
+    // ("true" / "false") is what belongs on the clipboard.
+    const auto cellText = [model](const QModelIndex &index) {
+        const QString text = model->data(index, Qt::DisplayRole).toString();
+        return text.isEmpty() ? model->data(index, Qt::EditRole).toString() : text;
+    };
 
     // Try full-row selection first (log table uses SelectRows)
     QModelIndexList selectedRows = selModel->selectedRows();
@@ -27,7 +36,7 @@ void UiManager::copyTableRows(QTableView *tableView)
         for (const QModelIndex &rowIdx : selectedRows) {
             QStringList cells;
             for (int col : visibleCols)
-                cells << model->data(model->index(rowIdx.row(), col), Qt::DisplayRole).toString();
+                cells << cellText(model->index(rowIdx.row(), col));
             lines << cells.join(QStringLiteral("\t"));
         }
         QApplication::clipboard()->setText(lines.join(QStringLiteral("\n")));
@@ -60,7 +69,7 @@ void UiManager::copyTableRows(QTableView *tableView)
             rowCells.clear();
             prevRow = idx.row();
         }
-        rowCells << model->data(idx, Qt::DisplayRole).toString();
+        rowCells << cellText(idx);
     }
     if (!rowCells.isEmpty())
         lines << rowCells.join(QStringLiteral("\t"));

@@ -7,6 +7,7 @@
 #include <QFrame>
 #include <QTabWidget>
 #include <QFontComboBox>
+#include <QFontInfo>
 #include <QSpinBox>
 #include <QLabel>
 #include <QListWidget>
@@ -22,21 +23,34 @@
 #include <QPushButton>
 #include <QMessageBox>
 
-SettingsDialog::SettingsDialog(const QFont &currentFont,
+namespace {
+/** Point sizes offered for the view font. */
+constexpr int kMinFontPointSize = 6;
+constexpr int kMaxFontPointSize = 48;
+} // namespace
+
+SettingsDialog::SettingsDialog(const std::optional<QFont> &viewFont,
+                               const QFont &defaultViewFont,
                                const QVector<bool> &columnVisibility,
-                               const QVector<bool> &propDefColumnVisibility,
                                QWidget *parent)
     : QDialog(parent)
-    , m_currentFont(currentFont)
+    , m_viewFont(viewFont)
+    , m_defaultViewFont(defaultViewFont)
     , m_initColumnVis(columnVisibility)
-    , m_initPropDefColVis(propDefColumnVisibility)
 {
     setWindowTitle(tr("Settings"));
     setMinimumSize(450, 380);
     setupUi();
 }
 
-QFont SettingsDialog::selectedFont() const
+std::optional<QFont> SettingsDialog::viewFont() const
+{
+    if (!m_customFontCheck->isChecked())
+        return std::nullopt;
+    return customFont();
+}
+
+QFont SettingsDialog::customFont() const
 {
     QFont font = m_fontComboBox->currentFont();
     font.setPointSize(m_fontSizeSpinBox->value());
@@ -48,15 +62,6 @@ QVector<bool> SettingsDialog::columnVisibility() const
     QVector<bool> vis;
     vis.reserve(m_columnCheckboxes.size());
     for (QCheckBox *cb : m_columnCheckboxes)
-        vis.append(cb->isChecked());
-    return vis;
-}
-
-QVector<bool> SettingsDialog::propDefColumnVisibility() const
-{
-    QVector<bool> vis;
-    vis.reserve(m_propDefColumnCheckboxes.size());
-    for (QCheckBox *cb : m_propDefColumnCheckboxes)
         vis.append(cb->isChecked());
     return vis;
 }
@@ -79,7 +84,6 @@ void SettingsDialog::setupUi()
 
     setupFontTab();
     setupColumnsTab();
-    setupPropDefColumnsTab();
     setupDatabaseTab();
     setupThemeTab();
 
@@ -154,6 +158,8 @@ void SettingsDialog::setupUi()
     connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
     // Live font preview
+    connect(m_customFontCheck, &QCheckBox::toggled,
+            this, [this]() { updatePreview(); });
     connect(m_fontComboBox, &QFontComboBox::currentFontChanged,
             this, [this]() { updatePreview(); });
     connect(m_fontSizeSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
@@ -168,29 +174,54 @@ void SettingsDialog::setupFontTab()
     auto *fontTab    = new QWidget;
     auto *fontLayout = new QVBoxLayout(fontTab);
 
-    auto *fontGroup  = new QGroupBox(tr("Application Font"), fontTab);
-    auto *formLayout = new QFormLayout(fontGroup);
+    auto *fontGroup   = new QGroupBox(tr("Log and Output View Font"), fontTab);
+    auto *groupLayout = new QVBoxLayout(fontGroup);
 
+    auto *scope = UiComponents::Label::caption(
+        tr("Used by the log tables and the read-only output views (dumpsys, "
+           "cradle, JSON, cell content). Buttons, inputs and other controls "
+           "keep the standard interface font."), fontGroup);
+    scope->setWordWrap(true);
+    groupLayout->addWidget(scope);
+
+    m_customFontCheck = new QCheckBox(tr("Use a custom font"), fontGroup);
+    m_customFontCheck->setChecked(m_viewFont.has_value());
+    groupLayout->addWidget(m_customFontCheck);
+
+    // Start the controls from the font in use, so ticking the box alone
+    // changes nothing visible.
+    const QFont initialFont = m_viewFont.value_or(m_defaultViewFont);
+
+    auto *formLayout = new QFormLayout;
     m_fontComboBox = new QFontComboBox(fontGroup);
-    m_fontComboBox->setCurrentFont(m_currentFont);
+    m_fontComboBox->setCurrentFont(initialFont);
     formLayout->addRow(tr("Family:"), m_fontComboBox);
 
     m_fontSizeSpinBox = new QSpinBox(fontGroup);
-    m_fontSizeSpinBox->setRange(6, 48);
-    m_fontSizeSpinBox->setValue(m_currentFont.pointSize() > 0
-                                    ? m_currentFont.pointSize()
-                                    : 10);
+    m_fontSizeSpinBox->setRange(kMinFontPointSize, kMaxFontPointSize);
+    m_fontSizeSpinBox->setValue(qBound(kMinFontPointSize,
+                                       QFontInfo(initialFont).pointSize(),
+                                       kMaxFontPointSize));
     m_fontSizeSpinBox->setSuffix(tr(" pt"));
     formLayout->addRow(tr("Size:"), m_fontSizeSpinBox);
+    groupLayout->addLayout(formLayout);
+
+    const auto enableFontControls = [this](bool custom) {
+        m_fontComboBox->setEnabled(custom);
+        m_fontSizeSpinBox->setEnabled(custom);
+    };
+    enableFontControls(m_customFontCheck->isChecked());
+    connect(m_customFontCheck, &QCheckBox::toggled, this, enableFontControls);
 
     fontLayout->addWidget(fontGroup);
 
     auto *previewGroup  = new QGroupBox(tr("Preview"), fontTab);
     auto *previewLayout = new QVBoxLayout(previewGroup);
-    m_previewLabel = new QLabel(tr("The quick brown fox jumps over the lazy dog.\n"
-                                   "0123456789  ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
-                                previewGroup);
-    m_previewLabel->setAlignment(Qt::AlignCenter);
+    m_previewLabel = new QLabel(
+        QStringLiteral("10:22:31.123  I  ActivityManager: Start proc 4321:com.example\n"
+                       "The quick brown fox jumps over the lazy dog. 0123456789"),
+        previewGroup);
+    m_previewLabel->setWordWrap(true);
     m_previewLabel->setMinimumHeight(60);
     previewLayout->addWidget(m_previewLabel);
     fontLayout->addWidget(previewGroup);
@@ -243,48 +274,13 @@ void SettingsDialog::setupColumnsTab()
     m_tabWidget->addTab(colTab, tr("Log Table Columns"));
 }
 
-void SettingsDialog::setupPropDefColumnsTab()
-{
-    auto *tab    = new QWidget;
-    auto *layout = new QVBoxLayout(tab);
-
-    auto *group     = new QGroupBox(tr("Visible Property Definition Columns"), tab);
-    auto *grpLayout = new QVBoxLayout(group);
-
-    // Column names are sourced from TableConfig::PropertyDefColumns::Names to ensure consistency
-    using namespace TableConfig::PropertyDefColumns;
-    const QStringList colNames = {
-        tr(Names::ID),            // 0
-        tr(Names::NAME),          // 1
-        tr(Names::SUPPORTED),     // 2
-        tr(Names::NEED_REBOOT),   // 3
-        tr(Names::TYPE),          // 4
-        tr(Names::READ_ONLY),     // 5
-        tr(Names::DEFAULT),       // 6
-        tr(Names::VALUE),         // 7
-        tr(Names::SET_BUTTON),    // 8
-        tr(Names::GET_BUTTON),    // 9
-        tr(Names::REMOVE_BUTTON), // 10
-    };
-
-    m_propDefColumnCheckboxes.clear();
-    for (int i = 0; i < colNames.size(); ++i) {
-        auto *cb = new QCheckBox(colNames[i], group);
-        const bool visible = (i < m_initPropDefColVis.size()) ? m_initPropDefColVis[i] : true;
-        cb->setChecked(visible);
-        grpLayout->addWidget(cb);
-        m_propDefColumnCheckboxes.append(cb);
-    }
-
-    layout->addWidget(group);
-    layout->addStretch();
-
-    m_tabWidget->addTab(tab, tr("Property Definition Columns"));
-}
-
 void SettingsDialog::updatePreview()
 {
-    m_previewLabel->setFont(selectedFont());
+    QFont font = m_customFontCheck->isChecked() ? customFont() : m_defaultViewFont;
+    // The preview sits in a group box, which the theme sets semibold; the log
+    // views it stands in for are not.
+    font.setWeight(QFont::Normal);
+    m_previewLabel->setFont(font);
 }
 
 QStringList SettingsDialog::keysToReset() const
@@ -306,15 +302,9 @@ void SettingsDialog::setupDatabaseTab()
 
     // Define which history groups exist and their friendly names
     m_dbEntries = {
-        { tr("Logcat — Keyword filter"),          QStringLiteral("keyword")        },
-        { tr("Logcat — Tag filter"),              QStringLiteral("tag")            },
-        { tr("Logcat — PID filter"),              QStringLiteral("pid")            },
-        { tr("Logcat — Package filter"),          QStringLiteral("package")        },
-        { tr("Logcat — Find in message"),         QStringLiteral("findMessage")    },
-        { tr("Settings table — Key filter"),      QStringLiteral("settingsKey")    },
-        { tr("Settings table — Value filter"),    QStringLiteral("settingsValue")  },
-        { tr("System properties — Key filter"),   QStringLiteral("propertiesKey")  },
-        { tr("System properties — Value filter"), QStringLiteral("propertiesValue")},
+        { tr("Logcat — Filter"),             QStringLiteral("logQuery")        },
+        { tr("Settings table — Filter"),     QStringLiteral("settingsQuery")   },
+        { tr("System properties — Filter"),  QStringLiteral("propertiesQuery") },
     };
 
     for (DbEntry &e : m_dbEntries) {

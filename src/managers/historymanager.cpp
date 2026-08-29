@@ -64,6 +64,9 @@ void HistoryManager::clearHistory(const QStringList &names)
         settings.remove(name);
     }
     settings.endGroup();
+
+    for (const QString &name : names)
+        emit historyChanged(name);
 }
 
 void HistoryManager::flush()
@@ -89,6 +92,11 @@ void HistoryManager::persistImmediate(const QString &name, const QString &value)
 
     QStringList history = loadHistory(name);
 
+    // Already the most recent entry: nothing to write, and no reason to make
+    // every listening completer rebuild its model.
+    if (!history.isEmpty() && history.constLast() == trimmed)
+        return;
+
     // Dedup + promote to most-recent.
     history.removeAll(trimmed);
     history.append(trimmed);
@@ -97,6 +105,7 @@ void HistoryManager::persistImmediate(const QString &name, const QString &value)
 
     m_cache.insert(name, history);
     writeToSettings(name, history);
+    emit historyChanged(name);
 }
 
 QStringList HistoryManager::readFromSettings(const QString &name) const

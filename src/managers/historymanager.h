@@ -43,6 +43,15 @@ public:
     static const int MAX_HISTORY_SIZE  = 50;
     static const int DEBOUNCE_INTERVAL_MS = 2000;
 
+signals:
+    /**
+     * The stored history for @p name changed.
+     *
+     * Completer models listen for this instead of reloading on every
+     * keystroke, which rebuilt the completion index on each character typed.
+     */
+    void historyChanged(const QString &name);
+
 private:
     void persistImmediate(const QString &name, const QString &value);
     QStringList readFromSettings(const QString &name) const;

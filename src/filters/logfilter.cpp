@@ -1,33 +1,22 @@
 #include "logfilter.h"
-#include "filterengine.h"
 
 bool LogFilter::passesFilter(const LogEntry &entry, const FilterCriteria &criteria) const
 {
-    // Keyword regex: matched against tag, message, or package.
-    if (!criteria.keywordFilter.isEmpty()
-        && !FilterEngine::matchesRegex({entry.tag, entry.message, entry.package},
-                                       criteria.keywordRegex))
+    // Level and time are plain comparisons, so they run first and spare the
+    // lines they reject the text search.
+    //
+    // Level index 0 is Verbose, i.e. "no floor": at that setting nothing is
+    // dropped, not even a line whose level letter we failed to recognise.
+    if (criteria.minLevelIndex > 0
+        && levelIndex(entry.level) < criteria.minLevelIndex)
         return false;
 
-    // String filters – use pre-parsed form (zero allocations per entry).
-    if (!FilterEngine::matchesLogic(entry.message, criteria.parsedMessage)) return false;
-    if (!FilterEngine::matchesLogic(entry.tag,     criteria.parsedTag))     return false;
-    if (!FilterEngine::matchesLogic(entry.package, criteria.parsedPackage)) return false;
-    if (!FilterEngine::matchesLogic(entry.pid,     criteria.parsedPid, /*exact=*/true)) return false;
-    if (!FilterEngine::matchesLogic(entry.tid,     criteria.parsedTid, /*exact=*/true)) return false;
-
-    // Time range
     if (!criteria.startTime.isEmpty() && entry.time < criteria.startTime)
         return false;
     if (!criteria.endTime.isEmpty()   && entry.time > criteria.endTime)
         return false;
 
-    // Level filter – O(1) switch, no QStringList allocation
-    if (criteria.minLevelIndex >= 0
-        && levelIndex(entry.level) < criteria.minLevelIndex)
-        return false;
-
-    return true;
+    return criteria.query.matches(entry);
 }
 
 // ---------------------------------------------------------------------------
@@ -43,6 +32,8 @@ int LogFilter::levelIndex(const QString &level)
         case 'W': return 3;
         case 'E': return 4;
         case 'A': return 5;
+        // logcat prints Fatal, which Android ranks with Assert.
+        case 'F': return 5;
         default:  return -1;
     }
 }

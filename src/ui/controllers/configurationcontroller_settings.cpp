@@ -1,4 +1,4 @@
-// ConfigurationController: settings/properties row save + recreate buttons + refresh.
+// ConfigurationController: settings/properties row save + fetch handlers.
 #include "configurationcontroller.h"
 #include "ui_mainwindow.h"
 #include "tableconfig.h"
@@ -7,12 +7,7 @@
 #include "propertydefinitionmodel.h"
 #include "adbmanager.h"
 
-#include "components/components.h"
-
-#include <QHash>
-#include <QIcon>
 #include <QMessageBox>
-#include <QPushButton>
 
 void ConfigurationController::onSaveSettingClicked(int row)
 {
@@ -93,50 +88,6 @@ void ConfigurationController::onPropertySaveResult(int /*row*/, bool success,
     }
 }
 
-static QPushButton *makeRowActionButton(const QString &tooltip, QWidget *parent)
-{
-    // Centralized icon-button factory — see src/ui/components/README.md.
-    auto *btn = UiComponents::Button::icon(QIcon(":/icons/download.svg"),
-                                           tooltip, parent,
-                                           UiComponents::ButtonSize::Small);
-    btn->setMaximumSize(50, 25);
-    return btn;
-}
-
-void ConfigurationController::recreateSettingsButtons()
-{
-    using namespace TableConfig::SettingsColumns;
-    const int rowCount = m_settingsModel->rowCount();
-
-    for (int i = 0; i < rowCount; ++i) {
-        QWidget *old = m_ui->tableSettings->indexWidget(m_settingsModel->index(i, ACTION));
-        if (old) { m_ui->tableSettings->setIndexWidget(m_settingsModel->index(i, ACTION), nullptr); old->deleteLater(); }
-    }
-    for (int i = 0; i < rowCount; ++i) {
-        QPushButton *btn = makeRowActionButton("Save this setting to device", nullptr);
-        if (m_monitoringSettings) btn->setEnabled(false);
-        m_ui->tableSettings->setIndexWidget(m_settingsModel->index(i, ACTION), btn);
-        connect(btn, &QPushButton::clicked, this, [this, i]() { onSaveSettingClicked(i); });
-    }
-}
-
-void ConfigurationController::recreatePropertiesButtons()
-{
-    using namespace TableConfig::PropertiesColumns;
-    const int rowCount = m_propertiesModel->rowCount();
-
-    for (int i = 0; i < rowCount; ++i) {
-        QWidget *old = m_ui->tableProperties->indexWidget(m_propertiesModel->index(i, ACTION));
-        if (old) { m_ui->tableProperties->setIndexWidget(m_propertiesModel->index(i, ACTION), nullptr); old->deleteLater(); }
-    }
-    for (int i = 0; i < rowCount; ++i) {
-        QPushButton *btn = makeRowActionButton("Save this property to device", nullptr);
-        if (m_monitoringProperties) btn->setEnabled(false);
-        m_ui->tableProperties->setIndexWidget(m_propertiesModel->index(i, ACTION), btn);
-        connect(btn, &QPushButton::clicked, this, [this, i]() { onSavePropertyClicked(i); });
-    }
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: Settings & Properties Refresh / Fetched (moved from UiManager)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -163,31 +114,28 @@ void ConfigurationController::onRefreshPropertiesClicked()
 
 void ConfigurationController::onSettingsFetched(const QVector<SettingEntry> &settings)
 {
-    if (m_monitoringSettings) {
-        // Monitor path: value-only update (no insert), no filter rebuild,
-        // no per-row button recreation — keeps the user's filter and any
-        // disabled-state intact while ticking every 500 ms.
+    if (m_settingsMonitor.active) {
+        // Monitor path: value-only update (no insert, no filter rebuild) so
+        // the user's filter, selection and scroll position survive each tick.
         m_settingsModel->updateSettings(settings, /*allowInsert=*/false);
-        m_settingsRefreshBusy = false;
+        m_settingsMonitor.busy = false;
         return;
     }
     // Non-monitor path: full replace so the table aligns exactly with the
     // focused device (entries that no longer exist are removed).
     m_settingsModel->setSettings(settings);
     m_settingsModel->reapplyFilter();
-    recreateSettingsButtons();
 }
 
 void ConfigurationController::onPropertiesFetched(const QVector<PropertyEntry> &properties)
 {
-    if (m_monitoringProperties) {
+    if (m_propertiesMonitor.active) {
         m_propertiesModel->updateProperties(properties, /*allowInsert=*/false);
-        m_propertiesRefreshBusy = false;
+        m_propertiesMonitor.busy = false;
         return;
     }
     // Non-monitor path: full replace so the table aligns exactly with the
     // focused device.
     m_propertiesModel->setProperties(properties);
     m_propertiesModel->reapplyFilter();
-    recreatePropertiesButtons();
 }

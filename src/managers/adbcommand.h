@@ -16,9 +16,22 @@ inline QStringList getDeviceModel(const QString &deviceId)
     return QStringList() << "-s" << deviceId << "shell" << "getprop" << "ro.product.model";
 }
 
-inline QStringList startLogcat(const QString &deviceId)
+// logcat, from @p since ("MM-DD hh:mm:ss.mmm") when given. adb quotes logcat
+// arguments for the device shell itself, so the space needs no escaping.
+inline QStringList startLogcat(const QString &deviceId, const QString &since = QString())
 {
-    return QStringList() << "-s" << deviceId << "logcat" << "-v" << "threadtime";
+    QStringList args = QStringList() << "-s" << deviceId << "logcat" << "-v" << "threadtime";
+    if (!since.isEmpty())
+        args << "-T" << since;
+    return args;
+}
+
+// Block until the device is online, then print its boot id; a different id
+// than before means it rebooted.
+inline QStringList waitForBootId(const QString &deviceId)
+{
+    return QStringList() << "-s" << deviceId << "wait-for-device"
+                         << "shell" << "cat" << "/proc/sys/kernel/random/boot_id";
 }
 
 inline QStringList startDmesg(const QString &deviceId)
@@ -66,19 +79,25 @@ inline QStringList setProperty(const QString &deviceId, const QString &property,
     return QStringList() << "-s" << deviceId << "shell" << "setprop" << property << value;
 }
 
-inline QStringList getPropertyDefinitions(const QString &deviceId)
+// Datalogic configuration manager: adb shell cmd configuration_manager <args...>
+// Arguments reach the device shell joined by spaces, so values must already
+// be shell-quoted (ConfigurationManagerOutput::setCommands does that).
+inline QStringList configurationManager(const QString &deviceId, const QStringList &args)
 {
-    return QStringList() << "-s" << deviceId << "shell" << "cmd" << "configuration_manager" << "get";
+    return QStringList() << "-s" << deviceId << "shell" << "cmd" << "configuration_manager" << args;
 }
 
-inline QStringList getPropertyDefinition(const QString &deviceId, const QString &propertyId)
+inline QStringList listPropertyDefinitions(const QString &deviceId)
 {
-    return QStringList() << "-s" << deviceId << "shell" << "cmd" << "configuration_manager" << "get" << propertyId;
+    return configurationManager(deviceId, {QStringLiteral("list"), QStringLiteral("--json")});
 }
 
-inline QStringList setPropertyDefinition(const QString &deviceId, const QString &propertyId, const QString &value)
+// Processes by pid, for turning a log line pid into the app that wrote it.
+// `-o PID,NAME` is toybox (Android 8+); older devices print the classic
+// USER PID PPID ... NAME columns, which the parser also understands.
+inline QStringList listProcesses(const QString &deviceId)
 {
-    return QStringList() << "-s" << deviceId << "shell" << "cmd" << "configuration_manager" << "set" << propertyId << value;
+    return QStringList() << "-s" << deviceId << "shell" << "ps" << "-A" << "-o" << "PID,NAME";
 }
 
 inline QStringList listDumpsysServices(const QString &deviceId)

@@ -51,6 +51,17 @@ Palette Palette::dark()
     p.levelWarn            = QStringLiteral("#fbbf24");
     p.levelError           = QStringLiteral("#f87171");
     p.levelAssert          = QStringLiteral("#c084fc");  // purple-400
+    p.levelDefault         = QStringLiteral("#cccccc");
+
+    // Data views
+    p.rowMarked            = QStringLiteral("#1a3a80");  // deep blue
+    p.rowAnchor            = QStringLiteral("#1a3a4a");  // deep teal
+    p.rowSelected          = QStringLiteral("#4a4a52");
+    p.rowBlink             = QStringLiteral("#1f4d7a");  // muted blue flash
+    p.searchHighlightBg    = QStringLiteral("#b8860b");
+    p.searchHighlightText  = QStringLiteral("#ffffff");
+    p.panelBackground      = QStringLiteral("#2d2d30");
+    p.editorBackground     = QStringLiteral("#1e1e1e");
 
     // Scrollbars
     p.scrollbarHandle      = QStringLiteral("#3f3f46");

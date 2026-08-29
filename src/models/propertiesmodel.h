@@ -6,7 +6,7 @@
 #include <QHash>
 #include <QString>
 #include <QElapsedTimer>
-#include "valuefilter.h"
+#include "tablequery.h"
 #include "propertyentry.h"
 
 class QTimer;
@@ -24,7 +24,7 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-    
+
     void setProperties(const QVector<PropertyEntry> &properties);
     // Update values in the model.
     // allowInsert=true (default): add entries not yet present (adb fetch path).
@@ -34,18 +34,22 @@ public:
     // Returns the rows currently visible in the table (filtered if a filter
     // is active, otherwise all rows).
     const QVector<PropertyEntry>& visibleProperties() const;
-    
-    void applyFilter(const QString &nameFilter, const QString &valueFilter = QString());
+
+    /** Show only the rows matching @p query (see tablequery.h); empty shows all. */
+    void applyFilter(const QString &query);
     void reapplyFilter();
     void clearFilter();
+    /** The filter in force, for its repair warning. */
+    const TableQuery &filterQuery() const { return m_filterQuery; }
 
 private:
+    /** Recompute the visible rows from m_filterQuery and reset the view. */
+    void rebuildFilter();
+
     QVector<PropertyEntry> m_allProperties;
     QVector<PropertyEntry> m_filteredProperties;
-    ValueFilter m_filter;
+    TableQuery m_filterQuery;   // kept to reapply after an update
     bool m_isFiltered;
-    QString m_currentNameFilter;   // Store current name filter to reapply after update
-    QString m_currentValueFilter;  // Store current value filter to reapply after update
 
     QHash<QString, qint64> m_blinkUntil;
     QElapsedTimer          m_clock;

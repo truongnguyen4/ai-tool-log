@@ -1,36 +1,47 @@
 #ifndef CONFIGURATIONCONTROLLER_H
 #define CONFIGURATIONCONTROLLER_H
 
+#include <QHash>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QVector>
 #include <functional>
+#include <optional>
 
-#include "propertydefinition.h"
-#include "settingentry.h"
+#include "configurationmanageroutput.h"
 #include "propertyentry.h"
+#include "propertysetjson.h"
+#include "settingentry.h"
 #include "sqlitepresetstore.h"
-#include <QStringList>
 
 namespace Ui { class MainWindow; }
+class QHBoxLayout;
 class QMainWindow;
 class QComboBox;
+class QPoint;
 class QPushButton;
 class QTableView;
 class QTimer;
+class PropertyValueDelegate;
+class RowActionDelegate;
 class SettingsModel;
 class PropertiesModel;
 class PropertyDefinitionModel;
 
 /**
- * Owns the Configuration tab + Property Definition (SDK) workflows that
+ * Owns the Configuration tab and the SDK property workflows that
  * historically lived inside UiManager.
  *
  * Ownership:
  *   - Tables (Settings/Properties/PropertyDefinitions) and the models
  *     remain owned by UiManager.
- *   - All user-facing handlers and the "available property definitions"
- *     cache live here.
+ *   - All user-facing handlers live here.
+ *
+ * SDK properties: the whole configuration_manager catalog of the current
+ * device is listed. Edits are staged in the model and written together with
+ * Apply (or at once, with "Apply immediately" on); property sets save,
+ * export and re-stage values.
  */
 class ConfigurationController : public QObject
 {
@@ -49,13 +60,11 @@ public:
     void setupTables();
     void setupSDKTab();
     void setupMonitorButtons();
-    void applyPropDefColumnVisibility(const QVector<bool> &vis);
-    void updatePropertyNamesCompleter();
-    void recreatePropertyDefinitionButtons();
-    void clearAvailableCache();
 
-    const QVector<PropertyDefinition>& availablePropertyDefinitions() const
-    { return m_availablePropertyDefinitions; }
+    /** Load the current device's property list, unless a load is running. */
+    void refreshPropertyDefinitions();
+    /** Forget the loaded property list and its staged changes. */
+    void clearPropertyDefinitions();
 
 public slots:
     void onRefreshSettingsClicked();
@@ -63,21 +72,17 @@ public slots:
     void onSettingsFetched(const QVector<SettingEntry> &settings);
     void onPropertiesFetched(const QVector<PropertyEntry> &properties);
 
+    void onPropertyDefinitionsFetched(const QString &deviceId,
+                                      const QVector<PropertyDefinition> &definitions,
+                                      const QString &error);
+    void onPropertyDefinitionsWritten(const QString &deviceId, bool reset,
+                                      const PropertyWriteResult &result);
+
     // Property set persistence / exchange
     void onSavePropertySet();
     void onLoadPropertySet();
     void onExportPropertySet();
     void onImportPropertySet();
-
-    void onSearchPropertyDefinition();
-    void onAddPropertyDefinition();
-    void onClearAllPropertyDefinitions();
-    void onFetchPropertyDefinitions();
-    void onRefreshPropertyDefinitionValues();
-    void onPropertyDefinitionsFetched(const QVector<PropertyDefinition> &defs);
-    void onGetPropertyDefinitionClicked(int row);
-    void onSetPropertyDefinitionClicked(int row);
-    void onRemovePropertyDefinitionClicked(int row);
 
     void onSaveSettingClicked(int row);
     void onSettingSaveResult(int row, bool success,
@@ -89,18 +94,6 @@ public slots:
                               const QString &property,
                               const QString &newValue, const QString &verifiedValue,
                               const QString &error);
-    void recreateSettingsButtons();
-    void recreatePropertiesButtons();
-
-    // Monitor toggles — periodically re-fetch the corresponding table every
-    // 500 ms and disable per-row write buttons while active.
-    void onMonitorSettingsToggled(bool on);
-    void onMonitorPropertiesToggled(bool on);
-    void onMonitorPropertyDefsToggled(bool on);
-
-    bool isMonitoringSettings()      const { return m_monitoringSettings; }
-    bool isMonitoringProperties()    const { return m_monitoringProperties; }
-    bool isMonitoringPropertyDefs()  const { return m_monitoringPropertyDefs; }
 
     // Stop every active monitor (used by UiManager when the device changes /
     // disconnects — monitoring across a device switch makes no sense).
@@ -115,15 +108,64 @@ signals:
     void monitorTablesChanged(bool settings, bool properties, bool propertyDefs);
 
 private:
-    void wirePropertyRowButtons(int row);
-    void setSettingsRowActionsEnabled(bool enabled);
-    void setPropertiesRowActionsEnabled(bool enabled);
-    void setPropertyDefSetButtonsEnabled(bool enabled);
-    
-    // Helper methods to reduce code duplication
-    PropertyDefinition findPropertyByName(const QString &name) const;
-    PropertyDefinition parsePropertyDefinition(const QString &output, const QString &fallbackName = QString()) const;
+    // -----------------------------------------------------------------------
+    // Live monitor
+    //
+    // The Settings / Properties / Property-Definition tables each get a
+    // "Monitor" toggle that re-issues its fetch on a tick. The three used to
+    // be spelled out three times over; MonitorPane holds one pane's widgets
+    // and state so a single set of helpers drives all of them.
+    // -----------------------------------------------------------------------
+    struct MonitorPane {
+        QString      name;                  ///< user-facing table name
+        QPushButton *button   = nullptr;
+        QComboBox   *interval = nullptr;
+        QTimer      *timer    = nullptr;
+        bool         active   = false;
+        bool         busy     = false;      ///< a fetch is already in flight
+        /** Row actions disabled while the monitor writes into the table. */
+        QVector<RowActionDelegate *> rowActions;
+    };
+
+    /** Build one monitor toggle + interval combo into @p row of the layout. */
+    void buildMonitorControls(MonitorPane &pane, QHBoxLayout *row, QWidget *anchor);
+    /** Shared toggle handler: start/stop the tick and refresh dependent UI. */
+    void setMonitorActive(MonitorPane &pane, bool on);
+    /** Emit monitorStateChanged / monitorTablesChanged from current state. */
+    void publishMonitorState();
+
+    /** Attach a paint-based action button to @p column of @p view. */
+    RowActionDelegate *addRowAction(QTableView *view, int column,
+                                    const QString &iconPath, const QString &tooltip,
+                                    void (ConfigurationController::*slot)(int));
+
     bool validateDeviceId(const QString &deviceId) const;
+
+    // ── SDK properties ───────────────────────────────────────────────────────
+    /**
+     * Write the staged changes. @p retryFailed also re-sends the ones whose
+     * last write failed; automatic applying leaves those for the user.
+     */
+    void applyPropertyChanges(bool retryFailed);
+    void discardPropertyChanges();
+    void resetPropertiesToDefault(const QStringList &names);
+    void showPropertyContextMenu(const QPoint &pos);
+    void editPropertyValue(const QString &name);
+    void applyPropertyFilterText();
+    void updatePropertyActions();
+    void updatePropertySummary();
+    void updatePropertyFilterStatus();
+    void updatePropertyDetails();
+    /** Names of the selected rows, top to bottom. */
+    QStringList selectedPropertyNames() const;
+
+    // ── Property sets ────────────────────────────────────────────────────────
+    /** True when a property list is loaded; tells the user otherwise. */
+    bool requirePropertyCatalog(const QString &title) const;
+    /** Ask which properties to save; nothing when cancelled or empty. */
+    std::optional<QVector<PropertySetEntry>> choosePropertySet(const QString &title);
+    /** Stage the values of a loaded set and report what happened. */
+    void stagePropertySet(const QVector<PropertySetEntry> &entries, const QString &source);
 
     Ui::MainWindow          *m_ui;
     QMainWindow             *m_mainWindow;
@@ -133,27 +175,19 @@ private:
     SqlitePresetStore        m_propDefStore { QStringLiteral("propertydefs") };
     DeviceIdProvider         m_deviceIdProvider;
 
-    QVector<PropertyDefinition> m_availablePropertyDefinitions;
+    PropertyValueDelegate   *m_propertyValueDelegate = nullptr;
+    QTimer                  *m_propertyFilterTimer   = nullptr;
+    QTimer                  *m_autoApplyTimer        = nullptr;
+    QString                  m_propertyDeviceId;     ///< device the loaded list belongs to
+    QString                  m_propertyLoadError;
+    bool                     m_propertyFetchInFlight = false;
+    bool                     m_propertyRefetch       = false;  ///< reload once the running load ends
+    bool                     m_propertyWriteInFlight = false;
+    QHash<QString, QString>  m_propertyWriteValues;  ///< values of the running `set`
 
-    // Monitor state.
-    QPushButton *m_btnMonitorSettings     = nullptr;
-    QPushButton *m_btnMonitorProperties   = nullptr;
-    QPushButton *m_btnMonitorPropertyDefs = nullptr;
-    QComboBox   *m_cmbIntervalSettings     = nullptr;
-    QComboBox   *m_cmbIntervalProperties   = nullptr;
-    QComboBox   *m_cmbIntervalPropertyDefs = nullptr;
-    QTimer      *m_monitorSettingsTimer     = nullptr;
-    QTimer      *m_monitorPropertiesTimer   = nullptr;
-    QTimer      *m_monitorPropertyDefsTimer = nullptr;
-    bool m_monitoringSettings     = false;
-    bool m_monitoringProperties   = false;
-    bool m_monitoringPropertyDefs = false;
-    // Re-entrancy guards for the per-row monitor refresh tasks. Set while a
-    // QtConcurrent refresh batch is in flight; the next timer tick is skipped
-    // if the previous batch hasn't completed yet.
-    bool m_settingsRefreshBusy     = false;
-    bool m_propertiesRefreshBusy   = false;
-    bool m_propertyDefsRefreshBusy = false;
+    MonitorPane m_settingsMonitor;
+    MonitorPane m_propertiesMonitor;
+    MonitorPane m_propertyDefsMonitor;
 };
 
 #endif // CONFIGURATIONCONTROLLER_H

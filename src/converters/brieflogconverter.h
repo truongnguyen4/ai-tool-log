@@ -21,6 +21,12 @@ public:
     
 private:
     QRegularExpression m_regex;
+
+    // The brief format has no timestamp of its own, so one is synthesised and
+    // reused for a short window instead of being formatted per line.
+    mutable QString m_cachedDate;
+    mutable QString m_cachedTime;
+    mutable qint64  m_cachedStampMs = 0;
 };
 
 #endif // BRIEFLOGCONVERTER_H

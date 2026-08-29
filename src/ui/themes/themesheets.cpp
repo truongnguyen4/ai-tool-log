@@ -1,6 +1,8 @@
 #include "themesheets.h"
 #include "components/palette.h"
 
+#include <QFont>
+
 namespace ThemeSheets {
 
 using UiComponents::Palette;
@@ -394,13 +396,113 @@ QPushButton[size="sm"] { padding: 4px 10px; min-height: 22px; font-size: 12px; }
 QPushButton[size="md"] { min-height: 28px; }
 QPushButton[size="lg"] { padding: 9px 20px; min-height: 36px; font-size: 14px; }
 
-/* Monitor button: vivid danger-red while checked to signal "live re-fetch". */
+/* Monitor button: square icon toggle, vivid danger-red while polling. */
+QPushButton[role="monitor"] {
+    background-color: %11; border: 1px solid %12; color: %13;
+    border-radius: 6px; padding: 0;
+}
+QPushButton[role="monitor"]:hover { background-color: %14; border-color: %15; }
 QPushButton[role="monitor"]:checked {
     background-color: %18; border: 1px solid %18; color: %8;
     font-weight: 700;
 }
 QPushButton[role="monitor"]:checked:hover   { background-color: %19; border-color: %19; }
 QPushButton[role="monitor"]:checked:pressed { background-color: %19; border-color: %19; }
+
+/* Preset chips in the dumpsys toolbar: compact, pill-shaped ghost buttons. */
+QPushButton[role="chip"] {
+    border-radius: 11px; padding: 3px 12px; min-height: 20px;
+    font-size: 11px; color: %17; background-color: %11; border: 1px solid %12;
+}
+QPushButton[role="chip"]:hover   { background-color: %14; color: %13; border-color: %15; }
+QPushButton[role="chip"]:pressed { background-color: %16; }
+
+/* ── Active-pane / live-monitor accent ────────────────────────────────────────
+ * Marks the pane the user is driving in a split log view, and any config table
+ * that is currently being re-fetched on a timer. Both states reserve the same
+ * 2px so switching never shifts the layout.
+ *
+ * These selectors repeat the object id on purpose: the per-table rules further
+ * down are id-selectors, which outrank a bare attribute selector in QSS. */
+QTableView#tableLog[pane="active"],     QTableView#tableMarkLog[pane="active"],
+QTableView#tableLogB[pane="active"],    QTableView#tableMarkLogB[pane="active"],
+QTableView#tableSettings[pane="active"], QTableView#tableProperties[pane="active"],
+QTableView#tablePropertyDefinitions[pane="active"] {
+    border: 2px solid %7; border-radius: 4px;
+}
+QTableView#tableLog[pane="inactive"],  QTableView#tableMarkLog[pane="inactive"],
+QTableView#tableLogB[pane="inactive"], QTableView#tableMarkLogB[pane="inactive"] {
+    border: 2px solid transparent; border-radius: 4px;
+}
+QTableView#tableSettings[pane="inactive"], QTableView#tableProperties[pane="inactive"],
+QTableView#tablePropertyDefinitions[pane="inactive"] {
+    border: 2px solid %12; border-radius: 4px;
+}
+
+/* Capture toggles (Logcat / Kernel) while a capture is running. */
+QPushButton#btnStart[state="recording"], QPushButton#btnKernel[state="recording"] {
+    background-color: %18; border: 1px solid %18; color: %8; font-weight: 600;
+}
+QPushButton#btnStart[state="recording"]:hover,
+QPushButton#btnKernel[state="recording"]:hover {
+    background-color: %19; border-color: %19;
+}
+/* ── Searchable drop-down list (the App filter) ──────────────────────────── */
+QWidget#searchableListPopup {
+    background-color: %11; border: 1px solid %15; border-radius: 8px;
+}
+QLineEdit#searchableListSearch {
+    background-color: %16; color: %13; border: 1px solid %12;
+    border-radius: 6px; padding: 6px 10px;
+}
+QLineEdit#searchableListSearch:focus { border-color: %7; }
+QListWidget#searchableListView {
+    background-color: %11; color: %13; border: none; outline: none;
+}
+QListWidget#searchableListView::item {
+    padding: 5px 8px; border-radius: 4px;
+}
+QListWidget#searchableListView::item:hover    { background-color: %14; }
+QListWidget#searchableListView::item:selected { background-color: %20; color: %21; }
+QListWidget#searchableListView::item:disabled {
+    color: %17; font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px;
+    padding-top: 8px;
+}
+QLabel#searchableListCount { color: %17; font-size: 11px; padding: 0 2px; }
+
+/* A capture waiting for its device to come online. */
+QPushButton#btnStart[state="waiting"], QPushButton#btnKernel[state="waiting"] {
+    background-color: %20; border: 1px dashed %23; color: %23; font-weight: 600;
+}
+QPushButton#btnStart[state="waiting"]:hover,
+QPushButton#btnKernel[state="waiting"]:hover { border-style: solid; }
+/* "Follow reboots" toggle beside Logcat. */
+QPushButton#btnFollowReboots:checked {
+    background-color: %20; border: 1px solid %7; color: %21; padding: 5px 13px;
+}
+
+/* Toolbar group separators. */
+QFrame#toolbarDivider { color: %12; background: %12; border: none; margin: 2px 6px; }
+
+/* Devices tab: one row per connected device in the sidebar list. */
+QWidget[deviceRow="true"] {
+    background-color: transparent; border-left: 2px solid transparent;
+}
+QWidget[deviceRow="true"][selected="true"] {
+    background-color: %20; border-left: 2px solid %7;
+}
+
+/* Firmware-flash log output. */
+QTextEdit#flashOutputView {
+    background-color: %11; color: %13; border: 1px solid %12; border-radius: 6px;
+    font-family: "JetBrains Mono","Cascadia Code","Consolas","Courier New",monospace;
+    font-size: 12px;
+}
+
+/* Device-connection indicator in the Logcat toolbar. */
+QLabel#lblDeviceStatus                        { font-size: 16px; }
+QLabel#lblDeviceStatus[state="connected"]     { color: %22; }
+QLabel#lblDeviceStatus[state="disconnected"]  { color: %18; }
 
 /* ── Input variants ───────────────────────────────────────────────────────── */
 QLineEdit[variant="search"]   { padding-left: 12px; padding-right: 12px; border-radius: 16px; }
@@ -544,9 +646,8 @@ QLabel#lblSettings, QLabel#lblProperties {
     letter-spacing: 0.6px;
 }
 
-/* Filter input row */
-QLineEdit#txtFilterSettings, QLineEdit#txtFilterSettingsValue,
-QLineEdit#txtFilterProperties, QLineEdit#txtFilterPropertiesValue {
+/* Filter input row: the query box and the row count beside it */
+QLineEdit#txtFilterSettings, QLineEdit#txtFilterProperties {
     background-color: %16;
     color: %13;
     border: 1px solid %12;
@@ -555,14 +656,20 @@ QLineEdit#txtFilterProperties, QLineEdit#txtFilterPropertiesValue {
     selection-background-color: %20;
     selection-color: %21;
 }
-QLineEdit#txtFilterSettings:hover, QLineEdit#txtFilterSettingsValue:hover,
-QLineEdit#txtFilterProperties:hover, QLineEdit#txtFilterPropertiesValue:hover {
+QLineEdit#txtFilterSettings:hover, QLineEdit#txtFilterProperties:hover {
     border-color: %15;
 }
-QLineEdit#txtFilterSettings:focus, QLineEdit#txtFilterSettingsValue:focus,
-QLineEdit#txtFilterProperties:focus, QLineEdit#txtFilterPropertiesValue:focus {
+QLineEdit#txtFilterSettings:focus, QLineEdit#txtFilterProperties:focus {
     border-color: %7;
 }
+QLineEdit#txtFilterSettings[state="warning"], QLineEdit#txtFilterProperties[state="warning"] {
+    border-color: %23;
+}
+QLabel#lblSettingsFilterStatus, QLabel#lblPropertiesFilterStatus {
+    color: %17; font-size: 11px; padding: 0 2px;
+}
+QLabel#lblSettingsFilterStatus[state="warning"],
+QLabel#lblPropertiesFilterStatus[state="warning"] { color: %23; }
 
 /* Refresh icon buttons next to section headers */
 QPushButton#btnRefreshSettings, QPushButton#btnRefreshProperties {
@@ -674,10 +781,10 @@ QLabel#lblSDKTitle {
     padding: 4px 0;
 }
 
-/* SDK toolbar icon buttons (Export/Import/Save/Load + Refresh/Clear) */
+/* SDK toolbar icon buttons (Reload + Export/Import/Save/Load) */
 QPushButton#btnExportPropertySet, QPushButton#btnImportPropertySet,
 QPushButton#btnSavePropertySet,   QPushButton#btnLoadPropertySet,
-QPushButton#btnFetchPropertyDefs, QPushButton#btnClearAllProperties {
+QPushButton#btnFetchPropertyDefs {
     background: transparent;
     border: 1px solid transparent;
     border-radius: 6px;
@@ -685,16 +792,16 @@ QPushButton#btnFetchPropertyDefs, QPushButton#btnClearAllProperties {
 }
 QPushButton#btnExportPropertySet:hover, QPushButton#btnImportPropertySet:hover,
 QPushButton#btnSavePropertySet:hover,   QPushButton#btnLoadPropertySet:hover,
-QPushButton#btnFetchPropertyDefs:hover, QPushButton#btnClearAllProperties:hover {
+QPushButton#btnFetchPropertyDefs:hover {
     background-color: %14; border-color: %12;
 }
 QPushButton#btnExportPropertySet:pressed, QPushButton#btnImportPropertySet:pressed,
 QPushButton#btnSavePropertySet:pressed,   QPushButton#btnLoadPropertySet:pressed,
-QPushButton#btnFetchPropertyDefs:pressed, QPushButton#btnClearAllProperties:pressed {
+QPushButton#btnFetchPropertyDefs:pressed {
     background-color: %16;
 }
 
-/* SDK property search field */
+/* SDK property filter field */
 QLineEdit#txtPropertySearch {
     background-color: %16;
     color: %13;
@@ -706,6 +813,24 @@ QLineEdit#txtPropertySearch {
 }
 QLineEdit#txtPropertySearch:hover { border-color: %15; }
 QLineEdit#txtPropertySearch:focus { border-color: %7; }
+QLineEdit#txtPropertySearch[state="warning"] { border-color: %23; }
+
+/* SDK property counts, filter status and the selected property's details */
+QLabel#lblPropertyDefsSummary, QLabel#lblPropertyFilterStatus, QLabel#lblPropertyDetails {
+    color: %17; font-size: 11px; padding: 0 2px;
+}
+QLabel#lblPropertyDefsSummary[state="warning"],
+QLabel#lblPropertyFilterStatus[state="warning"] { color: %23; }
+QLabel#lblPropertyScope { color: %17; }
+
+/* Value editors inside a property row: compact enough to fit the row. */
+QTableView#tablePropertyDefinitions QLineEdit#propertyValueEditor,
+QTableView#tablePropertyDefinitions QSpinBox#propertyValueEditor,
+QTableView#tablePropertyDefinitions QComboBox#propertyValueEditor {
+    background-color: %11; color: %13;
+    border: 1px solid %7; border-radius: 3px;
+    padding: 0px 6px; min-height: 0px;
+}
 
 /* ─── ADB Logcat tab toolbar — modern ─── */
 QPushButton#btnStart {
@@ -794,8 +919,8 @@ QComboBox#cmbDevice QAbstractItemView {
     outline: none;
 }
 
-/* Tag/PID filter inputs in toolbar */
-QLineEdit#txtTagFilter, QLineEdit#txtPidFilter {
+/* Log filter box and the status line under it */
+QLineEdit#txtLogQuery {
     background-color: %16;
     color: %13;
     border: 1px solid %12;
@@ -804,8 +929,11 @@ QLineEdit#txtTagFilter, QLineEdit#txtPidFilter {
     selection-background-color: %20;
     selection-color: %21;
 }
-QLineEdit#txtTagFilter:hover, QLineEdit#txtPidFilter:hover { border-color: %15; }
-QLineEdit#txtTagFilter:focus, QLineEdit#txtPidFilter:focus { border-color: %7; }
+QLineEdit#txtLogQuery:hover { border-color: %15; }
+QLineEdit#txtLogQuery:focus { border-color: %7; }
+QLabel#lblQueryHint                  { color: %17; font-size: 11px; font-weight: 400; }
+QLabel#lblQueryHint[state="pending"] { color: %7; }
+QLabel#lblQueryHint[state="warning"] { color: %23; }
 
 /* ─── Configuration tab — dumpsys panel ─── */
 QWidget#dumpsysPanel { background-color: %11; }
@@ -866,6 +994,52 @@ QSplitter#splitterDumpsysOutput::handle {
 QSplitter#splitterDumpsysOutput::handle:vertical { height: 4px; }
 QSplitter#splitterDumpsysOutput::handle:horizontal { width: 4px; }
 QSplitter#splitterDumpsysOutput::handle:hover { background-color: %7; }
+
+/* Dumpsys search results: a VS Code-style list of the matching lines */
+QSplitter#splitterDumpsysResults::handle:horizontal { width: 4px; background-color: transparent; }
+QSplitter#splitterDumpsysResults::handle:hover { background-color: %7; }
+QWidget#dumpsysResultsPanel {
+    background-color: %11;
+    border: 1px solid %12;
+    border-radius: 8px;
+}
+QWidget#dumpsysResultsHeader {
+    background-color: %16;
+    border: none;
+    border-bottom: 1px solid %12;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+QLabel#lblDumpsysResultsTitle {
+    color: %13;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+QLabel#lblDumpsysResultsSummary { color: %17; font-size: 11px; }
+QTreeView#dumpsysResultsView {
+    background-color: %11;
+    alternate-background-color: %16;
+    color: %13;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    selection-background-color: %20;
+    selection-color: %21;
+    font-family: "JetBrains Mono","Fira Code","Cascadia Code","Menlo",monospace;
+    font-size: 12px;
+}
+QTreeView#dumpsysResultsView::item {
+    padding: 2px 6px;
+    border: none;
+    border-radius: 0;
+}
+QTreeView#dumpsysResultsView::item:hover:!selected { background-color: %14; }
+QTreeView#dumpsysResultsView::item:selected { background-color: %20; color: %21; }
+QPushButton#btnDumpsysResults:checked {
+    background-color: %20; color: %21; border-color: %7;
+}
 
 /* ─── Cradle tab — modern panel layout ─── */
 QGroupBox#grpCradleInfo, QGroupBox#grpCradleFirmware,
@@ -1209,10 +1383,45 @@ QPushButton#devBtnRebootFastboot:disabled, QPushButton#devBtnPowerKey:disabled {
         /* %7  */ p.accent,
         /* %8  */ p.textOnAccent,
         /* %9  */ p.accentHover)
+       /* %10..%16 */
        .arg(p.accentActive, p.surface, p.border, p.text, p.surfaceHover,
             p.borderStrong, p.surfaceMuted)
+       /* %17..%21 */
        .arg(p.textMuted, p.danger, p.dangerHover, p.accentSubtle,
-            p.accentSubtleText);
+            p.accentSubtleText)
+       /* %22..%23 */
+       .arg(p.success, p.warning);
+}
+
+QString viewFontRules(const QFont &font, const QString &interfaceFamily)
+{
+    QString family = font.family();
+    family.remove(QLatin1Char('"'));
+    QString headerFamily = interfaceFamily;
+    headerFamily.remove(QLatin1Char('"'));
+
+    const QString size = font.pointSizeF() > 0
+        ? QString::number(font.pointSizeF()) + QLatin1String("pt")
+        : QString::number(qMax(1, font.pixelSize())) + QLatin1String("px");
+
+    // Same selectors as the theme's own rules for these views and appended
+    // after them, so these win on equal specificity.
+    return QStringLiteral(R"(
+/* ── Log & output view font (Settings → Font) ────────────────────────────── */
+QTableView#tableLog, QTableView#tableMarkLog,
+QTableView#tableLogB, QTableView#tableMarkLogB,
+QPlainTextEdit#txtDumpsysCmdResult, QPlainTextEdit#txtDumpsysResult,
+QPlainTextEdit#txtCradleOutput, QPlainTextEdit#cellContentView,
+QTextEdit#flashOutputView, QTextEdit#devJsonView,
+QTreeView#dumpsysResultsView {
+    font-family: "%1"; font-size: %2;
+}
+/* Header labels are table chrome, not content: they keep the interface font. */
+QTableView#tableLog QHeaderView, QTableView#tableMarkLog QHeaderView,
+QTableView#tableLogB QHeaderView, QTableView#tableMarkLogB QHeaderView {
+    font-family: "%3"; font-size: 11px;
+}
+)").arg(family, size, headerFamily);
 }
 
 QString lightStylesheet() { return fromPalette(Palette::light()); }

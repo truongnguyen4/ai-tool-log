@@ -41,79 +41,52 @@ void DevicesTabController::refreshDevicesTab()
     const QString colRowSel = ColorScheme::toHex(cs.rowSelectedBackground());
 
     // ── Device row factory (with checkbox) ────────────────────────────────────
+    //
+    // Rows carry a `selected` dynamic property and are styled by the theme
+    // sheet's QWidget[deviceRow="true"] rules. Building a per-row stylesheet
+    // string, as this used to, meant re-parsing QSS once per device on every
+    // refresh — and duplicated the checkbox styling the theme already defines.
     auto makeDeviceRow = [&](const UiManager::DeviceInfo &info, bool selected, bool checked) -> QWidget* {
-        const QString statusColor = info.online ? colGreen : colMuted;
-        const QString dotChar     = info.online ? QStringLiteral("●") : QStringLiteral("○");
+        auto *row = new QWidget();
+        row->setObjectName(QStringLiteral("devRow_") + info.serial);
+        row->setProperty("deviceRow", true);
+        row->setProperty("selected", selected);
+        row->setCursor(Qt::PointingHandCursor);
 
-        QWidget *w = new QWidget();
-        w->setObjectName(QStringLiteral("devRow_") + info.serial);
-        const QString rowStyle = selected
-            ? QString("QWidget#devRow_%1 { background-color: %3; border-left: 2px solid %2; }")
-                  .arg(info.serial, colAccent, colRowSel)
-            : QString("QWidget#devRow_%1 { background-color: transparent; border-left: 2px solid transparent; }")
-                  .arg(info.serial);
-        w->setStyleSheet(rowStyle);
-        w->setCursor(Qt::PointingHandCursor);
+        auto *rowLayout = new QHBoxLayout(row);
+        rowLayout->setContentsMargins(selected ? 12 : 14, 8, 12, 8);
+        rowLayout->setSpacing(10);
 
-        QHBoxLayout *hl = new QHBoxLayout(w);
-        hl->setContentsMargins(selected ? 12 : 14, 8, 12, 8);
-        hl->setSpacing(10);
-
-        // Checkbox
-        QCheckBox *cb = new QCheckBox();
-        cb->setObjectName(QStringLiteral("devCheck_") + info.serial);
-        cb->setChecked(checked);
-        cb->setFixedSize(24, 24);
-        cb->setStyleSheet(QString(
-            "QCheckBox { spacing: 0px; }"
-            "QCheckBox::indicator {"
-            "  width: 18px; height: 18px;"
-            "  border: 2px solid %1;"
-            "  border-radius: 3px;"
-            "  background: transparent;"
-            "}"
-            "QCheckBox::indicator:checked {"
-            "  background-color: %2;"
-            "  border-color: %2;"
-            "}"
-            "QCheckBox::indicator:hover {"
-            "  border-color: %2;"
-            "}"
-        ).arg(colMuted, colAccent));
-        connect(cb, &QCheckBox::toggled, this, [this, uim, serial = info.serial](bool on) {
+        auto *check = new QCheckBox(row);
+        check->setObjectName(QStringLiteral("devCheck_") + info.serial);
+        check->setChecked(checked);
+        check->setToolTip(tr("Include this device in bulk actions"));
+        connect(check, &QCheckBox::toggled, this, [this, uim, serial = info.serial](bool on) {
             if (on)
                 uim->m_checkedDevices.insert(serial);
             else
                 uim->m_checkedDevices.remove(serial);
             refreshCheckedDevicesList();
         });
-        hl->addWidget(cb);
+        rowLayout->addWidget(check);
 
-        QLabel *dot = new QLabel(dotChar);
-        dot->setStyleSheet(QString("color: %1;").arg(statusColor));
-        dot->setFixedWidth(12);
+        auto *statusDot = new QLabel(info.online ? QStringLiteral("●") : QStringLiteral("○"), row);
+        statusDot->setStyleSheet(QStringLiteral("color: %1; background: transparent;")
+                                     .arg(info.online ? colGreen : colMuted));
+        statusDot->setFixedWidth(12);
+        rowLayout->addWidget(statusDot);
 
-        QWidget *nameW = new QWidget();
-        nameW->setStyleSheet("background: transparent;");
-        QVBoxLayout *vl = new QVBoxLayout(nameW);
-        vl->setContentsMargins(0, 0, 0, 0);
-        vl->setSpacing(1);
+        auto *name = new QLabel(info.name, row);
+        name->setStyleSheet(QStringLiteral("color: %1; background: transparent; font-weight: %2;")
+                                .arg(colText, selected ? QStringLiteral("600")
+                                                       : QStringLiteral("normal")));
+        name->setToolTip(info.serial);
+        rowLayout->addWidget(name, 1);
 
-        QLabel *nameLbl = new QLabel(info.name);
-        nameLbl->setStyleSheet(
-            QString("color: %1; font-weight: %2;")
-            .arg(colText, selected ? "bold" : "normal"));
-        nameLbl->setToolTip(info.serial);
-
-        vl->addWidget(nameLbl);
-
-        hl->addWidget(dot);
-        hl->addWidget(nameW, 1);
-
-        // Register row for click handling
-        uim->m_deviceRowMap[w] = info;
-        w->installEventFilter(uim->m_mainWindow);
-        return w;
+        // Register the row so the shared event filter can route clicks to it.
+        uim->m_deviceRowMap[row] = info;
+        row->installEventFilter(uim->m_mainWindow);
+        return row;
     };
 
     // ── Clear current list ────────────────────────────────────────────────────

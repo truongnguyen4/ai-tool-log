@@ -66,9 +66,6 @@
       </item>
       <item>
        <widget class="QLabel" name="lblDeviceStatus">
-        <property name="styleSheet">
-         <string notr="true">color: #4ec9b0; font-size: 16px;</string>
-        </property>
         <property name="text">
          <string>●</string>
         </property>
@@ -192,6 +189,38 @@
               </widget>
              </item>
              <item>
+              <widget class="QGroupBox" name="groupBoxQuery">
+               <property name="title">
+                <string>Filter</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_query">
+                <property name="spacing">
+                 <number>4</number>
+                </property>
+                <item>
+                 <widget class="QLineEdit" name="txtLogQuery">
+                  <property name="placeholderText">
+                   <string>e.g. camera | wifi  -tag:chatty</string>
+                  </property>
+                  <property name="clearButtonEnabled">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="lblQueryHint">
+                  <property name="text">
+                   <string>Words search Tag and Message. Hover the box for syntax.</string>
+                  </property>
+                  <property name="wordWrap">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
               <widget class="QGroupBox" name="groupBoxHighlight">
                <property name="title">
                 <string>Highlight</string>
@@ -202,7 +231,7 @@
                   <item>
                    <widget class="QLineEdit" name="txtHighlight">
                     <property name="placeholderText">
-                     <string>e.g. Android||Com  (Enter = next)</string>
+                     <string>e.g. error | timeout  (Enter = next)</string>
                     </property>
                    </widget>
                   </item>
@@ -286,86 +315,6 @@
               </widget>
              </item>
              <item>
-              <widget class="QGroupBox" name="groupBoxKeyword">
-               <property name="title">
-                <string>Text</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_keyword">
-                <item>
-                 <widget class="QLineEdit" name="txtKeyword">
-                  <property name="placeholderText">
-                   <string>Regex e.g. (?=.*camera)(?=.*service)</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_5">
-               <property name="title">
-                <string>Message</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_8">
-                <item>
-                 <widget class="QLineEdit" name="txtFindMessage">
-                  <property name="placeholderText">
-                   <string>e.g. Camera||Com</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox">
-               <property name="title">
-                <string>Tag</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_4">
-                <item>
-                 <widget class="QLineEdit" name="txtTagFilter">
-                  <property name="placeholderText">
-                   <string>e.g. CameraService||Android</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_2">
-               <property name="title">
-                <string>Package</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_5">
-                <item>
-                 <widget class="QLineEdit" name="txtPackageFilter">
-                  <property name="placeholderText">
-                   <string>e.g. com.google.android||android.com</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_3">
-               <property name="title">
-                <string>PID</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_6">
-                <item>
-                 <widget class="QLineEdit" name="txtPidFilter">
-                  <property name="placeholderText">
-                   <string>e.g. 14502||12345</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
               <widget class="QGroupBox" name="groupBox_6">
                <property name="title">
                 <string>Time Range</string>
@@ -397,8 +346,8 @@
                <property name="title">
                 <string>Minimum Level</string>
                </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_7">
-                <item>
+               <layout class="QGridLayout" name="gridLayout_levels">
+                <item row="0" column="0">
                  <widget class="QRadioButton" name="radioVerbosePlus">
                   <property name="text">
                    <string>V+</string>
@@ -408,42 +357,42 @@
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="0" column="1">
                  <widget class="QRadioButton" name="radioV">
                   <property name="text">
                    <string>V</string>
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="0" column="2">
                  <widget class="QRadioButton" name="radioD">
                   <property name="text">
                    <string>D</string>
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="0" column="3">
                  <widget class="QRadioButton" name="radioI">
                   <property name="text">
                    <string>I</string>
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="1" column="0">
                  <widget class="QRadioButton" name="radioW">
                   <property name="text">
                    <string>W</string>
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="1" column="1">
                  <widget class="QRadioButton" name="radioE">
                   <property name="text">
                    <string>E</string>
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="1" column="2">
                  <widget class="QRadioButton" name="radioA">
                   <property name="text">
                    <string>A</string>
@@ -947,14 +896,17 @@
                    <item>
                     <widget class="QLineEdit" name="txtFilterSettings">
                      <property name="placeholderText">
-                      <string>Filter by name...</string>
+                      <string>Filter, e.g. wifi  value=1  ns:secure</string>
+                     </property>
+                     <property name="clearButtonEnabled">
+                      <bool>true</bool>
                      </property>
                     </widget>
                    </item>
                    <item>
-                    <widget class="QLineEdit" name="txtFilterSettingsValue">
-                     <property name="placeholderText">
-                      <string>Filter by value...</string>
+                    <widget class="QLabel" name="lblSettingsFilterStatus">
+                     <property name="text">
+                      <string>0 rows</string>
                      </property>
                     </widget>
                    </item>
@@ -1044,14 +996,17 @@
                    <item>
                     <widget class="QLineEdit" name="txtFilterProperties">
                      <property name="placeholderText">
-                      <string>Filter by name...</string>
+                      <string>Filter, e.g. bluetooth  value=true</string>
+                     </property>
+                     <property name="clearButtonEnabled">
+                      <bool>true</bool>
                      </property>
                     </widget>
                    </item>
                    <item>
-                    <widget class="QLineEdit" name="txtFilterPropertiesValue">
-                     <property name="placeholderText">
-                      <string>Filter by value...</string>
+                    <widget class="QLabel" name="lblPropertiesFilterStatus">
+                     <property name="text">
+                      <string>0 rows</string>
                      </property>
                     </widget>
                    </item>
@@ -1400,7 +1355,14 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>PROPERTY DEFINITIONS</string>
+                  <string>CONFIGURATION PROPERTIES</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblPropertyDefsSummary">
+                 <property name="text">
+                  <string/>
                  </property>
                 </widget>
                </item>
@@ -1416,6 +1378,26 @@
                   </size>
                  </property>
                 </spacer>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnFetchPropertyDefs">
+                 <property name="maximumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="toolTip">
+                  <string>Reload every property from the device</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
+                   <normaloff>:/icons/refresh.svg</normaloff>:/icons/refresh.svg</iconset>
+                 </property>
+                </widget>
                </item>
                <item>
                 <widget class="QPushButton" name="btnExportPropertySet">
@@ -1501,50 +1483,40 @@
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_propertySearch">
+               <property name="spacing">
+                <number>8</number>
+               </property>
                <item>
                 <widget class="QLineEdit" name="txtPropertySearch">
                  <property name="placeholderText">
-                  <string>Search property name... (press Enter to add)</string>
+                  <string>Filter properties — e.g. scan, type:enum, value=true, -type:boolean</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="btnFetchPropertyDefs">
-                 <property name="maximumSize">
-                  <size>
-                   <width>30</width>
-                   <height>30</height>
-                  </size>
-                 </property>
-                 <property name="toolTip">
-                  <string>Refresh property values from device</string>
-                 </property>
+                <widget class="QLabel" name="lblPropertyScope">
                  <property name="text">
-                  <string/>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
-                   <normaloff>:/icons/refresh.svg</normaloff>:/icons/refresh.svg</iconset>
+                  <string>Show</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="btnClearAllProperties">
-                 <property name="maximumSize">
+                <widget class="QComboBox" name="cmbPropertyScope">
+                 <property name="minimumSize">
                   <size>
-                   <width>30</width>
-                   <height>30</height>
+                   <width>170</width>
+                   <height>0</height>
                   </size>
                  </property>
-                 <property name="toolTip">
-                  <string>Clear all property definitions</string>
-                 </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="../../build/Desktop_Qt_6_9_1-Debug/.qt/rcc/app_icons.qrc">
-                   <normaloff>:/icons/edit-delete.svg</normaloff>:/icons/edit-delete.svg</iconset>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblPropertyFilterStatus">
+                 <property name="minimumSize">
+                  <size>
+                   <width>70</width>
+                   <height>0</height>
+                  </size>
                  </property>
                 </widget>
                </item>
@@ -1559,9 +1531,54 @@
                 <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
                </property>
                <property name="sortingEnabled">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
               </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_propertyChanges">
+               <property name="spacing">
+                <number>8</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="lblPropertyDetails">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+                   <horstretch>1</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="chkApplyPropertiesImmediately">
+                 <property name="text">
+                  <string>Apply immediately</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnResetPropertyDefaults">
+                 <property name="text">
+                  <string>Reset to Default</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnDiscardPropertyChanges">
+                 <property name="text">
+                  <string>Discard All</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnApplyPropertyChanges">
+                 <property name="text">
+                  <string>Apply</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
             </layout>
            </widget>

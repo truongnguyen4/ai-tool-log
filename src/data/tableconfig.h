@@ -77,34 +77,24 @@ namespace TableConfig {
     }
 
     /**
-     * @brief Property Definition table column indices (PropertyDefinitionModel)
+     * @brief SDK property table column indices (PropertyDefinitionModel)
      */
     namespace PropertyDefColumns {
-        constexpr int ID            = 0;
-        constexpr int NAME          = 1;
-        constexpr int SUPPORTED     = 2;
-        constexpr int NEED_REBOOT   = 3;
-        constexpr int TYPE          = 4;
-        constexpr int READ_ONLY     = 5;
-        constexpr int DEFAULT       = 6;
-        constexpr int VALUE         = 7;
-        constexpr int SET_BUTTON    = 8;
-        constexpr int GET_BUTTON    = 9;
-        constexpr int REMOVE_BUTTON = 10;
-        constexpr int TOTAL_COLUMNS = 11;
+        constexpr int NAME    = 0;
+        constexpr int VALUE   = 1;
+        constexpr int DEFAULT = 2;
+        constexpr int TYPE    = 3;
+        constexpr int ID      = 4;
+        constexpr int NOTES   = 5;
+        constexpr int TOTAL_COLUMNS = 6;
 
         namespace Names {
-            constexpr const char* ID            = "ID";
-            constexpr const char* NAME          = "Name";
-            constexpr const char* SUPPORTED     = "Supported";
-            constexpr const char* NEED_REBOOT   = "Need Reboot";
-            constexpr const char* TYPE          = "Type";
-            constexpr const char* READ_ONLY     = "Read Only";
-            constexpr const char* DEFAULT       = "Default";
-            constexpr const char* VALUE         = "Value";
-            constexpr const char* SET_BUTTON    = "Set";    ///< Label used in settings dialog; table header is empty for button columns
-            constexpr const char* GET_BUTTON    = "Get";    ///< Label used in settings dialog; table header is empty for button columns
-            constexpr const char* REMOVE_BUTTON = "Remove"; ///< Label used in settings dialog; table header is empty for button columns
+            constexpr const char* NAME    = "Name";
+            constexpr const char* VALUE   = "Value";
+            constexpr const char* DEFAULT = "Default";
+            constexpr const char* TYPE    = "Type";
+            constexpr const char* ID      = "ID";
+            constexpr const char* NOTES   = "Notes";
         }
     }
 
@@ -134,17 +124,12 @@ namespace TableConfig {
         constexpr int PROPERTIES_VALUE = 300;
         constexpr int PROPERTIES_ACTION = 60;
 
-        // Property Definition table widths
-        constexpr int PROPDEF_NAME = 200;
+        // SDK property table widths (Value stretches)
+        constexpr int PROPDEF_NAME = 320;
+        constexpr int PROPDEF_DEFAULT = 140;
+        constexpr int PROPDEF_TYPE = 190;
         constexpr int PROPDEF_ID = 80;
-        constexpr int PROPDEF_SUPPORTED = 90;
-        constexpr int PROPDEF_DEFAULT = 150;
-        constexpr int PROPDEF_NEED_REBOOT = 100;
-        constexpr int PROPDEF_TYPE = 100;
-        constexpr int PROPDEF_READ_ONLY = 90;
-        constexpr int PROPDEF_SET_BUTTON = 34;
-        constexpr int PROPDEF_GET_BUTTON = 34;
-        constexpr int PROPDEF_REMOVE_BUTTON = 34;
+        constexpr int PROPDEF_NOTES = 150;
     }
 }
 
