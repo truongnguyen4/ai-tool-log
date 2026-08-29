@@ -14,6 +14,9 @@
 
 namespace BlinkSweep {
 
+/** How long a changed row stays tinted, in milliseconds. */
+constexpr qint64 kBlinkDurationMs = 1000;
+
 // Configures `timer` to periodically prune expired entries from `blinkUntil`
 // and invoke `refresh()` (typically the model emits dataChanged for the
 // Qt::BackgroundRole). The timer should be parented to the model, so the

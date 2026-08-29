@@ -67,6 +67,21 @@ struct FilterCriteria {
     // Pre-computed level index: -1 = no filter; 0=V 1=D 2=I 3=W 4=E 5=A
     int minLevelIndex = -1;
 
+    /**
+     * True when at least one constraint is set.
+     *
+     * When nothing is active the caller can skip filtering entirely and share
+     * the source vector, instead of copying every entry through a predicate
+     * that always returns true.
+     */
+    bool isActive() const {
+        return !keywordFilter.isEmpty()
+               || parsedMessage.active || parsedTag.active || parsedPackage.active
+               || parsedPid.active     || parsedTid.active
+               || !startTime.isEmpty() || !endTime.isEmpty()
+               || minLevelIndex > 0;
+    }
+
     // Infer operator from filter text: "&&" -> AND, everything else -> OR
     static FilterOperator detectOperator(const QString &filter) {
         return filter.contains("&&") ? FilterOperator::AND : FilterOperator::OR;

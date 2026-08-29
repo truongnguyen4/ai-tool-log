@@ -1,8 +1,94 @@
 #include "colorscheme.h"
 
+#include "components/palette.h"
+
 #include <QApplication>
 #include <QPalette>
 #include <QSettings>
+
+using UiComponents::Palette;
+
+namespace {
+constexpr auto kSettingsKey = "Theme/mode";
+
+QString modeToString(ColorScheme::Mode m)
+{
+    switch (m) {
+    case ColorScheme::Mode::Light: return QStringLiteral("light");
+    case ColorScheme::Mode::Auto:  return QStringLiteral("auto");
+    case ColorScheme::Mode::Dark:  break;
+    }
+    return QStringLiteral("dark");
+}
+
+ColorScheme::Mode modeFromString(const QString &s)
+{
+    if (s == QLatin1String("light")) return ColorScheme::Mode::Light;
+    if (s == QLatin1String("auto"))  return ColorScheme::Mode::Auto;
+    return ColorScheme::Mode::Dark;
+}
+} // namespace
+
+// ---------------------------------------------------------------------------
+// Resolved — every palette token pre-converted to QColor.
+//
+// levelColor() is called from LogModel::data() for every painted cell, so
+// parsing "#rrggbb" on each call (as this class used to do) showed up in
+// scroll profiles. Resolving once per theme switch removes that entirely.
+// ---------------------------------------------------------------------------
+struct ColorScheme::Resolved {
+    ColorScheme::Mode mode;
+    Palette palette;
+
+    // Indexed by LogFilter::levelIndex(): 0=V 1=D 2=I 3=W 4=E 5=A.
+    QColor level[6];
+    QColor levelDefault;
+
+    QColor markedRow;
+    QColor anchorRow;
+    QColor blink;
+    QColor highlightBg;
+    QColor highlightFg;
+
+    QColor text;
+    QColor mutedText;
+    QColor accent;
+    QColor success;
+    QColor danger;
+    QColor border;
+    QColor rowSelected;
+    QColor panel;
+    QColor editor;
+
+    explicit Resolved(ColorScheme::Mode m)
+        : mode(m)
+        , palette(m == ColorScheme::Mode::Light ? Palette::light() : Palette::dark())
+    {
+        level[0]     = QColor(palette.levelVerbose);
+        level[1]     = QColor(palette.levelDebug);
+        level[2]     = QColor(palette.levelInfo);
+        level[3]     = QColor(palette.levelWarn);
+        level[4]     = QColor(palette.levelError);
+        level[5]     = QColor(palette.levelAssert);
+        levelDefault = QColor(palette.levelDefault);
+
+        markedRow   = QColor(palette.rowMarked);
+        anchorRow   = QColor(palette.rowAnchor);
+        blink       = QColor(palette.rowBlink);
+        highlightBg = QColor(palette.searchHighlightBg);
+        highlightFg = QColor(palette.searchHighlightText);
+
+        text        = QColor(palette.text);
+        mutedText   = QColor(palette.textMuted);
+        accent      = QColor(palette.accent);
+        success     = QColor(palette.success);
+        danger      = QColor(palette.danger);
+        border      = QColor(palette.border);
+        rowSelected = QColor(palette.rowSelected);
+        panel       = QColor(palette.panelBackground);
+        editor      = QColor(palette.editorBackground);
+    }
+};
 
 ColorScheme &ColorScheme::instance()
 {
@@ -14,11 +100,13 @@ ColorScheme::ColorScheme(QObject *parent)
     : QObject(parent)
 {
     QSettings s;
-    const QString stored = s.value(QStringLiteral("Theme/mode"),
-                                   QStringLiteral("dark")).toString();
-    if      (stored == QLatin1String("light")) m_mode = Mode::Light;
-    else if (stored == QLatin1String("auto"))  m_mode = Mode::Auto;
-    else                                       m_mode = Mode::Dark;
+    m_mode = modeFromString(s.value(QLatin1String(kSettingsKey),
+                                    QStringLiteral("dark")).toString());
+}
+
+ColorScheme::~ColorScheme()
+{
+    delete m_cache;
 }
 
 void ColorScheme::setMode(Mode m)
@@ -27,8 +115,7 @@ void ColorScheme::setMode(Mode m)
     m_mode = m;
 
     QSettings s;
-    const char *str = (m == Mode::Light) ? "light" : (m == Mode::Auto ? "auto" : "dark");
-    s.setValue(QStringLiteral("Theme/mode"), QString::fromLatin1(str));
+    s.setValue(QLatin1String(kSettingsKey), modeToString(m));
 
     emit modeChanged();
 }
@@ -39,82 +126,66 @@ ColorScheme::Mode ColorScheme::resolvedMode() const
         return m_mode;
 
     // Best-effort detection: ask Qt's current palette whether it looks dark.
-    const QPalette pal = QApplication::palette();
-    const QColor base  = pal.color(QPalette::Window);
-    return base.lightness() < 128 ? Mode::Dark : Mode::Light;
+    const QColor window = QApplication::palette().color(QPalette::Window);
+    return window.lightness() < 128 ? Mode::Dark : Mode::Light;
+}
+
+const ColorScheme::Resolved &ColorScheme::resolved() const
+{
+    const Mode m = resolvedMode();
+    if (!m_cache || m_cache->mode != m) {
+        delete m_cache;
+        m_cache = new Resolved(m);
+    }
+    return *m_cache;
+}
+
+const Palette &ColorScheme::palette() const
+{
+    return resolved().palette;
+}
+
+QColor ColorScheme::levelColorByIndex(int levelIndex) const
+{
+    const Resolved &r = resolved();
+    if (levelIndex < 0 || levelIndex >= 6)
+        return r.levelDefault;
+    return r.level[levelIndex];
 }
 
 QColor ColorScheme::levelColor(const QString &level) const
 {
-    const bool dark = resolvedMode() == Mode::Dark;
-    if (level == QLatin1String("V")) return dark ? QColor("#9ca3af") : QColor("#4b5563"); // Verbose
-    if (level == QLatin1String("D")) return dark ? QColor("#60a5fa") : QColor("#1d4ed8"); // Debug
-    if (level == QLatin1String("I")) return dark ? QColor("#34d399") : QColor("#047857"); // Info
-    if (level == QLatin1String("W")) return dark ? QColor("#fbbf24") : QColor("#b45309"); // Warn
-    if (level == QLatin1String("E")) return dark ? QColor("#f87171") : QColor("#b91c1c"); // Error
-    if (level == QLatin1String("A")) return dark ? QColor("#c084fc") : QColor("#7e22ce"); // Assert
-    return dark ? QColor("#cccccc") : QColor("#1f2937");
+    if (level.isEmpty())
+        return resolved().levelDefault;
+
+    // Inline ordinal mapping — kept here (rather than calling LogFilter) so
+    // that the UI layer does not depend on the filter layer.
+    switch (level.at(0).toLatin1()) {
+    case 'V': return levelColorByIndex(0);
+    case 'D': return levelColorByIndex(1);
+    case 'I': return levelColorByIndex(2);
+    case 'W': return levelColorByIndex(3);
+    case 'E': return levelColorByIndex(4);
+    case 'A': return levelColorByIndex(5);
+    default:  return resolved().levelDefault;
+    }
 }
 
-QColor ColorScheme::markedRowBackground() const
-{
-    return resolvedMode() == Mode::Dark ? QColor("#1a3a80") : QColor("#bfdbfe");
-}
+QColor ColorScheme::markedRowBackground() const { return resolved().markedRow; }
+QColor ColorScheme::anchorRowBackground() const { return resolved().anchorRow; }
+QColor ColorScheme::blinkBackground()     const { return resolved().blink; }
+QColor ColorScheme::highlightBackground() const { return resolved().highlightBg; }
+QColor ColorScheme::highlightForeground() const { return resolved().highlightFg; }
 
-QColor ColorScheme::anchorRowBackground() const
-{
-    return resolvedMode() == Mode::Dark ? QColor("#1a3a4a") : QColor("#bae6fd");
-}
-
-QColor ColorScheme::highlightBackground() const
-{
-    return resolvedMode() == Mode::Dark ? QColor("#b8860b") : QColor("#fde68a");
-}
-
-QColor ColorScheme::highlightForeground() const
-{
-    return resolvedMode() == Mode::Dark ? QColor("#ffffff") : QColor("#111827");
-}
-
-QColor ColorScheme::text() const
-{
-    return resolvedMode() == Mode::Dark ? QColor("#cccccc") : QColor("#1f1f1f");
-}
-
-QColor ColorScheme::mutedText() const
-{
-    return resolvedMode() == Mode::Dark ? QColor("#8a8a8a") : QColor("#6b6b6b");
-}
-
-QColor ColorScheme::accent() const
-{
-    return resolvedMode() == Mode::Dark ? QColor("#818cf8") : QColor("#14b8a6");
-}
-
-QColor ColorScheme::success() const
-{
-    return resolvedMode() == Mode::Dark ? QColor("#34d399") : QColor("#1a7f37");
-}
-
-QColor ColorScheme::border() const
-{
-    return resolvedMode() == Mode::Dark ? QColor("#3e3e42") : QColor("#d4d4d4");
-}
-
-QColor ColorScheme::rowSelectedBackground() const
-{
-    return resolvedMode() == Mode::Dark ? QColor("#4a4a52") : QColor("#dbeafe");
-}
-
-QColor ColorScheme::panelBackground() const
-{
-    return resolvedMode() == Mode::Dark ? QColor("#2d2d30") : QColor("#ffffff");
-}
-
-QColor ColorScheme::editorBackground() const
-{
-    return resolvedMode() == Mode::Dark ? QColor("#1e1e1e") : QColor("#ffffff");
-}
+QColor ColorScheme::text()                  const { return resolved().text; }
+QColor ColorScheme::mutedText()             const { return resolved().mutedText; }
+QColor ColorScheme::accent()                const { return resolved().accent; }
+QColor ColorScheme::success()               const { return resolved().success; }
+QColor ColorScheme::danger()                const { return resolved().danger; }
+QColor ColorScheme::border()                const { return resolved().border; }
+QColor ColorScheme::rowSelectedBackground() const { return resolved().rowSelected; }
+QColor ColorScheme::panelBackground()       const { return resolved().panel; }
+QColor ColorScheme::editorBackground()      const { return resolved().editor; }
 
 QString ColorScheme::toHex(const QColor &c)
 {

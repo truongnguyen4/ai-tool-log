@@ -12,6 +12,7 @@
 #include "propertydefinitionmodel.h"
 #include "settingsmodel.h"
 #include "tableconfig.h"
+#include "tablestyler.h"
 #include "themesheets.h"
 
 #include <QAbstractItemView>
@@ -86,99 +87,95 @@ void UiManager::setupMainNavigationTabs()
     }
 }
 
-void UiManager::setupLogTable()
+void UiManager::applyLogColumnWidths(QTableView *view)
 {
     using namespace TableConfig::LogColumns;
     using namespace TableConfig::ColumnWidths;
 
-    // ── Main log table ────────────────────────────────────────────────────────
+    view->horizontalHeader()->setStretchLastSection(false);
+    view->setColumnWidth(DATE,    LOG_DATE);
+    view->setColumnWidth(TIME,    LOG_TIME);
+    view->setColumnWidth(PID,     LOG_PID);
+    view->setColumnWidth(TID,     LOG_TID);
+    view->setColumnWidth(PACKAGE, LOG_PACKAGE);
+    view->setColumnWidth(LEVEL,   LOG_LEVEL);
+    view->horizontalHeader()->setSectionResizeMode(MESSAGE, QHeaderView::Stretch);
+}
+
+void UiManager::installLogHighlightDelegates(QTableView *view, bool paneB)
+{
+    using namespace TableConfig::LogColumns;
+
+    HighlightDelegate *pid     = paneB ? m_pidHighlightDelegateB     : m_pidHighlightDelegate;
+    HighlightDelegate *package = paneB ? m_packageHighlightDelegateB : m_packageHighlightDelegate;
+    HighlightDelegate *tag     = paneB ? m_tagHighlightDelegateB     : m_tagHighlightDelegate;
+    HighlightDelegate *message = paneB ? m_messageHighlightDelegateB : m_messageHighlightDelegate;
+
+    message->setWordWrap(true);
+    view->setItemDelegateForColumn(PID,     pid);
+    view->setItemDelegateForColumn(PACKAGE, package);
+    view->setItemDelegateForColumn(TAG,     tag);
+    view->setItemDelegateForColumn(MESSAGE, message);
+
+    // A keyword-less HighlightDelegate at view level so DATE, TIME, TID and
+    // LEVEL also honour Qt::BackgroundRole for marked rows. (Per-column
+    // delegates take priority, hence the two-level setup.)
+    view->setItemDelegate(new HighlightDelegate(this));
+}
+
+void UiManager::wireRowResizeTriggers(QTableView *view, std::function<bool()> hasRows)
+{
+    using namespace TableConfig::LogColumns;
+
+    // Word-wrapped rows have to be re-measured when their column gets wider or
+    // when different rows scroll into view. Both go through the debounce timer
+    // so a drag or a flick costs one measurement pass, not one per event.
+    connect(view->horizontalHeader(), &QHeaderView::sectionResized, this,
+            [this](int section, int, int) {
+                if (section == TAG || section == MESSAGE)
+                    m_rowResizeTimer->start();
+            });
+    connect(view->verticalScrollBar(), &QScrollBar::valueChanged, this,
+            [this, hasRows = std::move(hasRows)](int) {
+                if (hasRows())
+                    m_rowResizeTimer->start();
+            });
+}
+
+void UiManager::setupLogTable()
+{
+    using namespace TableConfig::LogColumns;
+
+    // ── Models ────────────────────────────────────────────────────────────────
     m_ui->tableLog->setModel(m_logModel);
-    m_ui->tableLog->horizontalHeader()->setStretchLastSection(false);
     m_logModel->setMarkedRows(&m_markedRows);
-
-    m_ui->tableLog->setColumnWidth(DATE,    LOG_DATE);
-    m_ui->tableLog->setColumnWidth(TIME,    LOG_TIME);
-    m_ui->tableLog->setColumnWidth(PID,     LOG_PID);
-    m_ui->tableLog->setColumnWidth(TID,     LOG_TID);
-    m_ui->tableLog->setColumnWidth(PACKAGE, LOG_PACKAGE);
-    m_ui->tableLog->setColumnWidth(LEVEL,   LOG_LEVEL);
-    m_ui->tableLog->horizontalHeader()->setSectionResizeMode(MESSAGE, QHeaderView::Stretch);
-
-    // ── Mark log table ────────────────────────────────────────────────────────
     m_ui->tableMarkLog->setModel(m_markLogModel);
-    m_ui->tableMarkLog->horizontalHeader()->setStretchLastSection(false);
 
-    m_ui->tableMarkLog->setColumnWidth(DATE,    LOG_DATE);
-    m_ui->tableMarkLog->setColumnWidth(TIME,    LOG_TIME);
-    m_ui->tableMarkLog->setColumnWidth(PID,     LOG_PID);
-    m_ui->tableMarkLog->setColumnWidth(TID,     LOG_TID);
-    m_ui->tableMarkLog->setColumnWidth(PACKAGE, LOG_PACKAGE);
-    m_ui->tableMarkLog->setColumnWidth(LEVEL,   LOG_LEVEL);
-    m_ui->tableMarkLog->horizontalHeader()->setSectionResizeMode(DELTA,   QHeaderView::ResizeToContents);
-    m_ui->tableMarkLog->horizontalHeader()->setSectionResizeMode(MESSAGE, QHeaderView::Stretch);
+    // ── Columns ───────────────────────────────────────────────────────────────
+    applyLogColumnWidths(m_ui->tableLog);
+    applyLogColumnWidths(m_ui->tableMarkLog);
+    m_ui->tableMarkLog->horizontalHeader()->setSectionResizeMode(DELTA,
+                                                                 QHeaderView::ResizeToContents);
 
-    // Hide low-value columns by default and sync dependent filter group boxes
-    applyColumnVisibility({false, false, true, false, false, true, true, true});
+    // Hide low-value columns by default and sync the dependent filter groups.
+    applyColumnVisibility({false, false, true, true, false, true, true, true});
 
-    // ── Highlight delegates ───────────────────────────────────────────────────
+    // ── Row-resize debounce timer (created before anything can trigger it) ────
+    m_rowResizeTimer = new QTimer(this);
+    m_rowResizeTimer->setSingleShot(true);
+    m_rowResizeTimer->setInterval(UiTiming::kRowResizeDebounceMs);
+    connect(m_rowResizeTimer, &QTimer::timeout, this, &UiManager::resizeVisibleRows);
+
+    // ── Highlight delegates (pane A) ──────────────────────────────────────────
     m_pidHighlightDelegate     = new HighlightDelegate(this);
     m_packageHighlightDelegate = new HighlightDelegate(this);
     m_tagHighlightDelegate     = new HighlightDelegate(this);
     m_messageHighlightDelegate = new HighlightDelegate(this);
+    installLogHighlightDelegates(m_ui->tableLog, /*paneB=*/false);
+    wireRowResizeTriggers(m_ui->tableLog,
+                          [this]() { return m_logModel->rowCount() > 0; });
 
-    m_messageHighlightDelegate->setWordWrap(true);
-
-    m_ui->tableLog->setItemDelegateForColumn(PID,     m_pidHighlightDelegate);
-    m_ui->tableLog->setItemDelegateForColumn(PACKAGE, m_packageHighlightDelegate);
-    m_ui->tableLog->setItemDelegateForColumn(TAG,     m_tagHighlightDelegate);
-    m_ui->tableLog->setItemDelegateForColumn(MESSAGE, m_messageHighlightDelegate);
-
-    // Install a plain HighlightDelegate (no keywords) as the view-level
-    // delegate so that DATE, TIME, TID and LEVEL columns also honour
-    // Qt::BackgroundRole for marked rows (per-column delegates take priority).
-    m_ui->tableLog->setItemDelegate(new HighlightDelegate(this));
-
-    // ── Row-resize debounce timer ─────────────────────────────────────────────
-    m_rowResizeTimer = new QTimer(this);
-    m_rowResizeTimer->setSingleShot(true);
-    m_rowResizeTimer->setInterval(150);
-    connect(m_rowResizeTimer, &QTimer::timeout, this, [this]() { resizeVisibleRows(); });
-
-    connect(m_ui->tableLog->horizontalHeader(), &QHeaderView::sectionResized,
-            this, [this](int section, int, int) {
-        if (section == TableConfig::LogColumns::TAG ||
-            section == TableConfig::LogColumns::MESSAGE)
-            m_rowResizeTimer->start();
-    });
-    connect(m_ui->tableLog->verticalScrollBar(), &QScrollBar::valueChanged,
-            this, [this](int) {
-        if (m_logModel->rowCount() > 0)
-            m_rowResizeTimer->start();
-    });
-
-    // ── Multi-select + Ctrl+C copy ────────────────────────────────────────────
-    enableTableCopyAction(m_ui->tableLog);
-    enableTableCopyAction(m_ui->tableMarkLog);
-
-    // ── Modern table polish (Android log tab) ─────────────────────────────────
-    for (QTableView *tv : { m_ui->tableLog, m_ui->tableMarkLog }) {
-        tv->setShowGrid(false);
-        tv->setFrameShape(QFrame::NoFrame);
-        tv->setWordWrap(true);
-        tv->verticalHeader()->setVisible(false);
-        tv->verticalHeader()->setDefaultSectionSize(26);
-        tv->verticalHeader()->setMinimumSectionSize(22);
-        tv->horizontalHeader()->setHighlightSections(false);
-        tv->horizontalHeader()->setMinimumSectionSize(48);
-        tv->setSelectionMode(QAbstractItemView::ExtendedSelection);
-        tv->setAlternatingRowColors(true);
-        tv->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-        tv->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    }
-
-    // ── Install event filters for Shift+Scroll on viewports ──────────────────
-    m_ui->tableLog->viewport()->installEventFilter(m_mainWindow);
-    m_ui->tableMarkLog->viewport()->installEventFilter(m_mainWindow);
+    TableStyler::applyLogTableStyle({m_ui->tableLog, m_ui->tableMarkLog});
 }
 
 void UiManager::setupConfigurationTables()
@@ -192,21 +189,6 @@ void UiManager::setupConfigurationTables()
     }
     m_configurationController->setupTables();
     m_configurationController->setupMonitorButtons();
-
-    // ── Modern table polish (Configuration + SDK tabs) ───────────────────────
-    for (QTableView *tv : { m_ui->tableSettings, m_ui->tableProperties,
-                            m_ui->tablePropertyDefinitions }) {
-        tv->setShowGrid(false);
-        tv->setFrameShape(QFrame::NoFrame);
-        tv->verticalHeader()->setVisible(false);
-        tv->verticalHeader()->setDefaultSectionSize(28);
-        tv->verticalHeader()->setMinimumSectionSize(24);
-        tv->horizontalHeader()->setHighlightSections(false);
-        tv->horizontalHeader()->setMinimumSectionSize(56);
-        tv->setAlternatingRowColors(true);
-        tv->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-        tv->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    }
 
     // ── Config splitters ──────────────────────────────────────────────────────
     // Proportional sizing: scales with window width (used as initial fallback;

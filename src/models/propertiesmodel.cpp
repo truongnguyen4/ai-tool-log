@@ -1,10 +1,19 @@
 #include "propertiesmodel.h"
 #include "blinksweep.h"
+#include "colorscheme.h"
 #include "tableconfig.h"
+#include "valuetablesync.h"
 #include <QBrush>
-#include <QColor>
 #include <QSet>
 #include <QTimer>
+
+namespace {
+/** Identity of a system property — its name is already unique. */
+QStringList propertyAliases(const PropertyEntry &entry)
+{
+    return {entry.property};
+}
+}
 
 PropertiesModel::PropertiesModel(QObject *parent)
     : QAbstractTableModel(parent), m_isFiltered(false)
@@ -54,10 +63,12 @@ QVariant PropertiesModel::data(const QModelIndex &index, int role) const
         }
     }
 
-    if (role == Qt::BackgroundRole) {
+    // Blink-on-change: tint the row for ~1s after updateProperties() saw the
+    // value move, so the user can spot what changed during live monitoring.
+    if (role == Qt::BackgroundRole && !m_blinkUntil.isEmpty()) {
         const auto it = m_blinkUntil.constFind(entry.property);
         if (it != m_blinkUntil.constEnd() && it.value() > m_clock.elapsed())
-            return QBrush(QColor("#1f4d7a"));
+            return QBrush(ColorScheme::instance().blinkBackground());
     }
 
     return QVariant();
@@ -96,27 +107,29 @@ Qt::ItemFlags PropertiesModel::flags(const QModelIndex &index) const
 
 bool PropertiesModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (!index.isValid() || role != Qt::EditRole || index.column() != 2)
+    if (!index.isValid() || role != Qt::EditRole
+        || index.column() != TableConfig::PropertiesColumns::VALUE)
         return false;
-    
+
     QVector<PropertyEntry> &properties = m_isFiltered ? m_filteredProperties : m_allProperties;
-    
-    if (index.row() >= properties.size())
+    if (index.row() < 0 || index.row() >= properties.size())
         return false;
-    
-    properties[index.row()].value = value.toString();
-    
-    // If filtering, also update in all properties
+
+    const QString newValue = value.toString();
+    properties[index.row()].value = newValue;
+
+    // The filtered list holds copies, so mirror the edit into the master list.
+    // Match on the property name: unlike the line number it is unique.
     if (m_isFiltered) {
-        const QString &line = properties[index.row()].line;
-        for (int i = 0; i < m_allProperties.size(); ++i) {
-            if (m_allProperties[i].line == line) {
-                m_allProperties[i].value = value.toString();
+        const QString &name = properties.at(index.row()).property;
+        for (PropertyEntry &candidate : m_allProperties) {
+            if (candidate.property == name) {
+                candidate.value = newValue;
                 break;
             }
         }
     }
-    
+
     emit dataChanged(index, index, {role});
     return true;
 }
@@ -133,63 +146,37 @@ void PropertiesModel::setProperties(const QVector<PropertyEntry> &properties)
 
 void PropertiesModel::updateProperties(const QVector<PropertyEntry> &properties, bool allowInsert)
 {
-    bool changed = false;
-    QSet<QString> blinkKeys;
-
-    for (const PropertyEntry &newEntry : properties) {
-        bool found = false;
-        for (int i = 0; i < m_allProperties.size(); ++i) {
-            if (m_allProperties[i].property == newEntry.property) {
-                if (m_allProperties[i].value != newEntry.value) {
-                    blinkKeys.insert(m_allProperties[i].property);
-                    m_allProperties[i].value = newEntry.value;
-                    changed = true;
-                }
-                if (allowInsert)
-                    m_allProperties[i].line = newEntry.line;
-                found = true;
-                break;
-            }
-        }
-        if (!found && allowInsert) {
-            m_allProperties.append(newEntry);
-            changed = true;
-        }
-    }
-
-    if (!changed)
+    const auto merged = ValueTableSync::merge(m_allProperties, properties,
+                                              allowInsert, propertyAliases);
+    if (!merged.changed)
         return;
 
-    if (!blinkKeys.isEmpty()) {
-        const qint64 deadline = m_clock.elapsed() + 1000;
-        for (const QString &k : blinkKeys) m_blinkUntil.insert(k, deadline);
+    if (!merged.changedKeys.isEmpty()) {
+        const qint64 deadline = m_clock.elapsed() + BlinkSweep::kBlinkDurationMs;
+        for (const QString &key : merged.changedKeys)
+            m_blinkUntil.insert(key, deadline);
         scheduleBlinkSweep();
     }
 
     if (allowInsert) {
-        if (m_isFiltered)
+        // Full upsert path: rebuild filter and reset view.
+        if (m_isFiltered) {
             applyFilter(m_currentNameFilter, m_currentValueFilter);
-        else {
+        } else {
             beginResetModel();
             endResetModel();
         }
-    } else {
-        if (m_isFiltered) {
-            for (PropertyEntry &fe : m_filteredProperties) {
-                for (const PropertyEntry &e : m_allProperties) {
-                    if (e.property == fe.property) {
-                        fe.value = e.value;
-                        break;
-                    }
-                }
-            }
-        }
-        const int rows = rowCount();
-        if (rows > 0) {
-            emit dataChanged(index(0, 0),
-                             index(rows - 1, columnCount() - 1));
-        }
+        return;
     }
+
+    // Value-only monitor path: refresh the filtered view in place and repaint
+    // without resetting, so selection and scroll position survive each tick.
+    if (m_isFiltered)
+        ValueTableSync::copyValues(m_filteredProperties, m_allProperties, propertyAliases);
+
+    const int rows = rowCount();
+    if (rows > 0)
+        emit dataChanged(index(0, 0), index(rows - 1, columnCount() - 1));
 }
 
 const QVector<PropertyEntry>& PropertiesModel::getProperties() const

@@ -11,7 +11,11 @@ ThreadtimeLogConverter::ThreadtimeLogConverter()
     // Note: There can be spaces before the colon (e.g., "TAG :" or "TAG:")
     // The \s* before ":" trims trailing space from the tag; nothing is trimmed after
     // the colon so leading whitespace in the message is preserved.
-    m_regex.setPattern("^(\\d{2}-\\d{2})\\s+(\\d{2}:\\d{2}:\\d{2}\\.\\d{3})\\s+(\\S+)(?:\\s+(\\d+))?\\s+([VDIWEA])[/\\s]+(.+?)\\s*:(.*)$");
+    m_regex.setPattern(QStringLiteral(
+        R"(^(\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2}\.\d{3})\s+(\S+)(?:\s+(\d+))?\s+([VDIWEA])[/\s]+(.+?)\s*:(.*)$)"));
+    // Matched against every line of a capture or a loaded file — JIT-compile it
+    // once here rather than on first use.
+    m_regex.optimize();
 }
 
 LogEntry ThreadtimeLogConverter::convert(const QString &line) const

@@ -11,13 +11,17 @@
 #include "threadtimelogconverter.h"
 
 #include <QDir>
-#include <QFile>
 #include <QFileDialog>
-#include <QFileInfo>
-#include <QMessageBox>
-#include <QTextStream>
-#include <QTimer>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QStatusBar>
 #include <QtConcurrent>
+
+namespace {
+/** How long the "loaded N entries" summary stays on the status bar. */
+constexpr int kLoadMessageTimeoutMs = 5000;
+constexpr auto kLogFileFilter = "Log Files (*.log *.txt);;All Files (*.*)";
+} // namespace
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION: File I/O
@@ -27,7 +31,7 @@ void UiManager::onLoadFileClicked()
 {
     const QString filePath = m_ui->txtFilePath->text().trimmed();
     if (filePath.isEmpty()) {
-        m_ui->statusbar->showMessage("Please enter a file path", 3000);
+        flashStatus(tr("Please enter a file path"));
         return;
     }
     loadLogsFromFile(filePath);
@@ -39,42 +43,41 @@ void UiManager::onOpenFileClicked()
     const QString defaultPath = currentPath.isEmpty() ? QDir::homePath() : currentPath;
 
     const QString filePath = QFileDialog::getOpenFileName(
-        m_mainWindow, "Open Log File", defaultPath,
-        "Log Files (*.log *.txt);;All Files (*.*)");
+        m_mainWindow, tr("Open Log File"), defaultPath, tr(kLogFileFilter));
+    if (filePath.isEmpty())
+        return;
 
-    if (!filePath.isEmpty()) {
-        m_ui->txtFilePath->setText(filePath);
-        loadLogsFromFile(filePath);
-    }
+    m_ui->txtFilePath->setText(filePath);
+    loadLogsFromFile(filePath);
 }
 
 void UiManager::onSaveFileClicked()
 {
     QString filePath = m_ui->txtFilePath->text().trimmed();
     if (filePath.isEmpty()) {
-        m_ui->statusbar->showMessage("Please enter a file path", 3000);
+        flashStatus(tr("Please enter a file path"));
         return;
     }
-    if (!filePath.endsWith(".log") && !filePath.endsWith(".txt"))
-        filePath += ".log";
+    if (!filePath.endsWith(QLatin1String(".log")) && !filePath.endsWith(QLatin1String(".txt")))
+        filePath += QLatin1String(".log");
 
     QString errorMsg;
     if (m_fileManager.saveToFile(filePath, activeAllLogs(), errorMsg))
-        m_ui->statusbar->showMessage(
-            QString("Saved %1 log entries to %2").arg(activeAllLogs().size()).arg(filePath), 3000);
+        flashStatus(tr("Saved %1 log entries to %2")
+                        .arg(activeAllLogs().size()).arg(filePath));
     else
-        m_ui->statusbar->showMessage(QString("Failed to save: %1").arg(errorMsg), 5000);
+        flashStatus(tr("Failed to save: %1").arg(errorMsg));
 }
 
 void UiManager::loadLogsFromFile(const QString &filePath)
 {
     if (m_isLoadingFile) {
-        m_ui->statusbar->showMessage("File loading already in progress…", 3000);
+        flashStatus(tr("File loading already in progress…"));
         return;
     }
     m_isLoadingFile = true;
     m_ui->btnOpen->setEnabled(false);
-    m_ui->statusbar->showMessage("Loading log file…", 0);
+    m_ui->statusbar->showMessage(tr("Loading log file…"), 0);
 
     QVector<LogConverterPtr> converters;
     converters.append(LogConverterPtr(new ThreadtimeLogConverter()));
@@ -133,46 +136,42 @@ void UiManager::onFileLoadFinished()
 
     const int entryCount = res.entries.size();
 
-    activeAllLogs()         = std::move(res.entries);
-    activeAllLogsIndex()    = std::move(res.allLogsIndex);
-    activeNextLogId()       = res.nextLogId;
-    activeMarkLogModel()->clear();
-    if (res.converter) m_logConverter = res.converter;
-
-    // Block signals while clearing filter fields (avoid spurious filter-change events)
-    const QSignalBlocker b1(m_ui->txtFindMessage);
-    const QSignalBlocker b2(m_ui->txtStartTime);
-    const QSignalBlocker b3(m_ui->txtEndTime);
-    const QSignalBlocker b4(m_ui->txtTagFilter);
-    const QSignalBlocker b5(m_ui->txtPackageFilter);
-    const QSignalBlocker b6(m_ui->txtPidFilter);
-    m_ui->txtFindMessage->clear();
-    m_ui->txtStartTime->clear();
-    m_ui->txtEndTime->clear();
-    m_ui->txtTagFilter->clear();
-    m_ui->txtPackageFilter->clear();
-    m_ui->txtPidFilter->clear();
-
-    // All filters cleared → filteredLogs == allLogs (O(1) implicit-share copies)
-    activeFilteredLogs()        = activeAllLogs();
-    activeFilteredLogsIndex()   = activeAllLogsIndex();
+    activeAllLogs()      = std::move(res.entries);
+    activeAllLogsIndex() = std::move(res.allLogsIndex);
+    activeNextLogId()    = res.nextLogId;
     activeMarkedRows().clear();
+    activeMarkLogModel()->clear();
+    m_highlightRow = -1;
+    if (res.converter)
+        m_logConverter = res.converter;
 
-    activeLogModel()->setLogs(activeFilteredLogs());
-    activeLogModel()->setMarkedRows(&activeMarkedRows());
+    // Clear the column filters so the freshly loaded file is fully visible.
+    // The keyword, highlight and level controls are deliberately left alone —
+    // they are the user's current search, not a property of the old file.
+    {
+        const QList<QLineEdit *> columnFilters = {
+            m_ui->txtFindMessage, m_ui->txtStartTime, m_ui->txtEndTime,
+            m_ui->txtTagFilter,   m_ui->txtPackageFilter,
+            m_ui->txtPidFilter,   m_ui->txtTidFilter,
+        };
+        for (QLineEdit *filter : columnFilters) {
+            const QSignalBlocker blocker(filter);
+            filter->clear();
+        }
+    }
 
-    updateFilterHighlighting();
-    updateFilterCount();
-    updateStatusBar();
+    // Run the filter rather than assuming everything passes: a keyword or a
+    // level floor may still be set, and the view must agree with the controls.
+    applyFilters();
 
     m_ui->statusbar->showMessage(
-        QString("Loaded %1 log entries from %2 (Format: %3, Parsed: %4/%5)")
+        tr("Loaded %1 log entries from %2 (Format: %3, Parsed: %4/%5)")
             .arg(entryCount)
-            .arg(res.filePath)
-            .arg(res.converter ? res.converter->name() : "Unknown")
+            .arg(res.filePath,
+                 res.converter ? res.converter->name() : tr("Unknown"))
             .arg(res.parsedCount)
             .arg(res.lineCount),
-        5000);
+        kLoadMessageTimeoutMs);
 
     m_rowResizeTimer->start();
 }

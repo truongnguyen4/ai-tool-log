@@ -1,42 +1,57 @@
 #include "brieflogconverter.h"
 #include <QDateTime>
 
+namespace {
+/**
+ * How long a formatted timestamp is reused, in milliseconds.
+ *
+ * The brief format carries no timestamp, so one is synthesised. Formatting a
+ * QDateTime twice per line dominated the cost of loading a brief-format file,
+ * and millisecond precision is meaningless for a value we invented anyway.
+ */
+constexpr qint64 kTimestampCacheMs = 1000;
+} // namespace
+
 BriefLogConverter::BriefLogConverter()
 {
-    // Regex pattern for brief format: LEVEL/TAG(PID): message
-    // Leading whitespace in message is intentionally preserved.
-    m_regex.setPattern("^([VDIWEA])/(.+?)\\((\\d+)\\):(.*)$");
+    // Format: LEVEL/TAG(PID): message
+    // Leading whitespace in the message is intentionally preserved.
+    m_regex.setPattern(QStringLiteral(R"(^([VDIWEA])/(.+?)\((\d+)\):(.*)$)"));
+    m_regex.optimize();
 }
 
 LogEntry BriefLogConverter::convert(const QString &line) const
 {
     LogEntry entry;
-    
-    QRegularExpressionMatch match = m_regex.match(line);
-    
-    if (match.hasMatch()) {
-        entry.level = match.captured(1);
-        entry.tag = match.captured(2);
-        entry.pid = match.captured(3);
-        entry.message = match.captured(4);
-        
-        // Brief format doesn't have time or TID, generate current date and time
-        QDateTime now = QDateTime::currentDateTime();
-        entry.date = now.toString("yyyy-MM-dd");
-        entry.time = now.toString("hh:mm:ss.zzz");
-        entry.tid = "";
-        entry.package = "";
+
+    const QRegularExpressionMatch match = m_regex.match(line);
+    if (!match.hasMatch())
+        return entry;
+
+    entry.level   = match.captured(1);
+    entry.tag     = match.captured(2);
+    entry.pid     = match.captured(3);
+    entry.message = match.captured(4);
+
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (m_cachedStampMs == 0 || nowMs - m_cachedStampMs > kTimestampCacheMs) {
+        const QDateTime now = QDateTime::currentDateTime();
+        m_cachedDate   = now.toString(QStringLiteral("yyyy-MM-dd"));
+        m_cachedTime   = now.toString(QStringLiteral("hh:mm:ss.zzz"));
+        m_cachedStampMs = nowMs;
     }
-    
+    entry.date = m_cachedDate;
+    entry.time = m_cachedTime;
+
     return entry;
 }
 
 QString BriefLogConverter::name() const
 {
-    return "Brief";
+    return QStringLiteral("Brief");
 }
 
 QString BriefLogConverter::formatDescription() const
 {
-    return "Android logcat brief format (LEVEL/TAG(PID): message)";
+    return QStringLiteral("Android logcat brief format (LEVEL/TAG(PID): message)");
 }

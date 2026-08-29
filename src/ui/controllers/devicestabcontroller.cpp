@@ -5,21 +5,30 @@
 #include "devicesmanager.h"
 #include "adbcommand.h"
 #include "colorscheme.h"
+#include "components/components.h"
 
 #include <QDialog>
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QFont>
 #include <QLabel>
 #include <QMessageBox>
 #include <QProcess>
 #include <QPushButton>
 #include <QTabBar>
 #include <QTabWidget>
-#include <QFont>
 #include <QTextCursor>
 #include <QTextEdit>
 #include <QVBoxLayout>
+
+#include <memory>
+
+namespace {
+/** Firmware-flash progress dialog geometry. */
+constexpr int kFlashDialogWidth  = 720;
+constexpr int kFlashDialogHeight = 520;
+} // namespace
 
 DevicesTabController::DevicesTabController(UiManager *owner, QObject *parent)
     : QObject(parent), m_owner(owner) {}
@@ -48,6 +57,40 @@ void DevicesTabController::runOnSelected(QStringList (*adbCommandFactory)(const 
     for (const QString &s : selectedSerials())
         mgr.runAdbCommand(adbCommandFactory(s));
 }
+namespace {
+
+/** Shell used to run the vendor flash script, per platform. */
+QString flashShell()
+{
+#if defined(Q_OS_WIN)
+    return QStringLiteral("cmd.exe");
+#else
+    return QStringLiteral("/bin/bash");
+#endif
+}
+
+QStringList flashShellArgs(const QString &command)
+{
+#if defined(Q_OS_WIN)
+    return {QStringLiteral("/c"), command};
+#else
+    return {QStringLiteral("-c"), command};
+#endif
+}
+
+/** The flash command run for one device, from the firmware directory. */
+QString flashCommand(const QString &serial)
+{
+#if defined(Q_OS_WIN)
+    return QStringLiteral("set ANDROID_SERIAL=%1 && adb -s %1 reboot bootloader && download.sh")
+        .arg(serial);
+#else
+    return QStringLiteral("export ANDROID_SERIAL=%1 ; adb -s %1 reboot bootloader && ./download.sh")
+        .arg(serial);
+#endif
+}
+
+} // namespace
 
 void DevicesTabController::runFlashFirmware()
 {
@@ -67,124 +110,106 @@ void DevicesTabController::runFlashFirmware()
         return;
     }
 
-    const QFileInfo scriptInfo(firmwarePath + "/download.sh");
-    if (!scriptInfo.exists()) {
+    if (!QFileInfo::exists(firmwarePath + QStringLiteral("/download.sh"))) {
         QMessageBox::warning(uim->m_mainWindow, tr("Script Not Found"),
                              tr("download.sh not found in the firmware directory."));
         return;
     }
 
-    // Create progress dialog
-    QDialog *dlg = new QDialog(uim->m_mainWindow);
-    dlg->setWindowTitle(tr("Flash Firmware"));
-    dlg->resize(700, 500);
-    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    // ── Progress dialog ──────────────────────────────────────────────────────
+    auto *dialog = new QDialog(uim->m_mainWindow);
+    dialog->setWindowTitle(tr("Flash Firmware"));
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->resize(kFlashDialogWidth, kFlashDialogHeight);
 
-    QVBoxLayout *layout = new QVBoxLayout(dlg);
+    auto *layout = new QVBoxLayout(dialog);
     layout->setContentsMargins(12, 12, 12, 12);
     layout->setSpacing(8);
 
-    QLabel *statusLabel = new QLabel(tr("Flashing %1 device(s)...").arg(serials.size()));
-    const ColorScheme &cs = ColorScheme::instance();
-    const QString flashText   = ColorScheme::toHex(cs.text());
-    const QString flashMuted  = ColorScheme::toHex(cs.mutedText());
-    const QString flashBorder = ColorScheme::toHex(cs.border());
-    const QString flashAccent = ColorScheme::toHex(cs.accent());
-    const bool flashIsDark    = cs.resolvedMode() == ColorScheme::Mode::Dark;
-    const QString flashBg     = ColorScheme::toHex(cs.editorBackground());
-    const QString flashBtnBg  = flashIsDark ? "#37373d" : "#ececec";
-    const QString flashBtnHov = flashIsDark ? "#3e3e50" : "#e1e1e1";
-    statusLabel->setStyleSheet(QString("color: %1; font-weight: bold; font-size: 13px;").arg(flashText));
+    auto *statusLabel = UiComponents::Label::h3(
+        tr("Flashing %n device(s)…", nullptr, serials.size()), dialog);
     layout->addWidget(statusLabel);
 
-    QTextEdit *outputView = new QTextEdit();
+    auto *outputView = new QTextEdit(dialog);
+    outputView->setObjectName(QStringLiteral("flashOutputView"));
     outputView->setReadOnly(true);
-    outputView->setStyleSheet(QString(
-        "QTextEdit { background-color: %1; color: %2; border: 1px solid %3;"
-        " border-radius: 4px; font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; }")
-        .arg(flashBg, flashText, flashBorder));
+    outputView->setProperty("role", QStringLiteral("mono"));
     layout->addWidget(outputView, 1);
 
-    QPushButton *closeBtn = new QPushButton(tr("Close"));
-    closeBtn->setEnabled(false);
-    closeBtn->setStyleSheet(QString(
-        "QPushButton { background-color: %1; color: %2; border: 1px solid %3;"
-        " border-radius: 4px; padding: 8px 24px; font-weight: bold; }"
-        "QPushButton:hover { background-color: %4; border-color: %5; }"
-        "QPushButton:disabled { color: %6; }")
-        .arg(flashBtnBg, flashText, flashBorder, flashBtnHov, flashAccent, flashMuted));
-    layout->addWidget(closeBtn, 0, Qt::AlignRight);
+    auto *closeButton = UiComponents::Button::make(tr("Close"),
+                                                   UiComponents::ButtonVariant::Primary,
+                                                   dialog);
+    closeButton->setEnabled(false);
+    layout->addWidget(closeButton, 0, Qt::AlignRight);
+    connect(closeButton, &QPushButton::clicked, dialog, &QDialog::accept);
 
-    connect(closeBtn, &QPushButton::clicked, dlg, &QDialog::accept);
+    dialog->show();
 
-    dlg->show();
+    // Progress shared by every device's process. Owned by the dialog, so it
+    // cannot outlive the widgets the callbacks touch — the previous version
+    // used raw new'd counters that both the finished and errorOccurred
+    // handlers deleted, which double-freed whenever a process failed to start.
+    struct FlashProgress {
+        int  remaining = 0;
+        bool anyFailed = false;
+    };
+    auto progress = std::make_shared<FlashProgress>();
+    progress->remaining = serials.size();
 
-    // Track completion of all device processes
-    auto remaining = new int(serials.size());
-    auto hasErrors = new bool(false);
+    auto reportDeviceDone = [progress, statusLabel, closeButton](bool ok) {
+        if (!ok)
+            progress->anyFailed = true;
+        if (--progress->remaining > 0)
+            return;
 
-    // Launch a separate process per device in parallel
+        const bool allOk = !progress->anyFailed;
+        statusLabel->setText(allOk ? tr("All devices flashed successfully.")
+                                   : tr("Flashing completed with errors on some devices."));
+        const ColorScheme &colors = ColorScheme::instance();
+        statusLabel->setStyleSheet(
+            QStringLiteral("color: %1; font-weight: 600;")
+                .arg(ColorScheme::toHex(allOk ? colors.success() : colors.danger())));
+        closeButton->setEnabled(true);
+    };
+
+    // ── One process per device, run in parallel ──────────────────────────────
     for (const QString &serial : serials) {
-        const QString cmd = QString("export ANDROID_SERIAL=%1 ; adb -s %1 reboot bootloader && ./download.sh").arg(serial);
-        outputView->append(QStringLiteral("[%1] $ %2\n").arg(serial, cmd));
+        const QString command = flashCommand(serial);
+        outputView->append(QStringLiteral("[%1] $ %2\n").arg(serial, command));
 
-        QProcess *proc = new QProcess(dlg);
-        proc->setWorkingDirectory(firmwarePath);
-        proc->setProcessChannelMode(QProcess::MergedChannels);
+        auto *process = new QProcess(dialog);
+        process->setWorkingDirectory(firmwarePath);
+        process->setProcessChannelMode(QProcess::MergedChannels);
 
-        connect(proc, &QProcess::readyRead, dlg, [proc, outputView, serial]() {
-            const QString text = QString::fromUtf8(proc->readAll());
-            const QStringList lines = text.split('\n');
-            for (const QString &line : lines) {
-                if (!line.isEmpty()) {
-                    outputView->moveCursor(QTextCursor::End);
-                    outputView->insertPlainText(QStringLiteral("[%1] %2\n").arg(serial, line));
-                }
+        connect(process, &QProcess::readyRead, dialog, [process, outputView, serial]() {
+            const QString text = QString::fromUtf8(process->readAll());
+            for (const QString &line : text.split(QLatin1Char('\n'))) {
+                if (line.isEmpty())
+                    continue;
+                outputView->moveCursor(QTextCursor::End);
+                outputView->insertPlainText(QStringLiteral("[%1] %2\n").arg(serial, line));
             }
             outputView->moveCursor(QTextCursor::End);
         });
 
-        connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-                dlg, [serial, statusLabel, outputView, closeBtn, remaining, hasErrors]
-                (int exitCode, QProcess::ExitStatus status) {
-            const bool ok = (status == QProcess::NormalExit && exitCode == 0);
-            outputView->append(QStringLiteral("[%1] --- Finished (exit code: %2) ---\n")
+        connect(process, &QProcess::finished, dialog,
+                [serial, outputView, reportDeviceDone](int exitCode, QProcess::ExitStatus status) {
+            outputView->append(tr("[%1] --- Finished (exit code: %2) ---\n")
                                    .arg(serial).arg(exitCode));
-            if (!ok)
-                *hasErrors = true;
-
-            --(*remaining);
-            if (*remaining <= 0) {
-                const bool allOk = !(*hasErrors);
-                statusLabel->setText(allOk ? QStringLiteral("All devices flashed successfully.")
-                                           : QStringLiteral("Flashing completed with errors on some devices."));
-                const QString successCol = ColorScheme::toHex(ColorScheme::instance().success());
-                statusLabel->setStyleSheet(
-                    allOk ? QString("color: %1; font-weight: bold; font-size: 13px;").arg(successCol)
-                          : QStringLiteral("color: #f44336; font-weight: bold; font-size: 13px;"));
-                closeBtn->setEnabled(true);
-                delete remaining;
-                delete hasErrors;
-            }
+            reportDeviceDone(status == QProcess::NormalExit && exitCode == 0);
         });
 
-        connect(proc, &QProcess::errorOccurred, dlg,
-                [serial, statusLabel, outputView, closeBtn, remaining, hasErrors](QProcess::ProcessError error) {
-            Q_UNUSED(error);
-            outputView->append(QStringLiteral("[%1] --- Failed to start command ---\n").arg(serial));
-            *hasErrors = true;
-
-            --(*remaining);
-            if (*remaining <= 0) {
-                statusLabel->setText(QStringLiteral("Flashing completed with errors on some devices."));
-                statusLabel->setStyleSheet("color: #f44336; font-weight: bold; font-size: 13px;");
-                closeBtn->setEnabled(true);
-                delete remaining;
-                delete hasErrors;
-            }
+        // A process that never starts emits errorOccurred but not finished, so
+        // it has to report completion on its own — exactly once.
+        connect(process, &QProcess::errorOccurred, dialog,
+                [serial, outputView, reportDeviceDone](QProcess::ProcessError error) {
+            if (error != QProcess::FailedToStart)
+                return;   // other errors are still followed by finished()
+            outputView->append(tr("[%1] --- Failed to start command ---\n").arg(serial));
+            reportDeviceDone(false);
         });
 
-        proc->start("/bin/bash", QStringList() << "-c" << cmd);
+        process->start(flashShell(), flashShellArgs(command));
     }
 }
 
@@ -365,32 +390,6 @@ QFrame *wrapLayoutInCard(QBoxLayout *host, int idx, const QString &cardName,
     QLayoutItem *taken = host->takeAt(idx);
     Q_UNUSED(taken);
     cardLayout->addLayout(inner);
-
-    host->insertWidget(idx, card);
-    return card;
-}
-
-// Wrap an existing widget (already inside `host` at index `idx`) inside a card.
-QFrame *wrapWidgetInCard(QBoxLayout *host, int idx, const QString &cardName,
-                         int padH = 18, int padV = 16)
-{
-    QLayoutItem *item = host->itemAt(idx);
-    if (!item) return nullptr;
-    QWidget *w = item->widget();
-    if (!w) return nullptr;
-
-    auto *card = new QFrame(host->parentWidget());
-    card->setObjectName(cardName);
-    card->setProperty("class", "devCard");
-    card->setFrameShape(QFrame::NoFrame);
-
-    auto *cardLayout = new QVBoxLayout(card);
-    cardLayout->setContentsMargins(padH, padV, padH, padV);
-    cardLayout->setSpacing(10);
-
-    QLayoutItem *taken = host->takeAt(idx);
-    cardLayout->addWidget(w);
-    delete taken; // QWidgetItem wrapper is distinct from the widget — safe.
 
     host->insertWidget(idx, card);
     return card;

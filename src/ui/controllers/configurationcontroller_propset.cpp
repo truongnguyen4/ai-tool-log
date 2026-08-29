@@ -52,7 +52,6 @@ void ConfigurationController::onLoadPropertySet()
     }
 
     m_propertyDefinitionModel->setPropertyDefinitions(defs);
-    recreatePropertyDefinitionButtons();
     updatePropertyNamesCompleter();
     if (!m_deviceIdProvider().isEmpty()) {
         m_ui->statusbar->showMessage(tr("Loading current property values from device..."), 0);
@@ -121,7 +120,6 @@ void ConfigurationController::onImportPropertySet()
         m_propertyDefinitionModel->setPropertyDefinitions(imported);
     }
 
-    recreatePropertyDefinitionButtons();
     updatePropertyNamesCompleter();
     if (!m_deviceIdProvider().isEmpty()) {
         m_ui->statusbar->showMessage(tr("Loading current property values from device..."), 0);

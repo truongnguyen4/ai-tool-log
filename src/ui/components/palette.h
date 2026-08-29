@@ -61,6 +61,17 @@ struct Palette {
     QString levelWarn;        // W
     QString levelError;       // E
     QString levelAssert;      // A
+    QString levelDefault;     // unrecognized level letter
+
+    // ── Data views (log tables, config tables, search) ──────────────────────
+    QString rowMarked;           // marked-row background in the log table
+    QString rowAnchor;           // ΔTime anchor-row background in the mark table
+    QString rowSelected;         // selected row / selected device row tint
+    QString rowBlink;            // "value just changed" flash background
+    QString searchHighlightBg;   // dumpsys search match background
+    QString searchHighlightText; // dumpsys search match foreground
+    QString panelBackground;     // dropdown / menu / dialog panel background
+    QString editorBackground;    // text edit / log output panel background
 
     // ── Scrollbars ──────────────────────────────────────────────────────────
     QString scrollbarHandle;

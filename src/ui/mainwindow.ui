@@ -352,13 +352,20 @@
              <item>
               <widget class="QGroupBox" name="groupBox_3">
                <property name="title">
-                <string>PID</string>
+                <string>PID / TID</string>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_6">
                 <item>
                  <widget class="QLineEdit" name="txtPidFilter">
                   <property name="placeholderText">
-                   <string>e.g. 14502||12345</string>
+                   <string>PID, e.g. 14502||12345</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="txtTidFilter">
+                  <property name="placeholderText">
+                   <string>TID, e.g. 14510||12350</string>
                   </property>
                  </widget>
                 </item>

@@ -13,14 +13,22 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-// Owns the LogFilter and the criteria-building logic that used to live in
-// UiManager. Reads filter widget state from Ui::MainWindow and runs filtering
-// over a log vector (uses QtConcurrent for parallelism). Stateless w.r.t.
-// log data: callers pass in the source vector and receive the filtered
-// vector + an id->row index map.
+// ---------------------------------------------------------------------------
+// LogFilterController — turns the filter widgets into a FilterCriteria and
+// runs it over a log vector (in parallel, via QtConcurrent).
 //
-// For the actual matching primitives (logic / regex) used by every table in
-// the app, see FilterEngine in src/filters/filterengine.h.
+// Stateless with respect to log data: callers pass in the source vector and
+// receive the filtered vector plus an id -> row index map.
+//
+// The criteria built from the widgets is cached. Building it parses every
+// filter expression and compiles a regex, which is cheap once per filter
+// change but ruinous once per log line — and passesCurrent() is called per
+// line. Callers refresh the cache with refreshCriteria() whenever the filter
+// widgets change.
+//
+// For the matching primitives shared with every other table in the app, see
+// FilterEngine in src/filters/filterengine.h.
+// ---------------------------------------------------------------------------
 class LogFilterController : public QObject
 {
     Q_OBJECT
@@ -32,20 +40,31 @@ public:
 
     explicit LogFilterController(Ui::MainWindow *ui, QObject *parent = nullptr);
 
-    // Read the current state of the filter widgets and produce a FilterCriteria.
+    /** Read the filter widgets and produce a fresh FilterCriteria. */
     FilterCriteria buildCriteria() const;
 
-    // Apply the criteria to the full log set. Uses QtConcurrent for parallelism.
+    /** Rebuild and cache the criteria; returns the new value. */
+    const FilterCriteria &refreshCriteria();
+
+    /** The cached criteria, rebuilt on first use. */
+    const FilterCriteria &criteria() const;
+
+    /** Apply @p criteria to @p allLogs. Uses QtConcurrent for parallelism. */
     Result apply(const QVector<LogEntry> &allLogs, const FilterCriteria &criteria) const;
 
-    // One-off convenience: does this entry pass the current UI criteria?
+    /** Convenience: apply the cached criteria. */
+    Result apply(const QVector<LogEntry> &allLogs) const { return apply(allLogs, criteria()); }
+
+    /** Does this entry pass the cached criteria? */
     bool passesCurrent(const LogEntry &entry) const;
 
     const ILogFilter &logFilter() const { return m_logFilter; }
 
 private:
-    Ui::MainWindow *m_ui;
-    LogFilter       m_logFilter;
+    Ui::MainWindow          *m_ui;
+    LogFilter                m_logFilter;
+    mutable FilterCriteria   m_criteria;
+    mutable bool             m_criteriaValid = false;
 };
 
 #endif // LOGFILTERCONTROLLER_H

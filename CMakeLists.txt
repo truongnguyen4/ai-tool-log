@@ -18,7 +18,6 @@ qt_add_executable(ToolLogPro
     src/ui/uimanager_events.cpp
     src/ui/uimanager_fileio.cpp
     src/ui/uimanager_files.cpp
-    src/ui/uimanager_kernel.cpp
     src/ui/uimanager_filter.cpp
     src/ui/uimanager_misc.cpp
     src/ui/uimanager_theme.cpp
@@ -32,6 +31,7 @@ qt_add_executable(ToolLogPro
     src/ui/dialogs/settingsdialog.cpp
     src/ui/dialogs/settingsdialog.h
     src/ui/tooltips.h
+    src/ui/tablestyler.h
     src/delegates/blinkdelegate.cpp
     src/delegates/blinkdelegate.h
     src/ui/controllers/cradlecontroller.cpp
@@ -78,6 +78,8 @@ qt_add_executable(ToolLogPro
     # Delegates
     src/delegates/highlightdelegate.cpp
     src/delegates/highlightdelegate.h
+    src/delegates/rowactiondelegate.cpp
+    src/delegates/rowactiondelegate.h
     
     # Managers
     src/managers/adbmanager.cpp
@@ -100,6 +102,9 @@ qt_add_executable(ToolLogPro
     src/managers/qsettingspresetstore.h
     
     # Models
+    src/models/logtablemodelbase.cpp
+    src/models/logtablemodelbase.h
+    src/models/valuetablesync.h
     src/models/logmodel.cpp
     src/models/logmodel.h
     src/models/marklogmodel.cpp
@@ -117,6 +122,8 @@ qt_add_executable(ToolLogPro
     src/converters/threadtimelogconverter.h
     src/converters/brieflogconverter.cpp
     src/converters/brieflogconverter.h
+    src/converters/dmesglogconverter.cpp
+    src/converters/dmesglogconverter.h
     src/converters/propertydefinitionconverter.cpp
     src/converters/propertydefinitionconverter.h
     src/converters/propertydefinitionjson.cpp
@@ -208,6 +215,11 @@ target_link_libraries(ToolLogPro
         Qt::Concurrent
         Qt::Sql
 )
+
+# Resident-set sampling for the status bar uses the platform's own API.
+if(WIN32)
+    target_link_libraries(ToolLogPro PRIVATE psapi)
+endif()
 
 include(GNUInstallDirs)
 

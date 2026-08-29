@@ -1,26 +1,46 @@
 #include "highlightdelegate.h"
-#include <QPainter>
-#include <QApplication>
-#include <QTextDocument>
+
 #include <QAbstractTextDocumentLayout>
-#include <QTableView>
+#include <QApplication>
+#include <QFontMetrics>
 #include <QHeaderView>
+#include <QPainter>
+#include <QTableView>
+#include <QTextDocument>
 
-// Define predefined highlight colors - vibrant but readable
-const QColor HighlightDelegate::HIGHLIGHT_COLORS[] = {
-    QColor(255, 165, 0, 180),    // Orange
-    QColor(135, 206, 250, 180),  // Light Sky Blue
-    QColor(144, 238, 144, 180),  // Light Green
-    QColor(255, 182, 193, 180),  // Light Pink
-    QColor(221, 160, 221, 180),  // Plum
-    QColor(255, 255, 0, 180),    // Yellow
-    QColor(0, 255, 255, 180),    // Cyan
-    QColor(255, 192, 203, 180),  // Pink
-    QColor(173, 216, 230, 180),  // Light Blue
-    QColor(152, 251, 152, 180),  // Pale Green
+#include <algorithm>
+
+namespace {
+
+/** Keyword background palette — vibrant but still readable under black text. */
+const QColor kKeywordColors[] = {
+    QColor(255, 165, 0,   180),  // orange
+    QColor(135, 206, 250, 180),  // light sky blue
+    QColor(144, 238, 144, 180),  // light green
+    QColor(255, 182, 193, 180),  // light pink
+    QColor(221, 160, 221, 180),  // plum
+    QColor(255, 255, 0,   180),  // yellow
+    QColor(0,   255, 255, 180),  // cyan
+    QColor(255, 192, 203, 180),  // pink
+    QColor(173, 216, 230, 180),  // light blue
+    QColor(152, 251, 152, 180),  // pale green
 };
+constexpr int kKeywordColorCount = int(std::size(kKeywordColors));
 
-const int HighlightDelegate::HIGHLIGHT_COLOR_COUNT = 10;
+/** Cell padding, in pixels. */
+constexpr int kPaddingX = 5;
+constexpr int kPaddingY = 3;
+/** Fallback column width when the view cannot be queried. */
+constexpr int kFallbackWidth = 400;
+/** Opacity applied to a marked row's background tint. */
+constexpr int kMarkedRowAlpha = 210;
+
+QColor keywordColor(int index)
+{
+    return kKeywordColors[index % kKeywordColorCount];
+}
+
+} // namespace
 
 HighlightDelegate::HighlightDelegate(QObject *parent)
     : QStyledItemDelegate(parent)
@@ -29,13 +49,14 @@ HighlightDelegate::HighlightDelegate(QObject *parent)
 
 void HighlightDelegate::setKeywords(const QStringList &keywords)
 {
+    if (m_keywords == keywords)
+        return;   // nothing to repaint
+
     m_keywords = keywords;
     m_colors.clear();
-    
-    // Assign colors to keywords
-    for (int i = 0; i < keywords.size(); i++) {
-        m_colors[keywords[i]] = getColorForKeyword(i);
-    }
+    m_colors.reserve(keywords.size());
+    for (int i = 0; i < keywords.size(); ++i)
+        m_colors.insert(keywords.at(i), keywordColor(i));
 }
 
 void HighlightDelegate::clearKeywords()
@@ -44,229 +65,233 @@ void HighlightDelegate::clearKeywords()
     m_colors.clear();
 }
 
-bool HighlightDelegate::hasKeywords() const
+void HighlightDelegate::setWordWrap(bool enabled)
 {
-    return !m_keywords.isEmpty();
+    m_wordWrap = enabled;
 }
 
-QColor HighlightDelegate::getColorForKeyword(int index) const
+bool HighlightDelegate::containsAnyKeyword(const QString &text) const
 {
-    return HIGHLIGHT_COLORS[index % HIGHLIGHT_COLOR_COUNT];
+    return std::any_of(m_keywords.cbegin(), m_keywords.cend(),
+                       [&text](const QString &keyword) {
+                           return text.contains(keyword, Qt::CaseInsensitive);
+                       });
 }
 
-void HighlightDelegate::paintMarkedBackground(QPainter *painter,
-                                              const QStyleOptionViewItem &opt,
-                                              const QModelIndex &index) const
+int HighlightDelegate::contentWidth(const QStyleOptionViewItem &option,
+                                    const QModelIndex &index)
 {
-    // Qt's stylesheet engine ignores Qt::BackgroundRole when any ::item
-    // background-color rule exists in the QSS.  We read it explicitly and
-    // paint it here — AFTER style->drawControl — so it sits on top of the
-    // stylesheet's normal/hover fill but below keyword spans and text.
-    if (opt.state & QStyle::State_Selected)
-        return;   // selection highlight takes precedence; don't overlay
-    const QVariant bg = index.data(Qt::BackgroundRole);
-    if (!bg.isValid()) return;
-    QColor bgColor = bg.value<QColor>();
-    if (!bgColor.isValid()) return;
-    bgColor.setAlpha(210);
-    painter->fillRect(opt.rect, bgColor);
+    // When Qt calls sizeHint() from resizeRowToContents(), option.rect is the
+    // whole view rather than the cell, so ask the view for the real column
+    // width instead of trusting the rect.
+    int width = kFallbackWidth;
+    if (const auto *view = qobject_cast<const QTableView *>(option.widget)) {
+        const int columnWidth = view->columnWidth(index.column());
+        if (columnWidth > 2 * kPaddingX)
+            width = columnWidth;
+    }
+    return width - 2 * kPaddingX;
+}
+
+void HighlightDelegate::drawItemBackground(QPainter *painter,
+                                           const QStyleOptionViewItem &option,
+                                           const QModelIndex &index) const
+{
+    const QWidget *widget = option.widget;
+    QStyle *style = widget ? widget->style() : QApplication::style();
+    style->drawControl(QStyle::CE_ItemViewItem, &option, painter, widget);
+
+    // Qt's stylesheet engine ignores Qt::BackgroundRole once any QTableView
+    // ::item background rule exists, so the marked-row tint is painted here by
+    // hand — after the style, below the keyword spans and the text.
+    if (option.state & QStyle::State_Selected)
+        return;   // the selection colour wins
+    const QVariant background = index.data(Qt::BackgroundRole);
+    if (!background.isValid())
+        return;
+    QColor color = background.value<QColor>();
+    if (!color.isValid())
+        return;
+    color.setAlpha(kMarkedRowAlpha);
+    painter->fillRect(option.rect, color);
 }
 
 void HighlightDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                               const QModelIndex &index) const
 {
-    // ── No keywords ────────────────────────────────────────────────────────
-    if (m_keywords.isEmpty()) {
-        if (!m_wordWrap) {
-            // QStyledItemDelegate::paint() calls style->drawControl() which ignores
-            // Qt::BackgroundRole when a QSS ::item rule is active.  Draw manually.
-            QStyleOptionViewItem opt = option;
-            initStyleOption(&opt, index);
-            const QString text = opt.text;
-            opt.text.clear();
-            const QWidget *widget = opt.widget;
-            QStyle *style = widget ? widget->style() : QApplication::style();
-            style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, widget);
-            paintMarkedBackground(painter, opt, index);  // overlay marked row color
-            painter->save();
-            painter->setFont(opt.font);
-            const bool sel = opt.state & QStyle::State_Selected;
-            painter->setPen(sel ? opt.palette.highlightedText().color()
-                                : opt.palette.text().color());
-            painter->drawText(opt.rect.adjusted(6, 0, -6, 0),
-                              Qt::AlignLeft | Qt::AlignVCenter, text);
-            painter->restore();
-            return;
-        }
-        // Word-wrap, no highlights
-        QStyleOptionViewItem opt = option;
-        initStyleOption(&opt, index);
-        const QString text = opt.text;
-        opt.text.clear();
-        const QWidget *widget = opt.widget;
-        QStyle *style = widget ? widget->style() : QApplication::style();
-        style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, widget);
-        paintMarkedBackground(painter, opt, index);  // overlay marked row color
-
-        painter->save();
-        painter->setFont(opt.font);
-        const bool sel = opt.state & QStyle::State_Selected;
-        painter->setPen(sel ? opt.palette.highlightedText().color()
-                            : opt.palette.text().color());
-        painter->drawText(opt.rect.adjusted(5, 3, -5, -3),
-                          Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignVCenter, text);
-        painter->restore();
-        return;
-    }
-
-    // ── Has keywords ────────────────────────────────────────────────────────
-    QString text = index.data(Qt::DisplayRole).toString();
-    if (text.isEmpty()) {
-        QStyledItemDelegate::paint(painter, option, index);
-        return;
-    }
-
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
-    const QWidget *widget = opt.widget;
-    QStyle *style = widget ? widget->style() : QApplication::style();
-    opt.text = "";
-    style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, widget);
-    paintMarkedBackground(painter, opt, index);  // overlay marked row color
 
-    const bool isSelected = option.state & QStyle::State_Selected;
+    const QString text = opt.text;
+    opt.text.clear();               // we draw the text ourselves
+    drawItemBackground(painter, opt, index);
+    if (text.isEmpty())
+        return;
 
-    if (!m_wordWrap) {
-        // Single-line highlight path (original behaviour)
-        drawHighlightedText(painter, option, text, isSelected);
+    const bool selected = opt.state & QStyle::State_Selected;
+
+    // The overwhelmingly common case is a cell with no keyword in it. Checking
+    // first keeps those cells on the cheap plain-text path instead of building
+    // an HTML string and a QTextDocument for every visible row on every paint.
+    if (m_keywords.isEmpty() || !containsAnyKeyword(text)) {
+        drawPlainText(painter, opt, text, selected);
         return;
     }
 
-    // Word-wrap + keyword highlights: render via QTextDocument with HTML spans
-    QString html = text.toHtmlEscaped();
-    for (const QString &kw : m_keywords) {
-        const QColor &c = m_colors[kw];
-        const QString spanOpen = QString("<span style=\"background-color:%1;color:black;\">").arg(c.name());
-        const QString kwEsc = kw.toHtmlEscaped();
-        QString result;
-        int pos = 0;
-        while (pos < html.size()) {
-            int found = html.indexOf(kwEsc, pos, Qt::CaseInsensitive);
-            if (found == -1) { result += html.mid(pos); break; }
-            result += html.mid(pos, found - pos);
-            result += spanOpen + html.mid(found, kwEsc.size()) + "</span>";
-            pos = found + kwEsc.size();
-        }
-        html = result;
-    }
-    const QString textColor = isSelected ? opt.palette.highlightedText().color().name()
-                                         : opt.palette.text().color().name();
-    QTextDocument doc;
-    doc.setDefaultFont(opt.font);
-    doc.setHtml("<span style=\"color:" + textColor + ";white-space:pre-wrap;\">" + html + "</span>");
-    doc.setTextWidth(opt.rect.width() - 10);
+    if (m_wordWrap)
+        drawWrappedHighlightedText(painter, opt, text, selected);
+    else
+        drawHighlightedText(painter, opt, text, selected);
+}
 
+void HighlightDelegate::drawPlainText(QPainter *painter, const QStyleOptionViewItem &option,
+                                      const QString &text, bool selected) const
+{
     painter->save();
-    const int docHeight = static_cast<int>(doc.size().height());
-    const int yOffset = qMax(0, (opt.rect.height() - docHeight) / 2);
-    painter->translate(opt.rect.left() + 5, opt.rect.top() + yOffset);
-    QAbstractTextDocumentLayout::PaintContext ctx;
-    ctx.palette = opt.palette;
-    doc.documentLayout()->draw(painter, ctx);
+    painter->setFont(option.font);
+    painter->setPen(selected ? option.palette.highlightedText().color()
+                             : option.palette.text().color());
+
+    if (m_wordWrap) {
+        painter->drawText(option.rect.adjusted(kPaddingX, kPaddingY, -kPaddingX, -kPaddingY),
+                          Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignVCenter, text);
+    } else {
+        const QRect textRect = option.rect.adjusted(kPaddingX, 0, -kPaddingX, 0);
+        const QFontMetrics metrics(option.font);
+        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter,
+                          metrics.elidedText(text, Qt::ElideRight, textRect.width()));
+    }
+
     painter->restore();
 }
 
-void HighlightDelegate::drawHighlightedText(QPainter *painter, const QStyleOptionViewItem &option,
-                                           const QString &text, bool isSelected) const
+void HighlightDelegate::drawHighlightedText(QPainter *painter,
+                                            const QStyleOptionViewItem &option,
+                                            const QString &text, bool selected) const
 {
     painter->save();
-    
-    // Set font
     painter->setFont(option.font);
-    
-    // Calculate text rect with margin
-    QRect textRect = option.rect.adjusted(5, 0, -5, 0);
-    
-    // Font metrics for measuring text
-    QFontMetrics fm(option.font);
-    
-    // Calculate proper vertical position for text baseline
-    int yPos = textRect.top() + fm.ascent() + (textRect.height() - fm.height()) / 2;
-    
-    // Track current position
-    int xPos = textRect.left();
-    
-    QString remainingText = text;
-    
-    // Find and highlight keywords
-    while (!remainingText.isEmpty() && xPos < textRect.right()) {
-        int earliestPos = -1;
-        QString foundKeyword;
-        
-        // Find the earliest keyword in the remaining text (case-insensitive)
+
+    const QRect textRect = option.rect.adjusted(kPaddingX, 0, -kPaddingX, 0);
+    const QFontMetrics metrics(option.font);
+    const int baseline = textRect.top() + metrics.ascent()
+                         + (textRect.height() - metrics.height()) / 2;
+    const QColor textColor = selected ? option.palette.highlightedText().color()
+                                      : option.palette.text().color();
+
+    int x = textRect.left();
+    QString remaining = text;
+
+    while (!remaining.isEmpty() && x < textRect.right()) {
+        // Find the earliest keyword still ahead of us.
+        int matchPos = -1;
+        int matchLength = 0;
+        QColor matchColor;
         for (const QString &keyword : m_keywords) {
-            int pos = remainingText.indexOf(keyword, 0, Qt::CaseInsensitive);
-            if (pos != -1 && (earliestPos == -1 || pos < earliestPos)) {
-                earliestPos = pos;
-                foundKeyword = keyword;
+            const int pos = remaining.indexOf(keyword, 0, Qt::CaseInsensitive);
+            if (pos >= 0 && (matchPos < 0 || pos < matchPos)) {
+                matchPos    = pos;
+                matchLength = keyword.size();
+                matchColor  = m_colors.value(keyword, keywordColor(0));
             }
         }
-        
-        if (earliestPos == -1) {
-            // No more keywords, draw remaining text normally
-            QString textToDraw = fm.elidedText(remainingText, Qt::ElideRight, textRect.right() - xPos);
-            painter->setPen(isSelected ? option.palette.highlightedText().color() : option.palette.text().color());
-            painter->drawText(xPos, yPos, textToDraw);
+
+        if (matchPos < 0) {
+            painter->setPen(textColor);
+            painter->drawText(x, baseline,
+                              metrics.elidedText(remaining, Qt::ElideRight,
+                                                 textRect.right() - x));
             break;
         }
-        
-        // Draw text before keyword
-        if (earliestPos > 0) {
-            QString beforeText = remainingText.left(earliestPos);
-            int textWidth = fm.horizontalAdvance(beforeText);
-            
-            if (xPos + textWidth > textRect.right()) {
-                // Not enough space, draw what fits
-                beforeText = fm.elidedText(beforeText, Qt::ElideRight, textRect.right() - xPos);
-                painter->setPen(isSelected ? option.palette.highlightedText().color() : option.palette.text().color());
-                painter->drawText(xPos, yPos, beforeText);
+
+        if (matchPos > 0) {
+            const QString before = remaining.left(matchPos);
+            const int width = metrics.horizontalAdvance(before);
+            painter->setPen(textColor);
+            if (x + width > textRect.right()) {
+                painter->drawText(x, baseline,
+                                  metrics.elidedText(before, Qt::ElideRight,
+                                                     textRect.right() - x));
                 break;
             }
-            
-            painter->setPen(isSelected ? option.palette.highlightedText().color() : option.palette.text().color());
-            painter->drawText(xPos, yPos, beforeText);
-            xPos += textWidth;
+            painter->drawText(x, baseline, before);
+            x += width;
         }
-        
-        // Draw highlighted keyword
-        QString keywordText = remainingText.mid(earliestPos, foundKeyword.length());
-        int keywordWidth = fm.horizontalAdvance(keywordText);
-        
-        if (xPos + keywordWidth > textRect.right()) {
-            // Not enough space for keyword
-            keywordText = fm.elidedText(keywordText, Qt::ElideRight, textRect.right() - xPos);
-            keywordWidth = fm.horizontalAdvance(keywordText);
+
+        // The matched span keeps the source text's own casing.
+        QString match = remaining.mid(matchPos, matchLength);
+        int matchWidth = metrics.horizontalAdvance(match);
+        const bool elided = x + matchWidth > textRect.right();
+        if (elided) {
+            match = metrics.elidedText(match, Qt::ElideRight, textRect.right() - x);
+            matchWidth = metrics.horizontalAdvance(match);
         }
-        
-        // Draw highlight background
-        QRect highlightRect(xPos, textRect.top(), keywordWidth, textRect.height());
-        painter->fillRect(highlightRect, m_colors[foundKeyword]);
-        
-        // Draw keyword text (darker color for better contrast)
-        painter->setPen(Qt::black);
-        painter->drawText(xPos, yPos, keywordText);
-        xPos += keywordWidth;
-        
-        // Move to remaining text
-        remainingText = remainingText.mid(earliestPos + foundKeyword.length());
-        
-        // Check if text was elided (compare lengths since case might differ)
-        if (keywordText.length() != foundKeyword.length()) {
-            // Text was elided, stop here
+
+        painter->fillRect(QRect(x, textRect.top(), matchWidth, textRect.height()),
+                          matchColor);
+        painter->setPen(Qt::black);   // keyword fills are light; black reads best
+        painter->drawText(x, baseline, match);
+        x += matchWidth;
+
+        if (elided)
             break;
-        }
+        remaining = remaining.mid(matchPos + matchLength);
     }
-    
+
+    painter->restore();
+}
+
+void HighlightDelegate::drawWrappedHighlightedText(QPainter *painter,
+                                                   const QStyleOptionViewItem &option,
+                                                   const QString &text, bool selected) const
+{
+    // Build one HTML fragment with a <span> per keyword occurrence and let
+    // QTextDocument do the wrapping. Only reached for cells that actually
+    // contain a keyword.
+    QString html = text.toHtmlEscaped();
+    for (const QString &keyword : m_keywords) {
+        const QString needle = keyword.toHtmlEscaped();
+        if (needle.isEmpty() || !html.contains(needle, Qt::CaseInsensitive))
+            continue;
+
+        const QString openTag =
+            QStringLiteral("<span style=\"background-color:%1;color:black;\">")
+                .arg(m_colors.value(keyword, keywordColor(0)).name());
+
+        QString wrapped;
+        wrapped.reserve(html.size() + needle.size());
+        int pos = 0;
+        while (pos < html.size()) {
+            const int found = html.indexOf(needle, pos, Qt::CaseInsensitive);
+            if (found < 0) {
+                wrapped += QStringView(html).mid(pos);
+                break;
+            }
+            wrapped += QStringView(html).mid(pos, found - pos);
+            wrapped += openTag;
+            wrapped += QStringView(html).mid(found, needle.size());
+            wrapped += QLatin1String("</span>");
+            pos = found + needle.size();
+        }
+        html = wrapped;
+    }
+
+    const QColor textColor = selected ? option.palette.highlightedText().color()
+                                      : option.palette.text().color();
+    QTextDocument document;
+    document.setDefaultFont(option.font);
+    document.setDocumentMargin(0);
+    document.setHtml(QStringLiteral("<span style=\"color:%1;white-space:pre-wrap;\">%2</span>")
+                         .arg(textColor.name(), html));
+    document.setTextWidth(option.rect.width() - 2 * kPaddingX);
+
+    painter->save();
+    const int documentHeight = int(document.size().height());
+    const int yOffset = qMax(0, (option.rect.height() - documentHeight) / 2);
+    painter->translate(option.rect.left() + kPaddingX, option.rect.top() + yOffset);
+    QAbstractTextDocumentLayout::PaintContext context;
+    context.palette = option.palette;
+    document.documentLayout()->draw(painter, context);
     painter->restore();
 }
 
@@ -279,25 +304,11 @@ QSize HighlightDelegate::sizeHint(const QStyleOptionViewItem &option,
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
 
-    // When called from resizeRowToContents() / sizeHintForRow(), Qt sets
-    // opt.rect to the full view rect (via initViewItemOption), NOT the cell
-    // rect. Always read the actual column width from the view so the
-    // word-wrap height is computed against the real available space.
-    int availWidth = 400;
-    if (auto *tv = qobject_cast<const QTableView *>(opt.widget)) {
-        int cw = tv->columnWidth(index.column());
-        if (cw > 10) availWidth = cw;
-    }
-    availWidth -= 10;      // cell padding
-
-    const QFontMetrics fm(opt.font);
-    const QRect br = fm.boundingRect(QRect(0, 0, availWidth, 0),
-                                      Qt::TextWordWrap | Qt::AlignLeft,
-                                      opt.text);
-    return QSize(availWidth + 10, qMax(br.height() + 6, fm.height() + 6));
-}
-
-void HighlightDelegate::setWordWrap(bool enabled)
-{
-    m_wordWrap = enabled;
+    const int available = contentWidth(opt, index);
+    const QFontMetrics metrics(opt.font);
+    const QRect bounds = metrics.boundingRect(QRect(0, 0, available, 0),
+                                              Qt::TextWordWrap | Qt::AlignLeft,
+                                              opt.text);
+    return QSize(available + 2 * kPaddingX,
+                 qMax(bounds.height(), metrics.height()) + 2 * kPaddingY);
 }

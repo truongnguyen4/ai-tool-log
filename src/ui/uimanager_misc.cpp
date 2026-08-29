@@ -1,69 +1,76 @@
-// UiManager: layout/splitters/dialog launchers/shortcuts.
+// UiManager: persisted layout, splitter defaults, shortcuts and dialog launchers.
 #include "uimanager.h"
 #include "ui_mainwindow.h"
 #include "mainwindow.h"
 #include "configurationcontroller.h"
+#include "logsplitcontroller.h"
 #include "settingsdialog.h"
 #include "shortcutsdialog.h"
 #include "tableconfig.h"
 
 #include <QApplication>
-#include <QCheckBox>
-#include <QDialog>
-#include <QDialogButtonBox>
+#include <QHeaderView>
 #include <QKeySequence>
-#include <QLabel>
 #include <QSettings>
 #include <QShortcut>
 #include <QSplitter>
 #include <QTableView>
-#include <QVBoxLayout>
+
+namespace {
+constexpr auto kLayoutGroup  = "Layout";
+constexpr auto kHeaderSuffix = "/header";
+} // namespace
+
+QList<QSplitter *> UiManager::persistedSplitters() const
+{
+    return { m_ui->splitter, m_ui->splitterLogTables,
+             m_ui->splitterMain, m_ui->splitterConfig,
+             m_ui->splitterConfigTables, m_ui->splitterDumpsysOutput };
+}
+
+QList<QTableView *> UiManager::persistedTables() const
+{
+    return { m_ui->tableLog, m_ui->tableMarkLog,
+             m_ui->tableSettings, m_ui->tableProperties,
+             m_ui->tablePropertyDefinitions };
+}
 
 void UiManager::saveLayoutPreferences()
 {
-    QSettings s;
-    s.beginGroup(QStringLiteral("Layout"));
+    QSettings settings;
+    settings.beginGroup(QLatin1String(kLayoutGroup));
 
-    // Splitter geometries (Qt provides QSplitter::saveState / restoreState).
-    for (QSplitter *sp : { m_ui->splitter, m_ui->splitterLogTables,
-                           m_ui->splitterMain, m_ui->splitterConfig,
-                           m_ui->splitterConfigTables, m_ui->splitterDumpsysOutput }) {
-        if (sp) s.setValue(sp->objectName(), sp->saveState());
+    for (QSplitter *splitter : persistedSplitters()) {
+        if (splitter)
+            settings.setValue(splitter->objectName(), splitter->saveState());
+    }
+    for (QTableView *table : persistedTables()) {
+        if (table && table->horizontalHeader())
+            settings.setValue(table->objectName() + QLatin1String(kHeaderSuffix),
+                              table->horizontalHeader()->saveState());
     }
 
-    // Header column widths (one entry per relevant table).
-    for (QTableView *tv : { m_ui->tableLog, m_ui->tableMarkLog,
-                            m_ui->tableSettings, m_ui->tableProperties,
-                            m_ui->tablePropertyDefinitions }) {
-        if (tv && tv->horizontalHeader())
-            s.setValue(tv->objectName() + QStringLiteral("/header"),
-                       tv->horizontalHeader()->saveState());
-    }
-
-    s.endGroup();
+    settings.endGroup();
 }
 
 void UiManager::restoreLayoutPreferences()
 {
-    QSettings s;
-    s.beginGroup(QStringLiteral("Layout"));
+    QSettings settings;
+    settings.beginGroup(QLatin1String(kLayoutGroup));
 
-    for (QSplitter *sp : { m_ui->splitter, m_ui->splitterLogTables,
-                           m_ui->splitterMain, m_ui->splitterConfig,
-                           m_ui->splitterConfigTables, m_ui->splitterDumpsysOutput }) {
-        if (sp && s.contains(sp->objectName()))
-            sp->restoreState(s.value(sp->objectName()).toByteArray());
+    for (QSplitter *splitter : persistedSplitters()) {
+        if (splitter && settings.contains(splitter->objectName()))
+            splitter->restoreState(settings.value(splitter->objectName()).toByteArray());
+    }
+    for (QTableView *table : persistedTables()) {
+        if (!table || !table->horizontalHeader())
+            continue;
+        const QString key = table->objectName() + QLatin1String(kHeaderSuffix);
+        if (settings.contains(key))
+            table->horizontalHeader()->restoreState(settings.value(key).toByteArray());
     }
 
-    for (QTableView *tv : { m_ui->tableLog, m_ui->tableMarkLog,
-                            m_ui->tableSettings, m_ui->tableProperties,
-                            m_ui->tablePropertyDefinitions }) {
-        const QString key = tv->objectName() + QStringLiteral("/header");
-        if (tv && tv->horizontalHeader() && s.contains(key))
-            tv->horizontalHeader()->restoreState(s.value(key).toByteArray());
-    }
-
-    s.endGroup();
+    settings.endGroup();
 }
 
 void UiManager::setupSplittersAndMisc()
@@ -82,49 +89,19 @@ void UiManager::setupSplittersAndMisc()
     });
 }
 
-void UiManager::onColumnsClicked()
-{
-    QDialog dialog(m_mainWindow);
-    dialog.setWindowTitle("Column Visibility");
-    dialog.setMinimumWidth(300);
-
-    QVBoxLayout *layout = new QVBoxLayout(&dialog);
-    QLabel *titleLabel = new QLabel("Select columns to display:", &dialog);
-    titleLabel->setStyleSheet("font-weight: bold; margin-bottom: 10px;");
-    layout->addWidget(titleLabel);
-
-    const QStringList columnNames = {"Date", "Time", "PID", "TID", "Package", "Lvl", "Tag", "Message"};
-    QVector<QCheckBox *> checkboxes;
-    for (int i = 0; i < columnNames.size(); ++i) {
-        QCheckBox *cb = new QCheckBox(columnNames[i], &dialog);
-        cb->setChecked(!m_ui->tableLog->isColumnHidden(i));
-        checkboxes.append(cb);
-        layout->addWidget(cb);
-    }
-
-    QDialogButtonBox *buttons = new QDialogButtonBox(
-        QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
-    layout->addWidget(buttons);
-    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-
-    // Inherits qApp's themed stylesheet; no inline overrides.
-
-    if (dialog.exec() == QDialog::Accepted) {
-        auto *pb = m_logSplitController ? m_logSplitController->paneB() : nullptr;
-        for (int i = 0; i < checkboxes.size(); ++i) {
-            const bool hidden = !checkboxes[i]->isChecked();
-            m_ui->tableLog->setColumnHidden(i, hidden);
-            m_ui->tableMarkLog->setColumnHidden(i, hidden);
-            if (pb && pb->table)     pb->table->setColumnHidden(i, hidden);
-            if (pb && pb->markTable) pb->markTable->setColumnHidden(i, hidden);
-        }
-    }
-}
-
 void UiManager::onAutoScrollToggled(bool checked)
 {
-    if (checked) m_ui->tableLog->scrollToBottom();
+    if (!checked)
+        return;
+    // Jump to the newest line in every visible pane, not just pane A.
+    if (QTableView *table = m_ui->tableLog)
+        table->scrollToBottom();
+    if (m_logSplitController) {
+        if (auto *paneB = m_logSplitController->paneB()) {
+            if (paneB->table)
+                paneB->table->scrollToBottom();
+        }
+    }
 }
 
 void UiManager::onAppSettingsClicked()

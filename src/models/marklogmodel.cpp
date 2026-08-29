@@ -1,182 +1,138 @@
 #include "marklogmodel.h"
-#include "tableconfig.h"
+
 #include "colorscheme.h"
-#include <QFont>
+#include "tableconfig.h"
+
 #include <QDateTime>
 
-MarkLogModel::MarkLogModel(QObject *parent)
-    : QAbstractTableModel(parent)
+#include <algorithm>
+
+namespace {
+
+constexpr auto kTimestampForm = "yyyy-MM-dd HH:mm:ss.zzz";
+
+/** Placeholder shown when a delta cannot be computed (em dash). */
+QString kEmDash() { return QStringLiteral("\u2014"); }
+
+/** Chronological key for sorting/comparing marked rows. */
+QString timestampKey(const LogEntry &e)
 {
-    connect(&ColorScheme::instance(), &ColorScheme::modeChanged,
-            this, [this]() {
-                if (m_markedLogs.isEmpty()) return;
-                emit dataChanged(index(0, 0),
-                                 index(m_markedLogs.size() - 1, columnCount() - 1),
-                                 { Qt::ForegroundRole, Qt::BackgroundRole });
-            });
+    return e.date + QLatin1Char(' ') + e.time;
+}
+} // namespace
+
+MarkLogModel::MarkLogModel(QObject *parent)
+    : LogTableModelBase(parent)
+{
 }
 
 int MarkLogModel::rowCount(const QModelIndex &parent) const
 {
-    if (parent.isValid())
-        return 0;
-    return m_markedLogs.size();
+    return parent.isValid() ? 0 : m_markedLogs.size();
 }
 
 int MarkLogModel::columnCount(const QModelIndex &parent) const
 {
-    if (parent.isValid())
-        return 0;
-    return 9; // Date, Time, PID, TID, Package, Lvl, Tag, Message, DeltaTime
+    // Same columns as the log table plus the trailing ΔTime column.
+    return parent.isValid() ? 0 : TableConfig::LogColumns::DELTA + 1;
 }
 
 QVariant MarkLogModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row() >= m_markedLogs.size())
-        return QVariant();
+    if (!index.isValid() || index.row() < 0 || index.row() >= m_markedLogs.size())
+        return {};
 
-    const LogEntry &entry = m_markedLogs[index.row()].entry;
+    const int row = index.row();
 
-    if (role == Qt::DisplayRole) {
-        using namespace TableConfig::LogColumns;
-        switch (index.column()) {
-            case DATE:    return entry.date;
-            case TIME:    return entry.time;
-            case PID:     return entry.pid;
-            case TID:     return entry.tid;
-            case PACKAGE: return entry.package;
-            case LEVEL:   return entry.level;
-            case TAG:     return entry.tag;
-            case MESSAGE: return entry.message;
-            case DELTA: {
-                // Anchor row is T=0 — show em-dash
-                if (index.row() == m_anchorRow)
-                    return QString("\u2014");
-                // All other rows: signed delta relative to the anchor row's timestamp
-                const LogEntry &anchor = m_markedLogs[m_anchorRow].entry;
-                const QDateTime curDT = QDateTime::fromString(
-                    entry.date + " " + entry.time, "yyyy-MM-dd HH:mm:ss.zzz");
-                const QDateTime anchorDT = QDateTime::fromString(
-                    anchor.date + " " + anchor.time, "yyyy-MM-dd HH:mm:ss.zzz");
-                if (!curDT.isValid() || !anchorDT.isValid())
-                    return QString("\u2014");
-                const qint64 ms = anchorDT.msecsTo(curDT);
-                if (ms == 0) return QString("0 ms");
-                return QString("%1%2 ms").arg(ms > 0 ? "+" : "").arg(ms);
-            }
-        }
+    if (role == Qt::BackgroundRole) {
+        return row == m_anchorRow
+                   ? QVariant(ColorScheme::instance().anchorRowBackground())
+                   : QVariant();
     }
-    else if (role == Qt::TextAlignmentRole && index.column() == TableConfig::LogColumns::DATE) {
-        // Center align the Date column
-        return Qt::AlignCenter;
-    }
-    else if (role == Qt::BackgroundRole) {
-        // Highlight the anchor row with a subtle teal tint
-        if (index.row() == m_anchorRow)
-            return ColorScheme::instance().anchorRowBackground();
-    }
-    else if (role == Qt::ForegroundRole) {
-        return getLevelColor(entry.level);
-    }
-    else if (role == Qt::FontRole && index.column() == TableConfig::LogColumns::LEVEL) {
-        // Bold font for log level
-        QFont font;
-        font.setBold(true);
-        return font;
-    }
+    if (role == Qt::DisplayRole && index.column() == TableConfig::LogColumns::DELTA)
+        return deltaText(row);
 
-    return QVariant();
+    return entryData(m_markedLogs.at(row).entry, index.column(), role);
 }
 
-QVariant MarkLogModel::headerData(int section, Qt::Orientation orientation, int role) const
+QString MarkLogModel::deltaText(int row) const
 {
-    if (role != Qt::DisplayRole)
-        return QVariant();
+    if (row == m_anchorRow || m_anchorRow < 0 || m_anchorRow >= m_markedLogs.size())
+        return kEmDash();
 
-    if (orientation == Qt::Horizontal) {
-        using namespace TableConfig::LogColumns;
-        switch (section) {
-            case DATE:    return Names::DATE;
-            case TIME:    return Names::TIME;
-            case PID:     return Names::PID;
-            case TID:     return Names::TID;
-            case PACKAGE: return Names::PACKAGE;
-            case LEVEL:   return Names::LEVEL;
-            case TAG:     return Names::TAG;
-            case MESSAGE: return Names::MESSAGE;
-            case DELTA:   return Names::DELTA;
-        }
-    }
-    else {
-        return section + 1;
-    }
+    const QDateTime current = QDateTime::fromString(
+        timestampKey(m_markedLogs.at(row).entry), QLatin1String(kTimestampForm));
+    const QDateTime anchor = QDateTime::fromString(
+        timestampKey(m_markedLogs.at(m_anchorRow).entry), QLatin1String(kTimestampForm));
+    if (!current.isValid() || !anchor.isValid())
+        return kEmDash();
 
-    return QVariant();
+    const qint64 ms = anchor.msecsTo(current);
+    if (ms == 0)
+        return QStringLiteral("0 ms");
+    return QStringLiteral("%1%2 ms").arg(ms > 0 ? QStringLiteral("+") : QString()).arg(ms);
 }
 
 void MarkLogModel::addMarkedLog(const LogEntry &entry, int originalIndex)
 {
-    // Check if already marked
-    for (const MarkedLogEntry &marked : m_markedLogs) {
-        if (marked.originalIndex == originalIndex) {
-            return; // Already marked
-        }
-    }
+    if (isMarked(originalIndex))
+        return;
 
-    MarkedLogEntry markedEntry;
-    markedEntry.entry = entry;
-    markedEntry.originalIndex = originalIndex;
-    
-    // Find the correct position to insert based on time (sorted order)
-    int insertPos = 0;
-    for (int i = 0; i < m_markedLogs.size(); ++i) {
-        if (entry.time < m_markedLogs[i].entry.time) {
-            insertPos = i;
-            break;
-        }
-        insertPos = i + 1;
-    }
-    
+    // Keep rows chronological. Comparing date+time (not time alone) keeps
+    // captures that span midnight in the right order.
+    const QString key = timestampKey(entry);
+    const auto pos = std::lower_bound(
+        m_markedLogs.cbegin(), m_markedLogs.cend(), key,
+        [](const MarkedLogEntry &lhs, const QString &rhs) {
+            return timestampKey(lhs.entry) < rhs;
+        });
+    const int insertPos = static_cast<int>(pos - m_markedLogs.cbegin());
+
     beginInsertRows(QModelIndex(), insertPos, insertPos);
-    m_markedLogs.insert(insertPos, markedEntry);
+    m_markedLogs.insert(insertPos, MarkedLogEntry{entry, originalIndex});
+    // Inserting at or above the anchor shifts it down by one row.
+    if (!m_markedLogs.isEmpty() && insertPos <= m_anchorRow && m_markedLogs.size() > 1)
+        ++m_anchorRow;
     endInsertRows();
+
+    // Every ΔTime value is relative to the anchor, so they all move with it.
+    refreshColumn(TableConfig::LogColumns::DELTA, {Qt::DisplayRole});
 }
 
 void MarkLogModel::removeMarkedLog(int originalIndex)
 {
     for (int i = 0; i < m_markedLogs.size(); ++i) {
-        if (m_markedLogs[i].originalIndex == originalIndex) {
-            beginRemoveRows(QModelIndex(), i, i);
-            m_markedLogs.removeAt(i);
-            endRemoveRows();
-            // Adjust anchor: if we removed a row before the anchor, shift it back;
-            // if we removed the anchor itself, reset to row 0.
-            if (i < m_anchorRow)
-                m_anchorRow--;
-            else if (i == m_anchorRow)
-                m_anchorRow = 0;
-            // Rows after anchor are unaffected.
-            return;
-        }
+        if (m_markedLogs.at(i).originalIndex != originalIndex)
+            continue;
+
+        beginRemoveRows(QModelIndex(), i, i);
+        m_markedLogs.removeAt(i);
+        // Adjust the anchor *inside* the removal so views never observe an
+        // anchor index pointing past the end of the list.
+        if (i < m_anchorRow)
+            --m_anchorRow;
+        else if (i == m_anchorRow)
+            m_anchorRow = 0;
+        endRemoveRows();
+
+        refreshColumn(TableConfig::LogColumns::DELTA, {Qt::DisplayRole});
+        return;
     }
 }
 
 bool MarkLogModel::isMarked(int originalIndex) const
 {
-    for (const MarkedLogEntry &marked : m_markedLogs) {
-        if (marked.originalIndex == originalIndex) {
-            return true;
-        }
-    }
-    return false;
+    return std::any_of(m_markedLogs.cbegin(), m_markedLogs.cend(),
+                       [originalIndex](const MarkedLogEntry &m) {
+                           return m.originalIndex == originalIndex;
+                       });
 }
 
 int MarkLogModel::getOriginalIndex(int row) const
 {
-    if (row >= 0 && row < m_markedLogs.size()) {
-        return m_markedLogs[row].originalIndex;
-    }
-    return -1;
+    if (row < 0 || row >= m_markedLogs.size())
+        return -1;
+    return m_markedLogs.at(row).originalIndex;
 }
 
 void MarkLogModel::clear()
@@ -197,15 +153,6 @@ void MarkLogModel::setAnchorRow(int row)
     if (row < 0 || row >= m_markedLogs.size() || row == m_anchorRow)
         return;
     m_anchorRow = row;
-    // Force every cell in the table to repaint:
-    //  - Qt::DisplayRole  → recalculate the DELTA text for every row
-    //  - Qt::BackgroundRole → move the teal anchor-row highlight
-    const QModelIndex topLeft     = index(0, 0);
-    const QModelIndex bottomRight = index(m_markedLogs.size() - 1, columnCount() - 1);
-    emit dataChanged(topLeft, bottomRight, {Qt::DisplayRole, Qt::BackgroundRole});
-}
-
-QColor MarkLogModel::getLevelColor(const QString &level) const
-{
-    return ColorScheme::instance().levelColor(level);
+    // DisplayRole  → recompute every ΔTime; BackgroundRole → move the tint.
+    refreshAllRows({Qt::DisplayRole, Qt::BackgroundRole});
 }

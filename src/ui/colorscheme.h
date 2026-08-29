@@ -5,10 +5,19 @@
 #include <QObject>
 #include <QString>
 
-// Centralized colour palette. Replaces hardcoded #xxxxxx literals scattered
-// across LogModel, MarkLogModel, and the main UI stylesheet. Accessed as
-// a singleton; mode can be switched at runtime (currently only the log-level
-// palette is mode-aware; mainwindow.ui stylesheet swap is pending).
+namespace UiComponents { struct Palette; }
+
+// ---------------------------------------------------------------------------
+// ColorScheme — the single runtime source of truth for *widget-code* colours.
+//
+// It does not define any colour itself: every accessor resolves a semantic
+// token from the active UiComponents::Palette (see palette_light.cpp /
+// palette_dark.cpp), which is the same palette ThemeSheets uses to build the
+// application stylesheet. Re-theming therefore means editing one palette file.
+//
+// Colours are resolved once per theme switch and cached, because accessors
+// such as levelColor() are called from model data() on every painted cell.
+// ---------------------------------------------------------------------------
 class ColorScheme : public QObject
 {
     Q_OBJECT
@@ -23,28 +32,32 @@ public:
     // Resolved mode after honoring Auto (always Dark or Light).
     Mode resolvedMode() const;
 
-    // Log-level foreground colour (V/D/I/W/E/A).
+    // The palette backing the currently resolved mode.
+    const UiComponents::Palette &palette() const;
+
+    // ---- Log-level foregrounds -------------------------------------------
+    /** Foreground colour for a log-level letter ("V"/"D"/"I"/"W"/"E"/"A"). */
     QColor levelColor(const QString &level) const;
+    /** Same, by pre-computed ordinal (see LogFilter::levelIndex); -1 = unknown. */
+    QColor levelColorByIndex(int levelIndex) const;
 
-    // Marked-row background (used by LogModel BackgroundRole).
-    QColor markedRowBackground() const;
+    // ---- Data-view backgrounds -------------------------------------------
+    QColor markedRowBackground() const;   ///< marked row in the log table
+    QColor anchorRowBackground() const;   ///< ΔTime anchor row in the mark table
+    QColor blinkBackground() const;       ///< "value just changed" flash
+    QColor highlightBackground() const;   ///< dumpsys search match background
+    QColor highlightForeground() const;   ///< dumpsys search match foreground
 
-    // Anchor-row background (used by MarkLogModel BackgroundRole).
-    QColor anchorRowBackground() const;
-
-    // Dumpsys search highlight (background / foreground).
-    QColor highlightBackground() const;
-    QColor highlightForeground() const;
-
-    // ---- General UI palette (used by Devices tab inline stylesheets) -------
-    QColor text() const;          // primary text
-    QColor mutedText() const;     // secondary / muted text
-    QColor accent() const;        // brand accent (#007acc family)
-    QColor success() const;       // online/connected indicator
-    QColor border() const;        // subtle separator/border
-    QColor rowSelectedBackground() const; // "selected device row" tint
-    QColor panelBackground() const;       // dropdown/menu/dialog panel bg
-    QColor editorBackground() const;      // text edit / log panel bg
+    // ---- General UI palette ----------------------------------------------
+    QColor text() const;
+    QColor mutedText() const;
+    QColor accent() const;
+    QColor success() const;
+    QColor danger() const;
+    QColor border() const;
+    QColor rowSelectedBackground() const;
+    QColor panelBackground() const;
+    QColor editorBackground() const;
 
     /** Returns the colour as "#rrggbb" for use inside QSS string literals. */
     static QString toHex(const QColor &c);
@@ -54,7 +67,15 @@ signals:
 
 private:
     explicit ColorScheme(QObject *parent = nullptr);
+    ~ColorScheme() override;
+
+    // Resolved-colour cache. Keyed on the resolved mode so that Auto, which
+    // follows the system palette, re-resolves without explicit invalidation.
+    struct Resolved;
+    const Resolved &resolved() const;
+
     Mode m_mode = Mode::Dark;
+    mutable Resolved *m_cache = nullptr;   ///< owned
 };
 
 #endif // COLORSCHEME_H

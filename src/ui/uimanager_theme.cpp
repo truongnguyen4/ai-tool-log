@@ -1,6 +1,7 @@
-// UiManager: theme/font/column visibility/status updates.
+// UiManager: theme, application font, column visibility and status-bar updates.
 #include "uimanager.h"
 #include "ui_mainwindow.h"
+#include "adbmanager.h"
 #include "colorscheme.h"
 #include "tableconfig.h"
 #include "themesheets.h"
@@ -8,35 +9,52 @@
 #include <QApplication>
 #include <QFile>
 #include <QFont>
-#include <QRegularExpression>
-#include <QTextStream>
+#include <QStatusBar>
 
+#if defined(Q_OS_WIN)
+#  include <windows.h>
+#  include <psapi.h>
+#elif defined(Q_OS_MACOS)
+#  include <mach/mach.h>
+#endif
+
+namespace {
+/** Minimum gap between resident-memory samples, in milliseconds. */
+constexpr qint64 kMemorySampleIntervalMs = 1000;
+constexpr qint64 kBytesPerMiB = 1024 * 1024;
+} // namespace
 
 void UiManager::applyColumnVisibility(const QVector<bool> &vis)
 {
     using namespace TableConfig::LogColumns;
-    auto *pb = m_logSplitController ? m_logSplitController->paneB() : nullptr;
-    for (int c = 0; c < vis.size(); ++c) {
-        m_ui->tableLog->setColumnHidden(c, !vis[c]);
-        m_ui->tableMarkLog->setColumnHidden(c, !vis[c]);
-        if (pb && pb->table)     pb->table->setColumnHidden(c, !vis[c]);
-        if (pb && pb->markTable) pb->markTable->setColumnHidden(c, !vis[c]);
+    auto *paneB = m_logSplitController ? m_logSplitController->paneB() : nullptr;
+
+    for (int column = 0; column < vis.size(); ++column) {
+        const bool hidden = !vis[column];
+        m_ui->tableLog->setColumnHidden(column, hidden);
+        m_ui->tableMarkLog->setColumnHidden(column, hidden);
+        if (paneB && paneB->table)     paneB->table->setColumnHidden(column, hidden);
+        if (paneB && paneB->markTable) paneB->markTable->setColumnHidden(column, hidden);
     }
-    if (vis.size() > PACKAGE) m_ui->groupBox_2->setVisible(vis[PACKAGE]);
-    if (vis.size() > PID)     m_ui->groupBox_3->setVisible(vis[PID]);
-    if (vis.size() > TIME)    m_ui->groupBox_6->setVisible(vis[TIME]);
-    if (vis.size() > TAG)     m_ui->groupBox->setVisible(vis[TAG]);
-    if (vis.size() > MESSAGE) m_ui->groupBox_5->setVisible(vis[MESSAGE]);
+
+    // Hide the filter group box for any column the user turned off — filtering
+    // on a column you cannot see is only confusing.
+    const auto setGroupVisible = [&vis](QWidget *group, int column) {
+        if (group && vis.size() > column)
+            group->setVisible(vis[column]);
+    };
+    setGroupVisible(m_ui->groupBox_2, PACKAGE);
+    setGroupVisible(m_ui->groupBox_3, PID);
+    setGroupVisible(m_ui->groupBox_6, TIME);
+    setGroupVisible(m_ui->groupBox,   TAG);
+    setGroupVisible(m_ui->groupBox_5, MESSAGE);
 }
 
 void UiManager::applyCurrentTheme()
 {
-    const auto resolved = ColorScheme::instance().resolvedMode();
-    const QString sheet = (resolved == ColorScheme::Mode::Light)
-                              ? ThemeSheets::lightStylesheet()
-                              : m_darkStylesheet;
+    const bool light = ColorScheme::instance().resolvedMode() == ColorScheme::Mode::Light;
     if (qApp)
-        qApp->setStyleSheet(sheet);
+        qApp->setStyleSheet(light ? ThemeSheets::lightStylesheet() : m_darkStylesheet);
 }
 
 void UiManager::applyAppFont(const QFont &font)
@@ -45,9 +63,9 @@ void UiManager::applyAppFont(const QFont &font)
     // pane B tables) inherits its font from the application via this loop.
     // No table-specific setFont calls live elsewhere — keep it that way.
     QApplication::setFont(font);
-    for (QWidget *w : QApplication::topLevelWidgets()) {
-        w->setFont(font);
-        w->setStyleSheet(w->styleSheet());
+    for (QWidget *widget : QApplication::topLevelWidgets()) {
+        widget->setFont(font);
+        widget->setStyleSheet(widget->styleSheet());   // force a re-polish
     }
 }
 
@@ -57,27 +75,51 @@ void UiManager::applyAppFont(const QFont &font)
 
 void UiManager::updateMemoryUsage()
 {
-    QFile file("/proc/self/status");
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return;
-    QTextStream stream(&file);
-    while (!stream.atEnd()) {
-        const QString line = stream.readLine();
-        if (line.startsWith("VmRSS:")) {
-            const QStringList parts = line.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
-            if (parts.size() >= 2)
-                memoryUsage = parts[1].toLongLong() / 1024;
-            break;
-        }
+    // Sampling hits the OS, and updateStatusBar() runs on every filter pass and
+    // log flush, so throttle to roughly one sample per second.
+    if (m_memorySampleClock.isValid()
+        && m_memorySampleClock.elapsed() < kMemorySampleIntervalMs)
+        return;
+    m_memorySampleClock.start();
+
+#if defined(Q_OS_WIN)
+    PROCESS_MEMORY_COUNTERS counters{};
+    if (GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters)))
+        m_memoryUsageMb = static_cast<qint64>(counters.WorkingSetSize) / kBytesPerMiB;
+#elif defined(Q_OS_MACOS)
+    mach_task_basic_info info{};
+    mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
+    if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
+                  reinterpret_cast<task_info_t>(&info), &count) == KERN_SUCCESS)
+        m_memoryUsageMb = static_cast<qint64>(info.resident_size) / kBytesPerMiB;
+#else
+    // Linux and other /proc-based systems: VmRSS is reported in kB.
+    QFile status(QStringLiteral("/proc/self/status"));
+    if (!status.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+    while (!status.atEnd()) {
+        const QByteArray line = status.readLine();
+        if (!line.startsWith("VmRSS:"))
+            continue;
+        const QList<QByteArray> fields = line.simplified().split(' ');
+        if (fields.size() >= 2)
+            m_memoryUsageMb = fields.at(1).toLongLong() / 1024;
+        break;
     }
+#endif
 }
 
 void UiManager::updateStatusBar()
 {
     updateMemoryUsage();
-    m_ui->statusbar->showMessage(
-        QString("UTF-8  Lines: %1    Mem: %2MB  \u25cf %3")
-            .arg(filteredLogs.size())
-            .arg(memoryUsage)
-            .arg(isPaused ? "Paused" : "Running"));
-}
 
+    const AdbManager &adb = AdbManager::instance();
+    const bool capturing = adb.isLogcatRunning() || adb.isDmesgRunning();
+
+    m_ui->statusbar->showMessage(
+        tr("UTF-8   Lines: %1   Mem: %2 MB   %3 %4")
+            .arg(activeFilteredLogs().size())
+            .arg(m_memoryUsageMb)
+            .arg(capturing ? QStringLiteral("●") : QStringLiteral("○"),
+                 capturing ? tr("Capturing") : tr("Idle")));
+}

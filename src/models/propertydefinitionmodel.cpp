@@ -1,8 +1,8 @@
 #include "propertydefinitionmodel.h"
 #include "blinksweep.h"
+#include "colorscheme.h"
 #include "tableconfig.h"
 #include <QBrush>
-#include <QColor>
 #include <QSet>
 #include <QTimer>
 
@@ -66,7 +66,7 @@ QVariant PropertyDefinitionModel::data(const QModelIndex &index, int role) const
     else if (role == Qt::BackgroundRole) {
         const auto it = m_blinkUntil.constFind(prop.id);
         if (it != m_blinkUntil.constEnd() && it.value() > m_clock.elapsed())
-            return QBrush(QColor("#1f4d7a"));
+            return QBrush(ColorScheme::instance().blinkBackground());
     }
     
     return QVariant();
@@ -151,7 +151,7 @@ void PropertyDefinitionModel::updatePropertyDefinitions(const QVector<PropertyDe
         return;
 
     if (!blinkKeys.isEmpty()) {
-        const qint64 deadline = m_clock.elapsed() + 1000;
+        const qint64 deadline = m_clock.elapsed() + BlinkSweep::kBlinkDurationMs;
         for (const QString &k : blinkKeys) m_blinkUntil.insert(k, deadline);
         scheduleBlinkSweep();
     }
@@ -179,7 +179,7 @@ void PropertyDefinitionModel::updatePropertyDefinition(int row, const PropertyDe
 
     // Trigger blink highlight if the value actually changed.
     if (prevValue != property.value && !property.id.isEmpty()) {
-        m_blinkUntil.insert(property.id, m_clock.elapsed() + 1000);
+        m_blinkUntil.insert(property.id, m_clock.elapsed() + BlinkSweep::kBlinkDurationMs);
         scheduleBlinkSweep();
     }
 

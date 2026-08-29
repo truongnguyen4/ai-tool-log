@@ -7,7 +7,11 @@ bool FilterEngine::matchesLogic(const QString &value,
     if (!pf.active)
         return true;
 
-    if (pf.op == FilterOperator::OR) {
+    // Exact matching compares whole values (PID, TID), so a single value can
+    // never equal two different tokens. "1234 && 5678" would therefore match
+    // nothing; the only useful reading of several exact tokens is "any of
+    // these", so exact matching is always an OR.
+    if (exactMatch || pf.op == FilterOperator::OR) {
         for (const QString &part : pf.parts) {
             if (exactMatch ? (value == part)
                            : value.contains(part, Qt::CaseInsensitive))
@@ -16,10 +20,9 @@ bool FilterEngine::matchesLogic(const QString &value,
         return false;
     }
 
-    // AND
+    // AND: every token must appear somewhere in the value.
     for (const QString &part : pf.parts) {
-        if (exactMatch ? (value != part)
-                       : !value.contains(part, Qt::CaseInsensitive))
+        if (!value.contains(part, Qt::CaseInsensitive))
             return false;
     }
     return true;

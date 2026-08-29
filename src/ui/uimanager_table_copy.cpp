@@ -8,10 +8,12 @@
 
 void UiManager::copyTableRows(QTableView *tableView)
 {
+    if (!tableView)
+        return;
     QAbstractItemModel *model = tableView->model();
-    if (!model) return;
-
     QItemSelectionModel *selModel = tableView->selectionModel();
+    if (!model || !selModel)
+        return;   // a view with no model has no selection model either
 
     // Try full-row selection first (log table uses SelectRows)
     QModelIndexList selectedRows = selModel->selectedRows();

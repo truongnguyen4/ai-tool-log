@@ -13,11 +13,13 @@
 #include <QStringList>
 
 namespace Ui { class MainWindow; }
+class QHBoxLayout;
 class QMainWindow;
 class QComboBox;
 class QPushButton;
 class QTableView;
 class QTimer;
+class RowActionDelegate;
 class SettingsModel;
 class PropertiesModel;
 class PropertyDefinitionModel;
@@ -51,7 +53,6 @@ public:
     void setupMonitorButtons();
     void applyPropDefColumnVisibility(const QVector<bool> &vis);
     void updatePropertyNamesCompleter();
-    void recreatePropertyDefinitionButtons();
     void clearAvailableCache();
 
     const QVector<PropertyDefinition>& availablePropertyDefinitions() const
@@ -89,18 +90,6 @@ public slots:
                               const QString &property,
                               const QString &newValue, const QString &verifiedValue,
                               const QString &error);
-    void recreateSettingsButtons();
-    void recreatePropertiesButtons();
-
-    // Monitor toggles — periodically re-fetch the corresponding table every
-    // 500 ms and disable per-row write buttons while active.
-    void onMonitorSettingsToggled(bool on);
-    void onMonitorPropertiesToggled(bool on);
-    void onMonitorPropertyDefsToggled(bool on);
-
-    bool isMonitoringSettings()      const { return m_monitoringSettings; }
-    bool isMonitoringProperties()    const { return m_monitoringProperties; }
-    bool isMonitoringPropertyDefs()  const { return m_monitoringPropertyDefs; }
 
     // Stop every active monitor (used by UiManager when the device changes /
     // disconnects — monitoring across a device switch makes no sense).
@@ -115,14 +104,41 @@ signals:
     void monitorTablesChanged(bool settings, bool properties, bool propertyDefs);
 
 private:
-    void wirePropertyRowButtons(int row);
-    void setSettingsRowActionsEnabled(bool enabled);
-    void setPropertiesRowActionsEnabled(bool enabled);
-    void setPropertyDefSetButtonsEnabled(bool enabled);
-    
+    // -----------------------------------------------------------------------
+    // Live monitor
+    //
+    // The Settings / Properties / Property-Definition tables each get a
+    // "Monitor" toggle that re-issues its fetch on a tick. The three used to
+    // be spelled out three times over; MonitorPane holds one pane's widgets
+    // and state so a single set of helpers drives all of them.
+    // -----------------------------------------------------------------------
+    struct MonitorPane {
+        QString      name;                  ///< user-facing table name
+        QPushButton *button   = nullptr;
+        QComboBox   *interval = nullptr;
+        QTimer      *timer    = nullptr;
+        bool         active   = false;
+        bool         busy     = false;      ///< a fetch is already in flight
+        /** Row actions disabled while the monitor writes into the table. */
+        QVector<RowActionDelegate *> rowActions;
+    };
+
+    /** Build one monitor toggle + interval combo into @p row of the layout. */
+    void buildMonitorControls(MonitorPane &pane, QHBoxLayout *row, QWidget *anchor);
+    /** Shared toggle handler: start/stop the tick and refresh dependent UI. */
+    void setMonitorActive(MonitorPane &pane, bool on);
+    /** Emit monitorStateChanged / monitorTablesChanged from current state. */
+    void publishMonitorState();
+
+    /** Attach a paint-based action button to @p column of @p view. */
+    RowActionDelegate *addRowAction(QTableView *view, int column,
+                                    const QString &iconPath, const QString &tooltip,
+                                    void (ConfigurationController::*slot)(int));
+
     // Helper methods to reduce code duplication
     PropertyDefinition findPropertyByName(const QString &name) const;
-    PropertyDefinition parsePropertyDefinition(const QString &output, const QString &fallbackName = QString()) const;
+    PropertyDefinition parsePropertyDefinition(const QString &output,
+                                               const QString &fallbackName = QString()) const;
     bool validateDeviceId(const QString &deviceId) const;
 
     Ui::MainWindow          *m_ui;
@@ -135,25 +151,9 @@ private:
 
     QVector<PropertyDefinition> m_availablePropertyDefinitions;
 
-    // Monitor state.
-    QPushButton *m_btnMonitorSettings     = nullptr;
-    QPushButton *m_btnMonitorProperties   = nullptr;
-    QPushButton *m_btnMonitorPropertyDefs = nullptr;
-    QComboBox   *m_cmbIntervalSettings     = nullptr;
-    QComboBox   *m_cmbIntervalProperties   = nullptr;
-    QComboBox   *m_cmbIntervalPropertyDefs = nullptr;
-    QTimer      *m_monitorSettingsTimer     = nullptr;
-    QTimer      *m_monitorPropertiesTimer   = nullptr;
-    QTimer      *m_monitorPropertyDefsTimer = nullptr;
-    bool m_monitoringSettings     = false;
-    bool m_monitoringProperties   = false;
-    bool m_monitoringPropertyDefs = false;
-    // Re-entrancy guards for the per-row monitor refresh tasks. Set while a
-    // QtConcurrent refresh batch is in flight; the next timer tick is skipped
-    // if the previous batch hasn't completed yet.
-    bool m_settingsRefreshBusy     = false;
-    bool m_propertiesRefreshBusy   = false;
-    bool m_propertyDefsRefreshBusy = false;
+    MonitorPane m_settingsMonitor;
+    MonitorPane m_propertiesMonitor;
+    MonitorPane m_propertyDefsMonitor;
 };
 
 #endif // CONFIGURATIONCONTROLLER_H

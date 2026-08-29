@@ -1,43 +1,37 @@
 #ifndef HIGHLIGHTDELEGATE_H
 #define HIGHLIGHTDELEGATE_H
 
-#include <QStyledItemDelegate>
-#include <QStringList>
 #include <QColor>
-#include <QMap>
+#include <QHash>
+#include <QStringList>
+#include <QStyledItemDelegate>
 
 /**
- * @brief Delegate that highlights keywords in table cells with different colors
- * 
- * This delegate is used to highlight filter keywords in the Tag and Message columns
- * of the log table. Each keyword gets a distinct color for easy identification.
+ * Paints table cells with the active filter keywords highlighted.
+ *
+ * Used on the log table's PID / Package / Tag / Message columns so the terms
+ * the user filtered or searched for stand out. Each keyword gets a distinct
+ * background colour, assigned in order.
+ *
+ * The Message column additionally word-wraps, which means paint() and
+ * sizeHint() have to measure text themselves rather than deferring to the
+ * base class.
  */
 class HighlightDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
+
 public:
     explicit HighlightDelegate(QObject *parent = nullptr);
-    
-    /**
-     * @brief Set the keywords to highlight with automatic color assignment
-     * @param keywords List of keywords to highlight
-     */
+
+    /** Replace the highlighted keywords; colours are assigned automatically. */
     void setKeywords(const QStringList &keywords);
-    
-    /**
-     * @brief Clear all keywords (disables highlighting)
-     */
     void clearKeywords();
-    
-    /**
-     * @brief Check if highlighting is enabled (has keywords)
-     */
-    bool hasKeywords() const;
+    bool hasKeywords() const { return !m_keywords.isEmpty(); }
 
     /**
-     * @brief Enable/disable word wrap for long messages.
-     * When enabled, sizeHint() returns the multi-line height and paint()
-     * renders text wrapped to the column width.
+     * Enable word wrapping. sizeHint() then reports the wrapped height and
+     * paint() lays the text out across multiple lines.
      */
     void setWordWrap(bool enabled);
     bool wordWrap() const { return m_wordWrap; }
@@ -45,37 +39,31 @@ public:
 protected:
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                const QModelIndex &index) const override;
-    
     QSize sizeHint(const QStyleOptionViewItem &option,
                    const QModelIndex &index) const override;
 
 private:
-    /**
-     * @brief Draw text with highlighted keywords
-     */
+    /** Draw the item's chrome: style background plus any marked-row tint. */
+    void drawItemBackground(QPainter *painter, const QStyleOptionViewItem &option,
+                            const QModelIndex &index) const;
+    /** Plain text, wrapped or single-line, with no keyword spans. */
+    void drawPlainText(QPainter *painter, const QStyleOptionViewItem &option,
+                       const QString &text, bool selected) const;
+    /** Single-line text with keyword backgrounds, elided at the cell edge. */
     void drawHighlightedText(QPainter *painter, const QStyleOptionViewItem &option,
-                            const QString &text, bool isSelected) const;
+                             const QString &text, bool selected) const;
+    /** Wrapped text with keyword backgrounds, laid out via QTextDocument. */
+    void drawWrappedHighlightedText(QPainter *painter, const QStyleOptionViewItem &option,
+                                    const QString &text, bool selected) const;
 
-    /**
-     * @brief Overlay Qt::BackgroundRole color for marked rows.
-     * Qt's stylesheet engine ignores BackgroundRole when any ::item background
-     * rule is active, so we must paint it manually after style->drawControl.
-     */
-    void paintMarkedBackground(QPainter *painter, const QStyleOptionViewItem &opt,
-                               const QModelIndex &index) const;
+    /** True when at least one keyword occurs in @p text. */
+    bool containsAnyKeyword(const QString &text) const;
+    /** Usable text width of a cell in @p option, excluding padding. */
+    static int contentWidth(const QStyleOptionViewItem &option, const QModelIndex &index);
 
-    /**
-     * @brief Generate a distinct color for a keyword based on its index
-     */
-    QColor getColorForKeyword(int index) const;
-    
-    QStringList m_keywords;           // Keywords to highlight
-    QMap<QString, QColor> m_colors;   // Color mapping for each keyword
-    bool m_wordWrap = false;          // Whether to wrap long messages
-    
-    // Predefined highlight colors (background colors for keywords)
-    static const QColor HIGHLIGHT_COLORS[];
-    static const int HIGHLIGHT_COLOR_COUNT;
+    QStringList           m_keywords;
+    QHash<QString, QColor> m_colors;
+    bool                  m_wordWrap = false;
 };
 
 #endif // HIGHLIGHTDELEGATE_H

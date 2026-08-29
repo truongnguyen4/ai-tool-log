@@ -14,6 +14,7 @@
 #include <QHash>
 #include <QObject>
 #include <QPointer>
+#include <QList>
 #include <QSet>
 #include <QVector>
 
@@ -65,9 +66,12 @@ signals:
 
 private:
     void buildPaneB();
+    void buildPaneBLogTable(QSplitter *parentSplitter);
+    void buildPaneBMarkTable();
     void teardownSplit();
     void installPaneFocusFilters();
     void applyActivePaneBorders();
+    /** Keep two headers' column widths in step, in both directions. */
     void wireColumnSync(QTableView *a, QTableView *b);
 
 protected:
@@ -91,4 +95,10 @@ protected:
     QPointer<QWidget>            m_originalMarkContainer;
     QPointer<QSplitter>          m_originalMarkParentSplitter;
     int                          m_markContainerOriginalIndex = 0;
+
+    // Connections made while pane B exists. They are dropped on teardown so a
+    // repeated split/unsplit cycle does not accumulate duplicate handlers.
+    QList<QMetaObject::Connection> m_paneBConnections;
+    /** Guards the two-way column-width mirroring against feedback loops. */
+    bool m_syncingColumnWidths = false;
 };

@@ -1,13 +1,18 @@
 #ifndef LOGMODEL_H
 #define LOGMODEL_H
 
-#include <QAbstractTableModel>
-#include <QVector>
-#include <QColor>
 #include <QSet>
-#include "ilogconverter.h"
+#include <QVector>
 
-class LogModel : public QAbstractTableModel
+#include "logtablemodelbase.h"
+
+/**
+ * Table model over the currently visible (filtered) log entries.
+ *
+ * The marked-row set is *not* owned: UiManager keeps one per pane and hands
+ * the model a pointer so both stay in sync without copying.
+ */
+class LogModel : public LogTableModelBase
 {
     Q_OBJECT
 
@@ -17,21 +22,22 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    // Custom methods
     void setLogs(const QVector<LogEntry> &logs);
     void addLog(const LogEntry &entry);
-    void addLogs(const QVector<LogEntry> &entries);  // batch insert — one signal per flush
+    void addLogs(const QVector<LogEntry> &entries);  ///< batch insert — one signal per flush
     void clear();
-    const LogEntry& getLogEntry(int row) const;
+
+    /** Entry at @p row, or a default-constructed entry when out of range. */
+    const LogEntry &getLogEntry(int row) const;
     int getLogCount() const;
+
+    /** Point the model at the caller-owned set of marked (visible) rows. */
     void setMarkedRows(const QSet<int> *markedRows);
 
 private:
     QVector<LogEntry> m_logs;
-    const QSet<int> *m_markedRows;
-    QColor getLevelColor(const QString &level) const;
+    const QSet<int>  *m_markedRows = nullptr;
 };
 
 #endif // LOGMODEL_H

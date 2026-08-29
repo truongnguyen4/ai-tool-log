@@ -8,18 +8,9 @@
 #include "adbmanager.h"
 
 #include <QHash>
-#include <QIcon>
 #include <QMessageBox>
-#include <QPushButton>
 #include <QTimer>
 #include <QtConcurrent/QtConcurrentRun>
-
-namespace {
-constexpr const char *kIconBtnStyle =
-    "QPushButton { padding: 0px; border: none; background: transparent; border-radius: 4px; }"
-    "QPushButton:hover { background-color: rgba(255,255,255,40); }"
-    "QPushButton:pressed { background-color: rgba(255,255,255,70); }";
-}
 
 // Helper: Find property by name
 PropertyDefinition ConfigurationController::findPropertyByName(const QString &name) const
@@ -91,7 +82,6 @@ void ConfigurationController::onAddPropertyDefinition()
     m_propertyDefinitionModel->addPropertyDefinition(selectedProp);
 
     if (m_propertyDefinitionModel->rowCount() > row) {
-        wirePropertyRowButtons(row);
         m_ui->statusbar->showMessage(QString("Added property: %1").arg(selectedProp.name), 2000);
         m_ui->txtPropertySearch->clear();
     } else {
@@ -176,7 +166,7 @@ void ConfigurationController::onPropertyDefinitionsFetched(const QVector<Propert
 
     m_ui->statusbar->showMessage(
         QString("Fetched %1 property definitions").arg(defs.size()), 3000);
-    m_propertyDefsRefreshBusy = false;
+    m_propertyDefsMonitor.busy = false;
 }
 
 void ConfigurationController::onGetPropertyDefinitionClicked(int row)

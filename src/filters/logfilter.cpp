@@ -22,8 +22,10 @@ bool LogFilter::passesFilter(const LogEntry &entry, const FilterCriteria &criter
     if (!criteria.endTime.isEmpty()   && entry.time > criteria.endTime)
         return false;
 
-    // Level filter – O(1) switch, no QStringList allocation
-    if (criteria.minLevelIndex >= 0
+    // Level filter – O(1) switch, no QStringList allocation.
+    // Index 0 is Verbose, i.e. "no floor": at that setting nothing is dropped,
+    // not even a line whose level letter we failed to recognise.
+    if (criteria.minLevelIndex > 0
         && levelIndex(entry.level) < criteria.minLevelIndex)
         return false;
 

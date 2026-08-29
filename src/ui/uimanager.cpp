@@ -1,86 +1,62 @@
 #include "uimanager.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "adbmanager.h"
+#include "colorscheme.h"
+#include "configurationcontroller.h"
+#include "cradlecontroller.h"
 #include "devicesmanager.h"
-#include "adbcommand.h"
-#include "threadtimelogconverter.h"
-#include "brieflogconverter.h"
-#include "propertydefinitionconverter.h"
-#include "settingsmodel.h"
+#include "devicestabcontroller.h"
+#include "dumpsyscontroller.h"
+#include "highlightdelegate.h"
+#include "logsplitcontroller.h"
 #include "propertiesmodel.h"
 #include "propertydefinitionmodel.h"
-#include "highlightdelegate.h"
+#include "settingsmodel.h"
 #include "tableconfig.h"
-#include "settingsdialog.h"
-#include "tooltips.h"
-#include "cradlecontroller.h"
-#include "dumpsyscontroller.h"
-#include "devicestabcontroller.h"
-#include "logsplitcontroller.h"
-#include "configurationcontroller.h"
-#include "colorscheme.h"
 #include "themesheets.h"
-#include "shortcutsdialog.h"
-#include <adbcommand.h>
+#include "threadtimelogconverter.h"
+#include "tooltips.h"
 
-#include <QHeaderView>
-#include <QScrollBar>
+#include <QAbstractItemModel>
+#include <QComboBox>
+#include <QFrame>
+#include <QGraphicsOpacityEffect>
 #include <QHBoxLayout>
-#include <QPushButton>
 #include <QLabel>
 #include <QLineEdit>
-#include <QCompleter>
-#include <QSettings>
-#include <QFrame>
-#include <QLabel>
-#include <QComboBox>
-#include <QAbstractItemModel>
-#include <QTimer>
-#include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
+#include <QPushButton>
+#include <QStatusBar>
+#include <QStyle>
 #include <QTableView>
-#include <algorithm>
-#include "toggleswitch.h"
-#include <QApplication>
-#include <QClipboard>
-#include <QRegularExpression>
-#include <QDialog>
-#include <QFormLayout>
-#include <QVBoxLayout>
-#include <QCheckBox>
-#include <QDialogButtonBox>
-#include <QMenu>
-#include <QAction>
-#include <QKeyEvent>
-#include <QRadioButton>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QDir>
-#include <QFile>
-#include <QDateTime>
-#include <QStringListModel>
-#include <QWheelEvent>
-#include <QTextStream>
-#include <QSplitter>
-#include <QShortcut>
-#include <QProcess>
-#include <QTextEdit>
-#include <QInputDialog>
-#include <QListWidget>
-#include <QtConcurrent>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QScrollArea>
-#include <QProgressBar>
-#include <QGroupBox>
-#include <QGridLayout>
-#include <QDrag>
-#include <QMimeData>
+#include <QTimer>
 
-// Row-resize threshold: below this count every row is sized to content on each
-// resize pass; above it only the visible viewport is measured for performance.
-static constexpr int ROW_RESIZE_THRESHOLD = 50'000;
+namespace {
+
+// ── Status-bar indicators ────────────────────────────────────────────────────
+constexpr int kDeviceFadeDurationMs = 280;
+constexpr qreal kDeviceFadeFromOpacity = 0.35;
+constexpr int kMonitorPulseIntervalMs = 700;
+constexpr int kStatusWidgetHeight = 22;
+
+/** Filled / hollow dot used by the status-bar indicators. */
+constexpr auto kFilledDot = "●";
+constexpr auto kHollowDot = "○";
+
+// ── Toolbar dividers ─────────────────────────────────────────────────────────
+constexpr int kDividerWidth = 2;
+constexpr int kDividerMinHeight = 28;
+constexpr int kDividerMaxHeight = 34;
+
+/** Coloured dot + label markup for a status-bar indicator. */
+QString statusDot(const QColor &color, const char *glyph)
+{
+    return QStringLiteral("<span style='color:%1;'>%2</span>")
+        .arg(ColorScheme::toHex(color), QString::fromUtf8(glyph));
+}
+
+} // namespace
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constructor / initialize
@@ -96,10 +72,6 @@ UiManager::UiManager(Ui::MainWindow *ui, MainWindow *mainWindow)
 QTableView* UiManager::activeTableLog()
 {
     return useB() ? m_logSplitController->paneB()->table : m_ui->tableLog;
-}
-QTableView* UiManager::activeTableMarkLog()
-{
-    return useB() ? m_logSplitController->paneB()->markTable : m_ui->tableMarkLog;
 }
 
 void UiManager::snapshotInputsTo(PaneInputs &out) const
@@ -160,8 +132,7 @@ void UiManager::loadInputsFrom(const PaneInputs &in)
     m_ui->radioA          ->setChecked(in.levelRadio == 6);
 
     m_highlightRow = -1;
-    applyFilters();
-    updateFilterHighlighting();
+    applyFilters();   // also refreshes the keyword highlighting
 }
 
 
@@ -185,7 +156,7 @@ void UiManager::initialize()
         themeToggleBtn->setFlat(true);
         themeToggleBtn->setCursor(Qt::PointingHandCursor);
         themeToggleBtn->setToolTip(tr("Toggle light/dark theme"));
-        themeToggleBtn->setFixedHeight(22);
+        themeToggleBtn->setFixedHeight(kStatusWidgetHeight);
 
         auto refreshLabel = [themeToggleBtn]() {
             const auto m = ColorScheme::instance().resolvedMode();
@@ -217,6 +188,13 @@ void UiManager::initialize()
     m_historyManager          = new HistoryManager(this);
     m_logFilterController     = new LogFilterController(m_ui, this);
 
+    // Batch-flush timer: coalesces incoming capture lines into one model
+    // insert per tick. Created before any signal wiring so a line arriving
+    // during start-up can never reach a null timer.
+    m_batchFlushTimer = new QTimer(this);
+    m_batchFlushTimer->setInterval(UiTiming::kBatchFlushIntervalMs);
+    connect(m_batchFlushTimer, &QTimer::timeout, this, &UiManager::flushPendingLines);
+
     // ── Setup UI sections (order matters: models before tables) ───────────────
     setupLogTable();
     setupConfigurationTables();
@@ -224,65 +202,8 @@ void UiManager::initialize()
 
     m_logSplitController = new LogSplitController(m_ui, this);
     m_logSplitController->setup();
-    connect(m_logSplitController, &LogSplitController::paneBBuilt, this,
-            [this](QTableView *logTable, QTableView *markTable) {
-                if (logTable) {
-                    using namespace TableConfig::LogColumns;
-                    logTable->setContextMenuPolicy(Qt::CustomContextMenu);
-                    connect(logTable, &QTableView::customContextMenuRequested,
-                            this, &UiManager::onTableContextMenu);
-                    connect(logTable, &QTableView::doubleClicked,
-                            this, &UiManager::onLogTableDoubleClicked);
-                    connect(logTable, &QTableView::clicked,
-                            this, &UiManager::onLogTableClicked);
-                    enableTableCopyAction(logTable);
-                    logTable->viewport()->installEventFilter(m_mainWindow);
-                    // Pane B owns its own highlight delegates so the
-                    // message/tag/package/PID filter highlights only follow
-                    // the active pane (when sync is off). word-wrap on
-                    // message column matches pane A.
-                    m_pidHighlightDelegateB     = new HighlightDelegate(this);
-                    m_packageHighlightDelegateB = new HighlightDelegate(this);
-                    m_tagHighlightDelegateB     = new HighlightDelegate(this);
-                    m_messageHighlightDelegateB = new HighlightDelegate(this);
-                    m_messageHighlightDelegateB->setWordWrap(true);
-                    logTable->setItemDelegateForColumn(PID,     m_pidHighlightDelegateB);
-                    logTable->setItemDelegateForColumn(PACKAGE, m_packageHighlightDelegateB);
-                    logTable->setItemDelegateForColumn(TAG,     m_tagHighlightDelegateB);
-                    logTable->setItemDelegateForColumn(MESSAGE, m_messageHighlightDelegateB);
-                    // Pane-A also installs a plain HighlightDelegate at the
-                    // view level so DATE/TIME/TID/LEVEL honour Qt::BackgroundRole
-                    // for marked rows. Mirror it on pane B.
-                    logTable->setItemDelegate(new HighlightDelegate(this));
-                    // Word-wrap support: trigger row-height recompute on scroll
-                    // and on column resize (TAG/MESSAGE only) — same wiring as
-                    // pane A in setupLogTable().
-                    connect(logTable->horizontalHeader(), &QHeaderView::sectionResized,
-                            this, [this](int section, int, int) {
-                        if (section == TableConfig::LogColumns::TAG ||
-                            section == TableConfig::LogColumns::MESSAGE)
-                            m_rowResizeTimer->start();
-                    });
-                    connect(logTable->verticalScrollBar(), &QScrollBar::valueChanged,
-                            this, [this](int) {
-                        if (m_logSplitController && m_logSplitController->paneB() &&
-                            m_logSplitController->paneB()->model &&
-                            m_logSplitController->paneB()->model->rowCount() > 0)
-                            m_rowResizeTimer->start();
-                    });
-                    // Kick an initial row-resize so any pre-seeded rows wrap.
-                    m_rowResizeTimer->start();
-                }
-                if (markTable) {
-                    markTable->setContextMenuPolicy(Qt::CustomContextMenu);
-                    connect(markTable, &QTableView::clicked,
-                            this, &UiManager::onMarkLogTableClicked);
-                    connect(markTable, &QTableView::customContextMenuRequested,
-                            this, &UiManager::onMarkLogContextMenu);
-                    enableTableCopyAction(markTable);
-                    markTable->viewport()->installEventFilter(m_mainWindow);
-                }
-            });
+    connect(m_logSplitController, &LogSplitController::paneBBuilt,
+            this, &UiManager::onPaneBBuilt);
 
     // Per-pane runtime UI state: snapshot the leaving pane and restore the
     // arriving pane on every active-pane change. Skipped while sync is on
@@ -324,7 +245,6 @@ void UiManager::initialize()
                         snapshotInputsTo(m_paneAInputs);
                         m_paneBInputs = m_paneAInputs;
                         applyFilters();
-                        updateFilterHighlighting();
                     }
                 });
     }
@@ -363,13 +283,30 @@ void UiManager::initialize()
         enableTableCopyAction(tv);
     }
 
-    // Batch-flush timer: coalesces incoming logcat lines into one model insert per 100 ms
-    m_batchFlushTimer = new QTimer(this);
-    m_batchFlushTimer->setInterval(100);
-    connect(m_batchFlushTimer, &QTimer::timeout, this, &UiManager::flushPendingLines);
-
     applyFilters();
     updateStatusBar();
+}
+
+void UiManager::onPaneBBuilt(QTableView *logTable, QTableView *markTable)
+{
+    connectLogTableSignals(logTable, markTable);
+    if (!logTable)
+        return;
+
+    // Pane B gets its own highlight delegates so that, with sync off, filter
+    // keywords only light up the pane they were typed for.
+    m_pidHighlightDelegateB     = new HighlightDelegate(this);
+    m_packageHighlightDelegateB = new HighlightDelegate(this);
+    m_tagHighlightDelegateB     = new HighlightDelegate(this);
+    m_messageHighlightDelegateB = new HighlightDelegate(this);
+    installLogHighlightDelegates(logTable, /*paneB=*/true);
+    wireRowResizeTriggers(logTable, [this]() {
+        auto *paneB = m_logSplitController ? m_logSplitController->paneB() : nullptr;
+        return paneB && paneB->model && paneB->model->rowCount() > 0;
+    });
+
+    // Size any rows the pane was seeded with.
+    m_rowResizeTimer->start();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -387,13 +324,13 @@ void UiManager::setupToolbarDividers()
 
     auto makeDivider = [this]() {
         auto *line = new QFrame(m_ui->btnAutoScroll->parentWidget());
+        line->setObjectName(QStringLiteral("toolbarDivider"));
         line->setFrameShape(QFrame::VLine);
         line->setFrameShadow(QFrame::Plain);
-        line->setFixedWidth(2);
-        line->setMinimumHeight(28);
-        line->setMaximumHeight(34);
-        const QString c = QStringLiteral("#5a5a5a");
-        line->setStyleSheet(QStringLiteral("QFrame { color: %1; background: %1; border: none; margin: 2px 6px; }").arg(c));
+        line->setFixedWidth(kDividerWidth);
+        line->setMinimumHeight(kDividerMinHeight);
+        line->setMaximumHeight(kDividerMaxHeight);
+        // Colour comes from the theme sheet's QFrame#toolbarDivider rule.
         return line;
     };
 
@@ -418,102 +355,110 @@ void UiManager::setupStatusBarIndicators()
     m_lblStatusDevices->setContentsMargins(8, 0, 8, 0);
     m_lblStatusMonitor->setContentsMargins(8, 0, 8, 0);
 
-    // Opacity effect for device dot fade in/out on connect/disconnect transitions.
-    auto *devOpacity = new QGraphicsOpacityEffect(m_lblStatusDevices);
-    devOpacity->setOpacity(1.0);
-    m_lblStatusDevices->setGraphicsEffect(devOpacity);
-    auto *devAnim = new QPropertyAnimation(devOpacity, "opacity", this);
-    devAnim->setDuration(280);
-    devAnim->setEasingCurve(QEasingCurve::InOutCubic);
+    // Fade the device indicator when the count changes, to draw the eye.
+    auto *deviceOpacity = new QGraphicsOpacityEffect(m_lblStatusDevices);
+    deviceOpacity->setOpacity(1.0);
+    m_lblStatusDevices->setGraphicsEffect(deviceOpacity);
+    auto *deviceFade = new QPropertyAnimation(deviceOpacity, "opacity", this);
+    deviceFade->setDuration(kDeviceFadeDurationMs);
+    deviceFade->setEasingCurve(QEasingCurve::InOutCubic);
+    deviceFade->setStartValue(kDeviceFadeFromOpacity);
+    deviceFade->setEndValue(1.0);
 
-    auto refreshDevices = [this, devOpacity, devAnim]() {
-        const int n = m_ui->cmbDevice ? m_ui->cmbDevice->count() : 0;
-        const QString dot = (n > 0) ? QStringLiteral("\u25cf") : QStringLiteral("\u25cb");
-        const QString color = (n > 0) ? QStringLiteral("#10b981") : QStringLiteral("#6b7280");
+    auto refreshDevices = [this, deviceOpacity, deviceFade]() {
+        const ColorScheme &colors = ColorScheme::instance();
+        const int count = m_ui->cmbDevice ? m_ui->cmbDevice->count() : 0;
+        const bool connected = count > 0;
+
         m_lblStatusDevices->setText(
-            QStringLiteral("<span style='color:%1;'>%2</span> %3 device%4")
-                .arg(color, dot).arg(n).arg(n == 1 ? "" : "s"));
-        // Fade out → in to draw the eye when count changes.
-        devAnim->stop();
-        devAnim->setKeyValueAt(0.0, 0.35);
-        devAnim->setKeyValueAt(0.5, 1.0);
-        devAnim->setKeyValueAt(1.0, 1.0);
-        devOpacity->setOpacity(0.35);
-        devAnim->setStartValue(0.35);
-        devAnim->setEndValue(1.0);
-        devAnim->start();
+            statusDot(connected ? colors.success() : colors.mutedText(),
+                      connected ? kFilledDot : kHollowDot)
+            + QLatin1Char(' ') + tr("%n device(s)", nullptr, count));
+
+        deviceFade->stop();
+        deviceOpacity->setOpacity(kDeviceFadeFromOpacity);
+        deviceFade->start();
     };
     refreshDevices();
+
     if (m_ui->cmbDevice) {
         connect(m_ui->cmbDevice, qOverload<int>(&QComboBox::currentIndexChanged),
                 this, [refreshDevices](int) { refreshDevices(); });
-        // Also catch add/remove of items.
-        connect(m_ui->cmbDevice->model(), &QAbstractItemModel::rowsInserted,
+        // The combo's own model signals catch add / remove / reset.
+        QAbstractItemModel *deviceModel = m_ui->cmbDevice->model();
+        connect(deviceModel, &QAbstractItemModel::rowsInserted,
                 this, [refreshDevices](const QModelIndex &, int, int) { refreshDevices(); });
-        connect(m_ui->cmbDevice->model(), &QAbstractItemModel::rowsRemoved,
+        connect(deviceModel, &QAbstractItemModel::rowsRemoved,
                 this, [refreshDevices](const QModelIndex &, int, int) { refreshDevices(); });
-        connect(m_ui->cmbDevice->model(), &QAbstractItemModel::modelReset,
+        connect(deviceModel, &QAbstractItemModel::modelReset,
                 this, [refreshDevices]() { refreshDevices(); });
     }
 
     auto renderMonitor = [this]() {
+        const ColorScheme &colors = ColorScheme::instance();
         if (m_monitorActiveCount <= 0) {
-            m_lblStatusMonitor->setText(
-                QStringLiteral("<span style='color:#6b7280;'>\u25cb</span> Idle"));
-        } else {
-            // Pulse between indigo-400 and indigo-300 for a subtle "live" feel.
-            const QString color = m_monitorPulseBright
-                ? QStringLiteral("#a5b4fc")  // indigo-300 (bright)
-                : QStringLiteral("#6366f1"); // indigo-500 (dim)
-            m_lblStatusMonitor->setText(
-                QStringLiteral("<span style='color:%1;'>\u25cf</span> Monitoring (%2)")
-                    .arg(color).arg(m_monitorActiveCount));
+            m_lblStatusMonitor->setText(statusDot(colors.mutedText(), kHollowDot)
+                                        + QLatin1Char(' ') + tr("Idle"));
+            return;
         }
+        // Alternate between the accent and a muted tone for a "live" pulse.
+        const QColor pulse = m_monitorPulseBright ? colors.accent() : colors.mutedText();
+        m_lblStatusMonitor->setText(statusDot(pulse, kFilledDot) + QLatin1Char(' ')
+                                    + tr("Monitoring (%1)").arg(m_monitorActiveCount));
     };
 
     if (!m_monitorPulseTimer) {
         m_monitorPulseTimer = new QTimer(this);
-        m_monitorPulseTimer->setInterval(700);
+        m_monitorPulseTimer->setInterval(kMonitorPulseIntervalMs);
         connect(m_monitorPulseTimer, &QTimer::timeout, this, [this, renderMonitor]() {
             m_monitorPulseBright = !m_monitorPulseBright;
             renderMonitor();
         });
     }
 
-    auto setMonitor = [this, renderMonitor](int active) {
+    auto setMonitorCount = [this, renderMonitor](int active) {
         m_monitorActiveCount = active;
         m_monitorPulseBright = true;
         renderMonitor();
         if (active > 0) {
-            if (!m_monitorPulseTimer->isActive()) m_monitorPulseTimer->start();
+            if (!m_monitorPulseTimer->isActive())
+                m_monitorPulseTimer->start();
         } else {
             m_monitorPulseTimer->stop();
         }
     };
-    setMonitor(0);
+    setMonitorCount(0);
+
+    // Repaint both indicators when the theme changes.
+    connect(&ColorScheme::instance(), &ColorScheme::modeChanged, this,
+            [refreshDevices, renderMonitor]() { refreshDevices(); renderMonitor(); });
+
     if (m_configurationController) {
         connect(m_configurationController, &ConfigurationController::monitorStateChanged,
-                this, setMonitor);
+                this, setMonitorCount);
 
-        // Indigo accent border around config tables that are actively monitoring,
-        // matching the active-pane border in the split log view.
-        auto applyTableBorder = [](QTableView *tv, bool on) {
-            if (!tv) return;
-            tv->setStyleSheet(on
-                ? QStringLiteral("QTableView { border: 2px solid #818cf8; border-radius: 4px; }")
-                : QStringLiteral("QTableView { border: 2px solid transparent; border-radius: 4px; }"));
-        };
+        // Accent the config tables that are actively polling, reusing the same
+        // themed "active pane" marker as the split log view.
         connect(m_configurationController, &ConfigurationController::monitorTablesChanged,
-                this, [this, applyTableBorder](bool s, bool p, bool d) {
-            applyTableBorder(m_ui->tableSettings, s);
-            applyTableBorder(m_ui->tableProperties, p);
-            applyTableBorder(m_ui->tablePropertyDefinitions, d);
+                this, [this](bool settings, bool properties, bool propertyDefs) {
+            setTableMonitoring(m_ui->tableSettings, settings);
+            setTableMonitoring(m_ui->tableProperties, properties);
+            setTableMonitoring(m_ui->tablePropertyDefinitions, propertyDefs);
         });
     }
 
     m_ui->statusbar->addPermanentWidget(m_lblStatusDevices);
     m_ui->statusbar->addPermanentWidget(m_lblStatusMonitor);
+}
 
+void UiManager::setTableMonitoring(QTableView *view, bool monitoring)
+{
+    if (!view)
+        return;
+    view->setProperty("pane", monitoring ? QStringLiteral("active")
+                                         : QStringLiteral("inactive"));
+    view->style()->unpolish(view);
+    view->style()->polish(view);
 }
 
 void UiManager::setupTooltips()
@@ -609,20 +554,20 @@ void UiManager::onDeviceChanged(int index)
 
 void UiManager::onDevicesChanged(const QList<AdbDevice> &devices)
 {
-    const QString currentDeviceId = m_ui->cmbDevice->currentData().toString();
+    const QString previousDeviceId = m_ui->cmbDevice->currentData().toString();
     m_ui->cmbDevice->clear();
+    setDeviceStatusConnected(!devices.isEmpty());
 
     if (devices.isEmpty()) {
-        m_ui->cmbDevice->addItem("No devices found", "");
-        m_ui->lblDeviceStatus->setStyleSheet("color: #f87171; font-size: 16px;");
-        m_currentDeviceId = "";
-        AdbManager::instance().setCurrentDeviceId("");
+        m_ui->cmbDevice->addItem(tr("No devices found"), QString());
+        m_currentDeviceId.clear();
+        AdbManager::instance().setCurrentDeviceId(QString());
 
         // Stop any active monitor — there is nothing left to query.
         if (m_dumpsysController)       m_dumpsysController->stopMonitor();
         if (m_configurationController) m_configurationController->stopAllMonitors();
 
-        // Clear device-specific data
+        // Drop device-specific data so no stale values are shown as current.
         m_settingsModel->setSettings({});
         m_propertiesModel->setProperties({});
         m_availablePropertyDefinitions.clear();
@@ -631,25 +576,38 @@ void UiManager::onDevicesChanged(const QList<AdbDevice> &devices)
         if (m_dumpsysController) m_dumpsysController->clearServices();
         m_ui->txtDumpsysService->clear();
         m_ui->txtDumpsysService->setPlaceholderText(tr("Service name (e.g. activity)"));
-    } else {
-        for (const AdbDevice &device : devices)
-            m_ui->cmbDevice->addItem(device.name, device.id);
-        m_ui->lblDeviceStatus->setStyleSheet("color: #34d399; font-size: 16px;");
-
-        // Restore previous selection if available, otherwise pick first
-        int index = m_ui->cmbDevice->findData(currentDeviceId);
-        m_ui->cmbDevice->setCurrentIndex(index >= 0 ? index : 0);
-
-        m_currentDeviceId = m_ui->cmbDevice->currentData().toString();
-        AdbManager::instance().setCurrentDeviceId(m_currentDeviceId);
-
-        // Auto-load tables when the first device becomes available.
-        if (!m_currentDeviceId.isEmpty() && currentDeviceId.isEmpty()) {
-            AdbManager::instance().fetchSettings(m_currentDeviceId);
-            AdbManager::instance().fetchProperties(m_currentDeviceId);
-            AdbManager::instance().fetchPropertyDefinitions(m_currentDeviceId);
-        }
+        return;
     }
+
+    for (const AdbDevice &device : devices)
+        m_ui->cmbDevice->addItem(device.name, device.id);
+
+    // Keep the previous selection when that device is still attached.
+    const int index = m_ui->cmbDevice->findData(previousDeviceId);
+    m_ui->cmbDevice->setCurrentIndex(index >= 0 ? index : 0);
+
+    m_currentDeviceId = m_ui->cmbDevice->currentData().toString();
+    AdbManager::instance().setCurrentDeviceId(m_currentDeviceId);
+
+    // Auto-load the configuration tables when the first device appears.
+    if (!m_currentDeviceId.isEmpty() && previousDeviceId.isEmpty()) {
+        AdbManager &adb = AdbManager::instance();
+        adb.fetchSettings(m_currentDeviceId);
+        adb.fetchProperties(m_currentDeviceId);
+        adb.fetchPropertyDefinitions(m_currentDeviceId);
+    }
+}
+
+void UiManager::setDeviceStatusConnected(bool connected)
+{
+    QLabel *label = m_ui->lblDeviceStatus;
+    if (!label)
+        return;
+    // Styled from the theme sheet via QLabel#lblDeviceStatus[state=...].
+    label->setProperty("state", connected ? QStringLiteral("connected")
+                                          : QStringLiteral("disconnected"));
+    label->style()->unpolish(label);
+    label->style()->polish(label);
 }
 
 

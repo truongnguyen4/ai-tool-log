@@ -394,13 +394,80 @@ QPushButton[size="sm"] { padding: 4px 10px; min-height: 22px; font-size: 12px; }
 QPushButton[size="md"] { min-height: 28px; }
 QPushButton[size="lg"] { padding: 9px 20px; min-height: 36px; font-size: 14px; }
 
-/* Monitor button: vivid danger-red while checked to signal "live re-fetch". */
+/* Monitor button: square icon toggle, vivid danger-red while polling. */
+QPushButton[role="monitor"] {
+    background-color: %11; border: 1px solid %12; color: %13;
+    border-radius: 6px; padding: 0;
+}
+QPushButton[role="monitor"]:hover { background-color: %14; border-color: %15; }
 QPushButton[role="monitor"]:checked {
     background-color: %18; border: 1px solid %18; color: %8;
     font-weight: 700;
 }
 QPushButton[role="monitor"]:checked:hover   { background-color: %19; border-color: %19; }
 QPushButton[role="monitor"]:checked:pressed { background-color: %19; border-color: %19; }
+
+/* Preset chips in the dumpsys toolbar: compact, pill-shaped ghost buttons. */
+QPushButton[role="chip"] {
+    border-radius: 11px; padding: 3px 12px; min-height: 20px;
+    font-size: 11px; color: %17; background-color: %11; border: 1px solid %12;
+}
+QPushButton[role="chip"]:hover   { background-color: %14; color: %13; border-color: %15; }
+QPushButton[role="chip"]:pressed { background-color: %16; }
+
+/* ── Active-pane / live-monitor accent ────────────────────────────────────────
+ * Marks the pane the user is driving in a split log view, and any config table
+ * that is currently being re-fetched on a timer. Both states reserve the same
+ * 2px so switching never shifts the layout.
+ *
+ * These selectors repeat the object id on purpose: the per-table rules further
+ * down are id-selectors, which outrank a bare attribute selector in QSS. */
+QTableView#tableLog[pane="active"],     QTableView#tableMarkLog[pane="active"],
+QTableView#tableLogB[pane="active"],    QTableView#tableMarkLogB[pane="active"],
+QTableView#tableSettings[pane="active"], QTableView#tableProperties[pane="active"],
+QTableView#tablePropertyDefinitions[pane="active"] {
+    border: 2px solid %7; border-radius: 4px;
+}
+QTableView#tableLog[pane="inactive"],  QTableView#tableMarkLog[pane="inactive"],
+QTableView#tableLogB[pane="inactive"], QTableView#tableMarkLogB[pane="inactive"] {
+    border: 2px solid transparent; border-radius: 4px;
+}
+QTableView#tableSettings[pane="inactive"], QTableView#tableProperties[pane="inactive"],
+QTableView#tablePropertyDefinitions[pane="inactive"] {
+    border: 2px solid %12; border-radius: 4px;
+}
+
+/* Capture toggles (Logcat / Kernel) while a capture is running. */
+QPushButton#btnStart[state="recording"], QPushButton#btnKernel[state="recording"] {
+    background-color: %18; border: 1px solid %18; color: %8; font-weight: 600;
+}
+QPushButton#btnStart[state="recording"]:hover,
+QPushButton#btnKernel[state="recording"]:hover {
+    background-color: %19; border-color: %19;
+}
+
+/* Toolbar group separators. */
+QFrame#toolbarDivider { color: %12; background: %12; border: none; margin: 2px 6px; }
+
+/* Devices tab: one row per connected device in the sidebar list. */
+QWidget[deviceRow="true"] {
+    background-color: transparent; border-left: 2px solid transparent;
+}
+QWidget[deviceRow="true"][selected="true"] {
+    background-color: %20; border-left: 2px solid %7;
+}
+
+/* Firmware-flash log output. */
+QTextEdit#flashOutputView {
+    background-color: %11; color: %13; border: 1px solid %12; border-radius: 6px;
+    font-family: "JetBrains Mono","Cascadia Code","Consolas","Courier New",monospace;
+    font-size: 12px;
+}
+
+/* Device-connection indicator in the Logcat toolbar. */
+QLabel#lblDeviceStatus                        { font-size: 16px; }
+QLabel#lblDeviceStatus[state="connected"]     { color: %22; }
+QLabel#lblDeviceStatus[state="disconnected"]  { color: %18; }
 
 /* ── Input variants ───────────────────────────────────────────────────────── */
 QLineEdit[variant="search"]   { padding-left: 12px; padding-right: 12px; border-radius: 16px; }
@@ -1209,10 +1276,14 @@ QPushButton#devBtnRebootFastboot:disabled, QPushButton#devBtnPowerKey:disabled {
         /* %7  */ p.accent,
         /* %8  */ p.textOnAccent,
         /* %9  */ p.accentHover)
+       /* %10..%16 */
        .arg(p.accentActive, p.surface, p.border, p.text, p.surfaceHover,
             p.borderStrong, p.surfaceMuted)
+       /* %17..%21 */
        .arg(p.textMuted, p.danger, p.dangerHover, p.accentSubtle,
-            p.accentSubtleText);
+            p.accentSubtleText)
+       /* %22 */
+       .arg(p.success);
 }
 
 QString lightStylesheet() { return fromPalette(Palette::light()); }

@@ -27,7 +27,10 @@ AdbManager::AdbManager(QObject *parent)
 
 AdbManager::~AdbManager()
 {
+    // Both capture processes are children of this object; kill them explicitly
+    // so neither outlives the app as an orphaned `adb logcat` / `adb dmesg`.
     stopLogcat();
+    stopDmesg();
     if (m_deviceDetectionTimer)
         m_deviceDetectionTimer->stop();
 }
@@ -78,10 +81,15 @@ void AdbManager::parseDeviceList(const QString &output)
 {
     const QList<AdbDevice> newDevices = DeviceListConverter::convert(output);
 
-    bool changed = (newDevices.size() != m_connectedDevices.size());
-    if (!changed) {
-        for (int i = 0; i < newDevices.size(); ++i)
-            if (newDevices[i].id != m_connectedDevices[i].id) { changed = true; break; }
+    // Compare identity *and* state: a device going offline keeps its serial,
+    // so an id-only comparison left the UI showing it as still connected.
+    bool changed = newDevices.size() != m_connectedDevices.size();
+    for (int i = 0; !changed && i < newDevices.size(); ++i) {
+        const AdbDevice &fresh   = newDevices.at(i);
+        const AdbDevice &current = m_connectedDevices.at(i);
+        changed = fresh.id != current.id
+                  || fresh.isOnline != current.isOnline
+                  || fresh.name != current.name;
     }
 
     if (changed) {

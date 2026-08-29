@@ -11,6 +11,7 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 class QComboBox;
 class QLabel;
+class QLineEdit;
 class QPushButton;
 class QStatusBar;
 class QTimer;
@@ -41,7 +42,6 @@ private slots:
     void updateDumpsysCommandText();
     void onRunDumpsysClicked();
     void onDumpsysFetched(const QString &output);
-    void applyDumpsysHighlights(const QString &needle);
     void onDumpsysSearchChanged();
     void onDumpsysSearchNext();
     void onDumpsysSearchPrev();
@@ -56,9 +56,20 @@ private slots:
     void onMonitorToggled(bool on);
 
 private:
-    void updateMatchCounter();
+    void buildToolbar();
+    void buildPresetChips();
     void renderOutput();
-    void applyAllExtraSelections();
+    /**
+     * Rebuild every ExtraSelection (diff lines + search hits) in one document
+     * pass and report the match count.
+     *
+     * Searching used to walk the whole document twice per keystroke — once to
+     * count and once to build the selections — on output that is routinely
+     * megabytes. One pass, debounced, and capped at kMaxSearchHighlights.
+     */
+    void refreshExtraSelections();
+    /** Move the cursor to the first / next / previous match. */
+    void findInOutput(bool backwards, bool fromStart = false);
     QString currentDumpsysArgs() const;
     QString computeDiff(const QString &a, const QString &b);
 
@@ -69,11 +80,13 @@ private:
 
     // Toolbar widgets injected at runtime.
     QLabel       *m_matchLabel  = nullptr;
+    QLineEdit    *m_packageInput = nullptr;   ///< optional dumpsys package argument
     QPushButton  *m_btnSave     = nullptr;
     QPushButton  *m_btnSnapshot = nullptr;
     QPushButton  *m_btnDiff     = nullptr;
     QPushButton  *m_btnMonitor  = nullptr;
     QComboBox    *m_monitorIntervalCombo = nullptr;
+    QTimer       *m_searchDebounce = nullptr;
 
     // Monitor mode: re-fetch the current dumpsys service every N ms.
     QTimer       *m_monitorTimer = nullptr;
